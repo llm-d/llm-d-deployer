@@ -1,0 +1,138 @@
+name: Test Charts
+
+on:
+  # FIXME: Dangerous! Please revert to pull_request once images are public
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number }}
+  cancel-in-progress: true
+
+permissions:
+  pull-requests: read
+  contents: read
+
+jobs:
+  test-chart:
+    # Aligning job name with the OpenShift CI config: https://github.com/openshift/release/blob/master/core-services/prow/02_config/redhat-developer/rhdh-chart/_prowconfig.yaml#L18
+    name: Test Latest Release
+    runs-on: ubuntu-latest
+    environment: ci
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+          ref: ${{ github.event.pull_request.head.sha }}  # FiXME: Remove once reverted to pull_request from pull_request_target
+
+      - name: Set up Helm
+        uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # renovate: tag=v3.5
+        with:
+          version: v3.10.0
+
+      - uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # v5
+        with:
+          python-version: 3.13
+
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@0d28d3144d3a25ea2cc349d6e59901c4ff469b3b # v2.7.0
+
+      - name: Run chart-testing (list-changed)
+        id: list-changed
+        env:
+          TARGET_BRANCH: ${{ github.event.pull_request.base.ref }}
+        run: |
+          changed=$(ct list-changed --target-branch "$TARGET_BRANCH")
+          if [[ -n "$changed" ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: "Add NGINX Ingress and Bitnami Repository"
+        if: steps.list-changed.outputs.changed == 'true'
+        run: |
+          helm repo add ingress-nginx "https://kubernetes.github.io/ingress-nginx"
+          helm repo add bitnami "https://charts.bitnami.com/bitnami"
+          helm repo update
+
+      # FIXME: Remove once images are public and this workflow is set to run to pull_request event instead of pull_request_target
+      - name: Login to Quay.io
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+
+      - name: login to registry.redhat.io
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
+        with:
+          registry: registry.redhat.io
+          username: ${{ secrets.REG_RH_USER }}
+          password: ${{ secrets.REG_RH_PASS }}
+
+      - name: Create KIND Cluster
+        if: steps.list-changed.outputs.changed == 'true'
+        uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
+        with:
+          config: helpers/kind-testing/kind-config.yaml
+
+      - name: Create custom storage class
+        if: steps.list-changed.outputs.changed == 'true'
+        run: |
+          export defaultScProvisioner=$(kubectl get storageclass -o jsonpath='{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io/is-default-class=="true")].provisioner}')
+          if [[ -z "$defaultScProvisioner" ]]; then
+            echo "No default storage class found or it has no provisioner. Exiting early because the test using the custom Storage Class will likely fail. Use a cluster that has a default storage class."
+            exit 1
+          fi
+          echo "[INFO] defaultScProvisioner=$defaultScProvisioner"
+
+          cat <<EOF | kubectl apply -f -
+          apiVersion: storage.k8s.io/v1
+          kind: StorageClass
+          metadata:
+            name: custom-sc
+          # same provisioner as the one used by the default storage class on the cluster
+          provisioner: $defaultScProvisioner
+          reclaimPolicy: Delete
+          volumeBindingMode: WaitForFirstConsumer
+          EOF
+
+          kubectl get storageclass custom-sc -o yaml
+
+      - name: Install Ingress Controller
+        if: steps.list-changed.outputs.changed == 'true'
+        run: |
+          helm install ingress-nginx/ingress-nginx --generate-name \
+            --set controller.service.type='NodePort' \
+            --set controller.admissionWebhooks.enabled=false
+
+      - name: Install Operator Lifecycle Manager (OLM)
+        if: steps.list-changed.outputs.changed == 'true'
+        # In case we need to install additional Operators
+        env:
+          OLM_VERSION: "v0.31.0"
+        run: |
+          curl -L "https://github.com/operator-framework/operator-lifecycle-manager/releases/download/${OLM_VERSION}/install.sh" -o install-olm.sh
+          chmod +x install-olm.sh
+          ./install-olm.sh "${OLM_VERSION}"
+
+      - name: Install prerequisites
+        if: steps.list-changed.outputs.changed == 'true'
+        run: |
+          pushd chart-dependencies
+          bash ci-deps.sh
+          popd
+
+
+      - name: Run chart-testing (install)
+        if: steps.list-changed.outputs.changed == 'true'
+        env:
+          TARGET_BRANCH: ${{ github.event.pull_request.base.ref }}
+        run: |
+          ct install \
+            --debug \
+            --config ct-install.yaml \
+            --upgrade \
+            --target-branch "$TARGET_BRANCH"

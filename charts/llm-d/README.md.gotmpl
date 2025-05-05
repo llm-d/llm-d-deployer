@@ -1,0 +1,133 @@
+# llm-d Helm Chart for OpenShift
+
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.versionBadge" . }}
+{{ template "chart.typeBadge" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.homepageLine" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+---
+
+## TL;DR
+
+```console
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo add neuralmagic https://neuralmagic.github.io/llm-d-deployer
+
+helm install my-llm-d neuralmagic/llm-d
+```
+
+## Prerequisites
+
+- Git (v2.25 or [latest](https://github.com/git-guides/install-git#install-git-on-linux), for sparse-checkout support)
+- Kubectl (1.25+ or [latest](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/) with built-in kustomize support)
+
+```shell
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/
+```
+
+- Kubernetes 1.25+ (OpenShift 4.12+)
+- Helm 3.10+ or [latest release](https://github.com/helm/helm/releases)
+
+## Usage
+
+Charts are available in the following formats:
+
+- [Chart Repository](https://helm.sh/docs/topics/chart_repository/)
+- [OCI Artifacts](https://helm.sh/docs/topics/registries/)
+
+### Installing from the Chart Repository
+
+The following command can be used to add the chart repository:
+
+```console
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo add neuralmagic https://neuralmagic.github.io/llm-d-deployer
+```
+
+Once the chart has been added, install this chart. However before doing so, please review the default `values.yaml` and adjust as needed.
+
+
+```console
+helm upgrade -i <release_name> neuralmagic/llm-d
+```
+
+### Installing from an OCI Registry
+
+Charts are also available in OCI format. The list of available releases can be found [here](https://github.com/orgs/neuralmagic/packages/container/package/llm-d-deployer%2Fllm-d).
+
+Install one of the available versions:
+
+```shell
+helm upgrade -i <release_name> oci://ghcr.io/neuralmagic/llm-d-deployer/llm-d --version=<version>
+```
+
+> **Tip**: List all releases using `helm list`
+
+### Testing a Release
+
+Once an Helm Release has been deployed, you can test it using the [`helm test`](https://helm.sh/docs/helm/helm_test/) command:
+
+```sh
+helm test <release_name>
+```
+
+This will run a simple Pod in the cluster to check that the application deployed is up and running.
+
+You can control whether to disable this test pod or you can also customize the image it leverages.
+See the `test.enabled` and `test.image` parameters in the [`values.yaml`](./values.yaml) file.
+
+> **Tip**: Disabling the test pod will not prevent the `helm test` command from passing later on. It will simply report that no test suite is available.
+
+Below are a few examples:
+
+<details>
+
+<summary>Disabling the test pod</summary>
+
+```sh
+helm install <release_name> <repo_or_oci_registry> \
+  --set test.enabled=false
+```
+
+</details>
+
+<details>
+
+<summary>Customizing the test pod image</summary>
+
+```sh
+helm install <release_name> <repo_or_oci_registry> \
+  --set test.image.repository=curl/curl-base \
+  --set test.image.tag=8.11.1
+```
+
+</details>
+
+### Uninstalling the Chart
+
+To uninstall/delete the `my-llm-d-release` deployment:
+
+```console
+helm uninstall my-llm-d-release
+```
+
+The command removes all the Kubernetes components associated with the chart and deletes the release.
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesSection" . }}
+
+
+## Features
+
+TBD

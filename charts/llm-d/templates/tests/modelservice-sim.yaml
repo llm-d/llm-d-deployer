@@ -1,0 +1,23 @@
+{{- if .Values.test.enabled -}}
+apiVersion: llm-d.ai/v1alpha1
+kind: ModelService
+metadata:
+  name: vllm-sim-model-service
+  annotations:
+    "helm.sh/hook": test
+spec:
+  decoupleScaling: false
+  baseConfigMapRef:
+    name: {{ include "modelservice.fullname" . }}-basic-sim-preset
+  routing:
+    modelName: food-review
+  modelArtifacts:
+    uri: hf://stub
+  decode:
+    replicas: 1
+    containers:
+    - name: "vllm"
+      args:
+      - "--model"
+      - food-review
+{{- end }}

@@ -1,0 +1,10 @@
+test:
+  enabled: true
+
+sampleApplication:
+  enabled: false
+
+redis:
+  master:
+    persistence:
+      enabled: false

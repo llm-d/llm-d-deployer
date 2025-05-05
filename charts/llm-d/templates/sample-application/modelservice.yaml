@@ -1,0 +1,45 @@
+{{- if .Values.sampleApplication.enabled -}}
+apiVersion: llm-d.ai/v1alpha1
+kind: ModelService
+metadata:
+  name: {{ include "sampleApplication.sanitizedModelName" . }}
+  labels: {{ include "common.labels.standard" $ | nindent 4 }}
+    app.kubernetes.io/component: sample-application
+    {{- if $.Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" $.Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- if $.Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" $.Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+spec:
+  decoupleScaling: false
+  baseConfigMapRef:
+    name: {{ include "modelservice.fullname" . }}-basic-gpu-with-nixl-preset
+  routing:
+    modelName: {{ .Values.sampleApplication.modelName }}
+  modelArtifacts:
+    uri: {{ .Values.sampleApplication.modelArtifactUri }}
+  decode:
+    replicas: 1
+    containers:
+    - name: "vllm"
+      command:
+        - vllm
+        - serve
+      args:
+      - "--served-model-name"
+      - {{ .Values.sampleApplication.modelName }}
+      resources: {{ .Values.sampleApplication.resources | toYaml | nindent 8 }}
+  prefill:
+    replicas: 1
+    containers:
+    - name: "vllm"
+      command:
+        - vllm
+        - serve
+      args:
+      - "--served-model-name"
+      - {{ .Values.sampleApplication.modelName }}
+      resources: {{ .Values.sampleApplication.resources | toYaml | nindent 8 }}
+{{- end }}

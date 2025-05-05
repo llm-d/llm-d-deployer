@@ -1,0 +1,82 @@
+# .github/workflows/e2e-dev.yml
+name: e2e dev
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  demo:
+    name: 🚀 Run demo-install.sh in Minikube
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🛎️ Checkout repo
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: 📦 Install OS packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y make jq
+
+      - name: 🔧 Install yq
+        run: |
+          wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O yq
+          chmod +x yq
+          sudo mv yq /usr/local/bin/yq
+
+      - name: 🔧 Install kustomize (latest)
+        run: |
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" \
+            | bash
+          sudo mv kustomize /usr/local/bin/
+
+      - name: ⚙️ Install kubectl (latest)
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+
+      - name: 🔧 Install Helm v3.17.0
+        run: |
+          curl -O https://get.helm.sh/helm-v3.17.0-linux-amd64.tar.gz
+          tar xvf helm-v3.17.0-linux-amd64.tar.gz
+          sudo mv linux-amd64/helm /usr/local/bin/helm
+
+      - name: ➕ Add bitnami Helm repo
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+
+      - name: 🔧 Install Minikube & start 2-node cluster
+        run: |
+          curl -LO https://github.com/kubernetes/minikube/releases/latest/download/minikube-linux-amd64
+          sudo install minikube-linux-amd64 /usr/local/bin/minikube && rm minikube-linux-amd64
+          minikube start --driver=docker --nodes=2
+
+      - name: 🔐 Inject pull secrets
+        run: |
+          mkdir -p $HOME/.config/containers
+          echo "${{ secrets.AUTH_JSON }}" > $HOME/.config/containers/auth.json
+
+      - name: 🔐 Inject HF token
+        run: echo "HF_TOKEN=${{ secrets.HF_TOKEN }}" >> $GITHUB_ENV
+
+      - name: ▶️ Run demo-install.sh
+        working-directory: chart-dependencies
+        env:
+          NAMESPACE: demo-ns
+          PULL_SECRET_NAME: llm-d-pull-secret
+        run: |
+          chmod +x install.sh
+          ./demo-install.sh --minikube-storage
+
+      - name: 🔍 Inspect cluster
+        run: |
+          echo "=== All Pods ==="
+          kubectl get pods --all-namespaces
+          echo ""
+          echo "=== Helm Releases in demo-ns ==="
+          helm list -n demo-ns

@@ -1,0 +1,289 @@
+# Default values for the llm-d chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Global parameters
+# Global Docker image parameters
+# Please, note that this will override the image parameters, including dependencies, configured to use the global value
+# Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+# @default -- See below
+global:
+  # -- Global Docker image registry
+  imageRegistry: ""
+
+  # -- Global Docker registry secret names as an array
+  # </br> E.g. `imagePullSecrets: [myRegistryKeySecretName]`
+  imagePullSecrets: ["llm-d-pull-secret"]
+
+  security:
+    allowInsecureImages: true
+# -- Common parameters
+
+# -- Override Kubernetes version
+kubeVersion: ""
+
+# -- String to partially override common.names.fullname
+nameOverride: ""
+
+# -- String to fully override common.names.fullname
+fullnameOverride: ""
+
+# -- Default Kubernetes cluster domain
+clusterDomain: cluster.local
+
+# -- Labels to add to all deployed objects
+commonLabels: {}
+
+# -- Annotations to add to all deployed objects
+commonAnnotations: {}
+
+# -- Array of extra objects to deploy with the release
+extraDeploy: []
+
+# -- Helm tests
+test:
+
+  # -- Enable rendering of helm test resources
+  enabled: false
+
+# -- Sample application deploying a p-d pair of specific model
+sampleApplication:
+
+  # -- Enable rendering of sample application resources
+  enabled: true
+
+  # -- Specify the model name as it is available to the api
+  modelName: Llama-32-3B-Instruct
+
+  # -- Specify the filepath for the model
+  modelPath: /cache/models/meta-llama/Llama-3.2-3B-Instruct
+
+  # -- Location where the model can be loaded from. Currently supports pvc:// backed by preexisting PVC
+  modelArtifactUri: pvc://llama-3.2-3b-instruct-pvc/models/meta-llama/Llama-32-3B-Instruct
+
+  # -- Modify resource limits/requests available to the pods
+  # -- Resource requests/limits
+  # <br /> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-requests-and-limits-of-pod-and-container
+  resources:
+    limits:
+      nvidia.com/gpu: 1
+    requests:
+      # cpu: "16"
+      # memory: 16Gi
+      nvidia.com/gpu: 1
+
+  # -- InferencePool port configuration
+  inferencePoolPort: 8000
+
+# -- kGateway configuration
+gateway:
+
+  # -- Deploy resources related to kGateway
+  enabled: true
+
+  # --  String to fully override gateway.fullname
+  fullnameOverride: ""
+
+  # -- String to partially override gateway.fullname
+  nameOverride: ""
+
+  # -- Gateway class that determines the backend used
+  gatewayClassName: kgateway
+
+  # -- Additional annotations provided to the Gateway resource
+  annotations: {}
+
+  # Special parameters applied via GatewayParameters resource
+  parameters:
+
+    proxyUID: false
+
+  # Set of listeners exposed via the Gateway, also propagated to the Ingress if enabled
+  listeners:
+    - name: default
+      path: /
+      port: 80
+      protocol: HTTP
+
+  # -- Gateway's service type. Ingress is only available if the service type is set to NodePort. Accepted values: ["LoadBalancer", "NodePort"]
+  serviceType: NodePort
+
+# -- Ingress configuration
+ingress:
+
+  # -- Deploy Ingress
+  enabled: true
+
+  # -- Name of the IngressClass cluster resource which defines which controller will implement the resource (e.g nginx)
+  ingressClassName: ""
+
+  # -- Additional annotations for the Ingress resource
+  annotations: {}
+
+  # -- Hostname to be used to expose the route to access the backstage application (e.g: backstage.IP.nip.io)
+  host: ""
+
+  # -- List of additional hostnames to be covered with this ingress record (e.g. a CNAME)
+  # <!-- E.g.
+  # extraHosts:
+  #   - name: backstage.env.example.com
+  #     path: / (Optional)
+  #     pathType: Prefix (Optional)
+  #     port: 7007 (Optional) -->
+  extraHosts: []
+
+  # -- Path to be used to expose the full route to access the backstage application (e.g: IP.nip.io/backstage)
+  path: "/"
+
+  # -- Ingress TLS parameters
+  tls:
+
+    # -- Enable TLS configuration for the host defined at `ingress.host` parameter
+    enabled: false
+
+    # -- The name to which the TLS Secret will be called
+    secretName: ""
+
+  # -- The TLS configuration for additional hostnames to be covered with this ingress record.
+  # <br /> Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+  # <!-- E.g.
+  # extraTls:
+  #   - hosts:
+  #     - backstage.env.example.com
+  #     secretName: backstage-env -->
+  extraTls: []
+
+auth:
+  hfToken:
+    # -- If the contents of this secret should be read into env
+    enabled: true
+    # -- Name of the secret to create to store your huggingface token
+    name: llm-d-hf-token
+    # -- Value of the token. Do not set this but use `envsubst` in conjunction with the helm chart
+    key: HF_TOKEN
+
+# -- Model service controller configuration
+modelservice:
+
+  # -- Toggle to deploy modelservice controller related resources
+  enabled: true
+
+  # --  String to fully override modelservice.fullname
+  fullnameOverride: ""
+
+  # --  String to partially override modelservice.fullname
+  nameOverride: ""
+
+  # -- Number of controller replicas
+  replicas: 1
+
+  # -- Modelservice controller image, please change only if appropriate adjustments to the CRD are being made
+  image:
+    registry: quay.io
+    repository: grpereir/llm-d-model-service-dev
+    tag: "cmd"
+    # repository: llm-d/llm-d-model-service-dev
+    # tag: "0.0.7"
+    imagePullPolicy: "Always"
+
+  # -- Endpoint picker image used in ModelService CR presets
+  epp:
+    image:
+      registry: quay.io
+      repository: llm-d/llm-d-gateway-api-inference-extension-dev
+      tag: "0.0.5"
+      imagePullPolicy: "IfNotPresent"
+
+  # -- vLLM image used in ModelService CR presets
+  vllm:
+    image:
+      registry: quay.io
+      repository: llm-d/llm-d-dev
+      tag: "0.0.5"
+      imagePullPolicy: "IfNotPresent"
+
+  # -- Routing proxy image used in ModelService CR presets
+  routingProxy:
+    image:
+      registry: quay.io
+      repository: llm-d/llm-d-routing-sidecar-dev
+      tag: "0.0.6"
+      imagePullPolicy: "Always"
+
+  # -- vLLM sim image used in ModelService CR presets
+  vllmSim:
+    image:
+      registry: quay.io
+      repository: llm-d/vllm-sim-dev
+      tag: "0.0.4"
+      imagePullPolicy: "IfNotPresent"
+
+
+  # -- Annotations to add to all modelservice resources
+  annotations: {}
+
+  # -- Pod annotations for modelservice
+  podAnnotations: {}
+
+  # -- Pod labels for modelservice
+  podLabels: {}
+
+  # Model service controller settings
+  service:
+
+    # -- Toggle to deploy a Service resource for Model service controller
+    enabled: true
+
+    # -- Port number exposed from Model Service controller
+    port: 8443
+
+    # -- Service type
+    type: ClusterIP
+
+  # -- Service Account Configuration
+  serviceAccount:
+
+    # -- Enable the creation of a ServiceAccount for Modelservice pods
+    create: true
+
+    # --  String to fully override modelservice.serviceAccountName, defaults to modelservice.fullname
+    fullnameOverride: ""
+
+    # --  String to partially override modelservice.serviceAccountName, defaults to modelservice.fullname
+    nameOverride: ""
+
+    # -- Additional custom labels to the service ServiceAccount.
+    labels: {}
+
+    # -- Additional custom annotations for the ServiceAccount.
+    annotations: {}
+
+  rbac:
+    # -- Enable the creation of RBAC resources
+    create: true
+
+# -- Bitnami/Redis chart configuration
+# @default -- Use sane defaults for minimal Redis deployment
+redis:
+  enabled: true
+  architecture: standalone
+  image:
+    registry: registry.redhat.io
+    repository: rhel9/redis-7
+    tag: 9.5-1744185101
+  master:
+    kind: Deployment
+    resources:
+      limits:
+        memory: "256Mi"
+        cpu: "250m"
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+    persistence:
+      enabled: true
+      size: "5Gi"
+    pdb:
+      create: false
+  networkPolicy:
+    enabled: false

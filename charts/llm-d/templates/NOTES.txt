@@ -1,0 +1,50 @@
+Thank you for installing {{ .Chart.Name }}.
+
+Your release is named {{ .Release.Name }}.
+
+To learn more about the release, try:
+
+  $ helm status {{ .Release.Name }}
+  $ helm get all {{ .Release.Name }}
+
+Following presets are available to your users:
+
+| Name                                                               | Description                                                |
+| ------------------------------------------------------------------ | ---------------------------------------------------------- |
+| {{ include "modelservice.fullname" . }}-basic-gpu-preset           | Basic GPU inference                                        |
+| {{ include "modelservice.fullname" . }}-basic-gpu-with-nixl-preset | GPU inference with NIXL enabled and Redis cache offloading |
+| {{ include "modelservice.fullname" . }}-basic-sim-preset           | Basic simulation                                           |
+
+
+{{ if not .Values.sampleApplication.enabled -}}
+To provision a ModelService, create a new ModelService resources as follows:
+
+```
+apiVersion: llm-d.ai/v1alpha1
+kind: ModelService
+metadata:
+  name: <name>
+spec:
+  decoupleScaling: false
+  baseConfigMapRef:
+    name: release-name-modelservice-basic-gpu-with-nixl-preset
+  routing:
+    modelName: <model-name>
+  modelArtifacts:
+    uri: pvc://<pvc-name>/<path-to-model>
+  decode:
+    replicas: 1
+    containers:
+    - name: "vllm"
+      args:
+      - "--model"
+      - <model-name>
+  prefill:
+    replicas: 1
+    containers:
+    - name: "vllm"
+      args:
+      - "--model"
+      - <model-name>
+```
+{{- end }}

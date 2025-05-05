@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: model-storage-inspect
+  namespace: e2e-helm
+spec:
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    runAsNonRoot: true
+    seccompProfile:
+      type: "RuntimeDefault"
+  containers:
+  - name: sleep
+    image: registry.access.redhat.com/ubi9/ubi-minimal
+    command: ["/bin/sh", "-c", "sleep infinity"]
+    volumeMounts:
+    - name: model-storage
+      readOnly: true
+      mountPath: /cache
+  volumes:
+  - name: model-storage
+    persistentVolumeClaim:
+      claimName: llama-3.2-3b-instruct-pvc # REPLACE THIS WITH YOUR MODEL PVC
+  restartPolicy: Never

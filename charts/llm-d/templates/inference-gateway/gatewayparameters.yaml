@@ -1,0 +1,46 @@
+{{ if .Values.gateway.enabled }}
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: GatewayParameters
+metadata:
+  name: {{ include "gateway.fullname" . }}
+  labels: {{ include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: inference-gateway
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- if .Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.gateway.annotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.gateway.annotations "context" $) | nindent 4 }}
+    {{- end }}
+spec:
+  kube:
+    envoyContainer:
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+        {{- if .Values.gateway.parameters.proxyUID }}
+        runAsUser: {{ .Values.gateway.parameters.proxyUID }}
+        {{- end}}
+        seccompProfile:
+          type: RuntimeDefault
+    service:
+      type: {{ .Values.gateway.serviceType | default "NodePort" | quote }}
+      extraLabels:
+        gateway: custom
+    podTemplate:
+      extraLabels:
+        gateway: custom
+    sdsContainer:
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        {{- if .Values.gateway.parameters.proxyUID }}
+        runAsUser: {{ .Values.gateway.parameters.proxyUID }}
+        {{- end}}
+        seccompProfile:
+          type: RuntimeDefault
+{{- end}}

@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: llm-d-oci
+  namespace: openshift-gitops
+spec:
+  destination:
+    namespace: e2e-helm
+    server: https://api.summit-gpu.octo-emerging.redhataicoe.com:6443
+  project: default
+  source:
+    chart: neuralmagic/llm-d-deployer/llm-d
+    repoURL: ghcr.io
+    targetRevision: 0.0.2

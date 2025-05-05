@@ -1,0 +1,124 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "modelservice.fullname" . }}-basic-sim-preset
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: modelservice
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- if .Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.modelservice.annotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.annotations "context" $) | nindent 4 }}
+    {{- end }}
+data:
+  decodeDeployment: |
+    apiVersion: apps/v1
+    kind: Deployment
+    spec:
+      template:
+        spec:
+          containers:
+            - name: vllm
+              image: {{ include "modelservice.vllmSimImage" . }}
+              securityContext:
+                allowPrivilegeEscalation: false
+              args:
+                - "--port"
+                - "8001"
+              ports:
+                - containerPort: 55555
+                  protocol: TCP
+  decodeService: |
+    apiVersion: v1
+    kind: Service
+    spec:
+      clusterIP: None
+      ports:
+      - name: vllm
+        port: 8000
+        protocol: TCP
+  eppService: |
+    apiVersion: v1
+    kind: Service
+    spec:
+      ports:
+        - port: 9002 # Needs to match the port of the eppDeployment
+          protocol: TCP
+          name: grpc
+        - port: 9003
+          protocol: TCP
+          name: grpc-health
+        - port: 9090
+          protocol: TCP
+          name: metrics
+      type: NodePort # accepts "LoadBalancer" or "NodePort"
+
+  eppDeployment: |
+    apiVersion: apps/v1
+    kind: Deployment
+    spec:
+      template:
+        spec:
+          containers:
+            - args:
+                - --poolName
+                - {{ include "modelservice.fullname" . }}
+                - --poolNamespace
+                - {{ .Release.Namespace }}
+                - -v
+                - "4"
+                - --zap-encoder
+                - json
+                - --grpcPort
+                - "9002"
+                - --grpcHealthPort
+                - "9003"
+              env:
+              {{- if .Values.redis.enabled }}
+                - name: KVCACHE_INDEXER_REDIS_ADDR
+                  value: {{ include "redis.master.service.fullurl" . -}}:8100
+              {{- end }}
+              image: {{ include "modelservice.eppImage" . }}
+              imagePullPolicy: Always
+              livenessProbe:
+                failureThreshold: 3
+                grpc:
+                  port: 9003
+                initialDelaySeconds: 5
+                periodSeconds: 10
+                successThreshold: 1
+                timeoutSeconds: 1
+              name: epp
+              ports:
+                - name: grpc
+                  containerPort: 9002
+                  protocol: TCP
+                - name: grpc-health
+                  containerPort: 9003
+                  protocol: TCP
+                - name: metrics
+                  containerPort: 9090
+                  protocol: TCP
+              readinessProbe:
+                failureThreshold: 3
+                grpc:
+                  port: 9003
+                initialDelaySeconds: 5
+                periodSeconds: 10
+                successThreshold: 1
+                timeoutSeconds: 1
+
+  inferencePool: |
+    apiVersion: inference.networking.x-k8s.io/v1alpha2
+    kind: InferencePool
+    spec:
+      targetPortNumber: 8000
+
+  inferenceModel: |
+    apiVersion: inference.networking.x-k8s.io/v1alpha2
+    kind: InferenceModel

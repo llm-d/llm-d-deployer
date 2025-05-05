@@ -1,0 +1,39 @@
+apiVersion: v2
+name: llm-d
+type: application
+version: 0.0.1
+appVersion: "0.0.1"
+icon: data:null
+description: A Helm chart for llm-d
+keywords:
+  - vllm
+kubeVersion: ">= 1.25.0-0"
+maintainers:
+  - name: Red Hat
+    url: https://github.com/neuralmagic/llm-d-deployer
+sources:
+  - https://github.com/neuralmagic/llm-d-deployer
+dependencies:
+  - name: common
+    repository: https://charts.bitnami.com/bitnami
+    tags:
+      - bitnami-common
+    version: "2.27.0"
+  - name: redis
+    repository: https://charts.bitnami.com/bitnami
+    tags:
+      - bitnami-redis
+    version: "20.13.4"
+    condition: redis.enabled
+annotations:
+  artifacthub.io/category: integration-delivery
+  artifacthub.io/license: Apache-2.0
+  artifacthub.io/links: |
+    - name: Chart Source
+      url: https://github.com/neuralmagic/llm-d-deployer
+  charts.openshift.io/name: llm-d Deployer
+  charts.openshift.io/provider: Red Hat
+  # Additional suggestion: This chart deploys vLLM along with lmcache.
+  # vLLM will use the default lmcache image as specified in the values.yaml
+  # unless a different image is provided by the user.
+  artifacthub.io/features: "Deploys vLLM with integrated lmcache. vLLM uses the default lmcache image unless overridden in values."

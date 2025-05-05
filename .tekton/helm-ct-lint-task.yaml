@@ -1,0 +1,29 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: helm-ct-lint-task
+spec:
+  params:
+    - name: chart-name
+      type: string
+      description: "The name of the chart directory to lint"
+  workspaces:
+    - name: source
+      description: "The workspace containing the charts directory"
+  steps:
+    - name: run-ct-lint
+      image: quay.io/helmpack/chart-testing:v3.12.0
+      env:
+        - name: CHART_NAME
+          value: "$(params.chart-name)"
+      script: |
+        #!/bin/bash
+        set -e
+
+        echo "Running ct lint against chart: $(params.chart-name)"
+        cd $(workspaces.source.path)
+
+        helm repo add bitnami https://charts.bitnami.com/bitnami
+        helm dependency build charts/$CHART_NAME
+
+        helm lint charts/$CHART_NAME

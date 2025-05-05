@@ -1,0 +1,46 @@
+repos:
+  - repo: https://github.com/norwoodj/helm-docs
+    rev: v1.2.0
+    hooks:
+      - id: helm-docs
+        files: (README\.md(\.gotmpl)?|(Chart|requirements|values)\.ya?ml)$
+        args:
+          # Make the tool search for charts only under the ``charts` directory
+          - --chart-search-root=charts
+          # The `./` makes it relative to the chart-search-root set above
+          - --template-files=./_templates.gotmpl
+          # A base filename makes it relative to each chart directory found
+          - --template-files=README.md.gotmpl
+  - repo: https://github.com/woodruffw/zizmor-pre-commit
+    rev: v1.6.0
+    hooks:
+      - id: zizmor
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-json
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+  - repo: https://github.com/amperser/proselint
+    rev: "0.14.0"
+    hooks:
+      - id: proselint
+        files: \.(md(\.gotmpl)?|txt|rst)$
+        exclude: charts/llm-d/README.md
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.32.0
+    hooks:
+      - id: typos
+  - repo: https://github.com/gruntwork-io/pre-commit
+    rev: v0.1.29
+    hooks:
+      - id: helmlint
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: v0.17.2
+    hooks:
+      - id: markdownlint-cli2
+        exclude: charts/llm-d/README.md
