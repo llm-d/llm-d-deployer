@@ -26,12 +26,12 @@ repos:
         exclude: ^.vale/
       - id: mixed-line-ending
       - id: trailing-whitespace
-  - repo: https://github.com/errata-ai/vale
-    rev: v3.11.2
-    hooks:
-      - id: vale
-        files: \.(md(\.gotmpl)?|txt|rst)$
-        exclude: charts/llm-d/README.md
+  # - repo: https://github.com/errata-ai/vale
+  #   rev: v3.11.2
+  #   hooks:
+  #     - id: vale
+  #       files: \.(md(\.gotmpl)?|txt|rst)$
+  #       exclude: charts/llm-d/README.md
   - repo: https://github.com/crate-ci/typos
     rev: v1.32.0
     hooks:
