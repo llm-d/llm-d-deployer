@@ -44,4 +44,4 @@ yq e -i ".version = \"$new_version\"" "$CHART_FILE"
 
 echo "Version updated: $current_version → $new_version"
 
-pre-commit run --show-diff-on-failure --color=always --verbose --all-files --show-diff-on-failure
+pre-commit run -a
