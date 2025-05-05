@@ -232,23 +232,36 @@ install() {
   fi
   log_success "✅ Job manifest patched"
 
-  log_info "💾 Provisioning model storage…"
-  # This now only uses the template based on user-provided storage class and size
-  eval "echo \"$(cat ${REPO_ROOT}/helpers/k8s/model-storage-rwx-pvc-template.yaml)\"" \
-    | kubectl apply -n "${NAMESPACE}" -f -
-  log_success "✅ PVC created with storageClassName ${STORAGE_CLASS} and size ${STORAGE_SIZE}"
+  RUN_MODEL_DOWNLOAD=$(cat ${VALUES_PATH} | yq .sampleApplication.model.pvc.enabled)
 
-  log_info "🚀 Launching model download job..."
-  kubectl apply -f "${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml" -n "${NAMESPACE}"
+  if [[ "${RUN_MODEL_DOWNLOAD}" == "true" ]]; then
+    log_info "💾 Provisioning model storage…"
+    # This now only uses the template based on user-provided storage class and size
+    eval "echo \"$(cat ${REPO_ROOT}/helpers/k8s/model-storage-rwx-pvc-template.yaml)\"" \
+        | kubectl apply -n "${NAMESPACE}" -f -
+    log_success "✅ PVC created with storageClassName ${STORAGE_CLASS} and size ${STORAGE_SIZE}"
 
-  log_info "⏳ Waiting up to 3m for model download job to complete; this may take a while depending on connection speed and model size..."
-  kubectl wait --for=condition=complete --timeout=180s job/download-model -n "${NAMESPACE}" || {
-    log_error "🙀 Model download job failed or timed out";
-    kubectl logs job/download-model -n "${NAMESPACE}";
-    kubectl logs -l job-name=download-model -n "${NAMESPACE}";
-    exit 1;
-  }
-  log_success "✅ Model downloaded"
+    log_info "🚀 Launching model download job..."
+    kubectl apply -f "${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml" -n "${NAMESPACE}"
+
+    log_info "⏳ Waiting 30 seconds pod to start running model download job ..."
+    kubectl wait --for=condition=Ready pod/$(kubectl get pod --selector=job-name=download-model -o json | jq -r '.items[0].metadata.name') --timeout=60s || {
+      log_error "🙀 No pod picked up model download job";
+      log_info "Please check your storageclass configuration for the \`download-model\` - if the PVC fails to spin the job will never get a pod"
+      kubectl logs job/download-model -n "${NAMESPACE}";
+    }
+
+    log_info "⏳ Waiting up to 3m for model download job to complete; this may take a while depending on connection speed and model size..."
+    kubectl wait --for=condition=complete --timeout=180s job/download-model -n "${NAMESPACE}" || {
+      log_error "🙀 Model download job failed or timed out";
+      JOB_POD=$(kubectl get pod --selector=job-name=download-model -o json | jq -r '.items[0].metadata.name')
+      kubectl logs pod/${JOB_POD} -n "${NAMESPACE}";
+      exit 1;
+    }
+    log_success "✅ Model downloaded"
+  else
+    log_info "⏭️ Model download to PVC skipped - BYO model via HF repo_id, will happen in inferencing pods"
+  fi
 
   helm repo add bitnami  https://charts.bitnami.com/bitnami
   log_info "🛠️ Building Helm chart dependencies..."

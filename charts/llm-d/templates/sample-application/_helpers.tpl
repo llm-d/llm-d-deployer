@@ -1,8 +1,34 @@
 {{/*
+Define what will be the positional argument to `vllm serve`
+*/}}
+{{- define "sampleApplication.modelServe" -}}
+  {{- if .Values.sampleApplication.enabled -}}
+    {{- if .Values.sampleApplication.model.pvc.enabled -}}
+      {{- .Values.sampleApplication.model.pvc.mountPath }}/{{`{{ .ModelPath }}`}}
+    {{- else if .Values.sampleApplication.model.huggingface.enabled -}}
+      {{`{{ .HFModelName }}`}}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+{{/*
+Define the model name to be used
+*/}}
+{{- define "sampleApplication.modelName" -}}
+  {{- if .Values.sampleApplication.enabled -}}
+    {{- if .Values.sampleApplication.model.pvc.enabled -}}
+      {{- .Values.sampleApplication.model.pvc.modelName }}
+    {{- else if .Values.sampleApplication.model.huggingface.enabled }}
+      {{- .Values.sampleApplication.model.huggingface.modelName }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+{{/*
 Sanitize the model name into a valid k8s label.
 */}}
 {{- define "sampleApplication.sanitizedModelName" -}}
-  {{- $name := .Values.sampleApplication.modelName | lower | trim -}}
+  {{- $name := include "sampleApplication.modelName" . | lower | trim -}}
   {{- $name = regexReplaceAll "[^a-z0-9_.-]" $name "-" -}}
   {{- $name = regexReplaceAll "^[\\-._]+" $name "" -}}
   {{- $name = regexReplaceAll "[\\-._]+$" $name "" -}}
@@ -15,11 +41,37 @@ Sanitize the model name into a valid k8s label.
 {{- $name -}}
 {{- end }}
 
-
+{{/*
+Define the template for ingress host
+*/}}
 {{- define "sampleApplication.ingressHost" -}}
   {{- if .Values.ingress.host -}}
     {{- include "common.tplvalues.render" ( dict "value" .Values.ingress.host "context" $ ) }}
   {{- else }}
     {{- include "gateway.fullname" . }}.{{ default "localhost" .Values.ingress.clusterRouterBase }}
   {{- end}}
+{{- end}}
+
+
+
+{{/*
+Define the model artifact URI if using pvc for BYO model
+*/}}
+{{- define "sampleApplication.modelArtifacts" -}}
+{{- if .Values.sampleApplication.enabled -}}
+{{- if .Values.sampleApplication.model.pvc.enabled -}}
+modelArtifacts:
+  uri: pvc://{{ .Values.sampleApplication.model.pvc.pvcName }}{{ .Values.sampleApplication.model.pvc.modelPath }}
+{{- else if .Values.sampleApplication.model.huggingface.enabled -}}
+modelArtifacts:
+  uri: hf://{{ .Values.sampleApplication.model.huggingface.repoID }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Define the model cache path for downloading models via huggingface
+*/}}
+{{- define "sampleApplication.huggingFaceCacheDir" -}}
+{{- .Values.sampleApplication.model.huggingface.cache.path | default "/vllm-hf-models" }}
 {{- end }}

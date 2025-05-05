@@ -52,14 +52,22 @@ sampleApplication:
   # -- Enable rendering of sample application resources
   enabled: true
 
-  # -- Specify the model name as it is available to the api
-  modelName: Llama-3.2-3B-Instruct
-
-  # -- Specify the filepath for the model
-  modelPath: /cache/models/meta-llama/Llama-3.2-3B-Instruct
-
-  # -- Location where the model can be loaded from. Currently supports pvc:// backed by preexisting PVC
-  modelArtifactUri: pvc://llama-3.2-3b-instruct-pvc/models/meta-llama/Llama-32-3B-Instruct
+  model:
+    pvc:
+      enabled: true
+      mountPath: "/cache"
+      modelPath: "/models/meta-llama/Llama-3.2-3B-Instruct"
+      modelName: "Llama-3.2-3B-Instruct"
+      pvcName: "llama-3.2-3b-instruct-pvc"
+    huggingface:
+      enabled: false
+      modelName: "Llama-3.2-3B-Instruct"
+      repoID: "meta-llama/Llama-3.2-3B-Instruct"
+      cache:
+        # -- specify override path for HF_HUB_CACHE. Defaults to `/vllm-hf-models`
+        path: ""
+        # -- specify a maximum volume size for HF_HUB_CACHE
+        sizeLimit: ""
 
   # -- Modify resource limits/requests available to the pods
   # -- Resource requests/limits

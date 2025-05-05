@@ -79,14 +79,18 @@ data:
               imagePullPolicy: {{ .Values.modelservice.vllm.image.imagePullPolicy }}
               securityContext:
                 allowPrivilegeEscalation: false
+              command:
+                - vllm
+                - serve
+                - {{ include "sampleApplication.modelServe" . }}
               args:
                 - "--port"
                 - "8000"
                 - "--kv-transfer-config"
                 - '{"kv_connector":"LMCacheConnectorV1","kv_role":"kv_consumer","kv_connector_extra_config": {"discard_partial_chunks": false, "lmcache_rpc_port": "consumer1"}}'
               env:
-                - name: XDG_CACHE_HOME
-                  value: /tmp
+                - name: HOME
+                  value: /home
                 - name: POD_IP
                   valueFrom:
                     fieldRef:
@@ -94,13 +98,6 @@ data:
                       fieldPath: status.podIP
                 - name: LMCACHE_DISTRIBUTED_URL
                   value: ${POD_IP}:80
-                {{- if .Values.auth.hfToken.enabled }}
-                - name: HF_TOKEN
-                  valueFrom:
-                    secretKeyRef:
-                      name: {{ .Values.auth.hfToken.name }}
-                      key: {{ .Values.auth.hfToken.key }}
-                {{- end }}
                 - name: CUDA_VISIBLE_DEVICES
                   value: "0"
                 - name: UCX_TLS
@@ -117,25 +114,50 @@ data:
                 - name: LMCACHE_LOOKUP_URL
                   value: {{ include "redis.master.service.fullurl" .}}
                 {{- end }}
+                {{- if .Values.sampleApplication.model.huggingface.enabled }}
+                - name: HF_HUB_CACHE
+                  value: {{ include "sampleApplication.huggingFaceCacheDir" . }}
+                {{- end }}
+                {{- if and .Values.sampleApplication.model.huggingface.enabled .Values.auth.hfToken.enabled }}
+                - name: HF_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.auth.hfToken.name }}
+                      key: {{ .Values.auth.hfToken.key }}
+                {{- end }}
               ports:
                 - containerPort: 8001
                   protocol: TCP
                 - containerPort: 55555
                   protocol: TCP
               volumeMounts:
+                - name: home
+                  mountPath: /home
                 - name: config-decoder
                   mountPath: /vllm-workspace
-                - name: model-cache
-                  mountPath: /vllm-workspace/models
+                {{- if .Values.sampleApplication.model.pvc.enabled }}
                 - name: model-storage
-                  mountPath: /cache
+                  mountPath: {{ .Values.sampleApplication.model.pvc.mountPath }}
+                  readOnly: true
+                {{- else if .Values.sampleApplication.model.huggingface.enabled }}
+                - name: model-cache
+                  mountPath: {{ include "sampleApplication.huggingFaceCacheDir" . }}
+                {{- end}}
           volumes:
+            - name: home
+              emptyDir: {}
             - name: config-decoder
               configMap:
                 name: {{ include "modelservice.fullname" . -}}-config-decoder
+            {{- if .Values.sampleApplication.model.huggingface.enabled }}
             - name: model-cache
+              {{- if .Values.sampleApplication.model.huggingface.cache.sizeLimit }}
               emptyDir:
-                sizeLimit: 1Gi
+                sizeLimit: {{ .Values.sampleApplication.model.huggingface.cache.sizeLimit }}
+              {{- else }}
+              emptyDir: {}
+              {{- end -}}
+            {{- end }}
 
   prefillDeployment: |
     apiVersion: apps/v1
@@ -164,14 +186,18 @@ data:
               imagePullPolicy: {{ .Values.modelservice.vllm.image.imagePullPolicy }}
               securityContext:
                 allowPrivilegeEscalation: false
+              command:
+                - vllm
+                - serve
+                - {{ include "sampleApplication.modelServe" . }}
               args:
                 - "--port"
                 - "8000"
                 - "--kv-transfer-config"
                 - '{"kv_connector":"LMCacheConnectorV1","kv_role":"kv_producer","kv_connector_extra_config": {"discard_partial_chunks": false, "lmcache_rpc_port": "producer1"}}'
               env:
-                - name: XDG_CACHE_HOME
-                  value: /tmp
+                - name: HOME
+                  value: /home
                 - name: POD_IP
                   valueFrom:
                     fieldRef:
@@ -179,13 +205,6 @@ data:
                       fieldPath: status.podIP
                 - name: LMCACHE_DISTRIBUTED_URL
                   value: "${POD_IP}:80"
-                {{- if .Values.auth.hfToken.enabled }}
-                - name: HF_TOKEN
-                  valueFrom:
-                    secretKeyRef:
-                      name: {{ .Values.auth.hfToken.name }}
-                      key: {{ .Values.auth.hfToken.key }}
-                {{- end }}
                 - name: CUDA_VISIBLE_DEVICES
                   value: "0"
                 - name: UCX_TLS
@@ -202,25 +221,50 @@ data:
                 - name: LMCACHE_LOOKUP_URL
                   value: {{ include "redis.master.service.fullurl" .}}
                 {{- end }}
+                {{- if .Values.sampleApplication.model.huggingface.enabled }}
+                - name: HF_HUB_CACHE
+                  value: {{ include "sampleApplication.huggingFaceCacheDir" . }}
+                {{- end }}
+                {{- if and .Values.sampleApplication.model.huggingface.enabled .Values.auth.hfToken.enabled }}
+                - name: HF_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.auth.hfToken.name }}
+                      key: {{ .Values.auth.hfToken.key }}
+                {{- end }}
               volumeMounts:
+                - name: home
+                  mountPath: /home
                 - name: config-prefiller
                   mountPath: /vllm-workspace
-                - name: model-cache
-                  mountPath: /vllm-workspace/models
+                {{- if .Values.sampleApplication.model.pvc.enabled }}
                 - name: model-storage
-                  mountPath: /cache
+                  mountPath: {{ .Values.sampleApplication.model.pvc.mountPath }}
+                  readOnly: true
+                {{- else if .Values.sampleApplication.model.huggingface.enabled }}
+                - name: model-cache
+                  mountPath: {{ include "sampleApplication.huggingFaceCacheDir" . }}
+                {{- end}}
               ports:
                 - containerPort: 8001
                   protocol: TCP
                 - containerPort: 55555
                   protocol: TCP
           volumes:
+            - name: home
+              emptyDir: {}
             - name: config-prefiller
               configMap:
                 name: {{ include "modelservice.fullname" . -}}-config-prefiller
+            {{- if .Values.sampleApplication.model.huggingface.enabled }}
             - name: model-cache
+              {{- if .Values.sampleApplication.model.huggingface.cache.sizeLimit }}
               emptyDir:
-                sizeLimit: 1Gi
+                sizeLimit: {{ .Values.sampleApplication.model.huggingface.cache.sizeLimit }}
+              {{- else }}
+              emptyDir: {}
+              {{- end }}
+            {{- end }}
 
   decodeService: |
     apiVersion: v1
@@ -297,7 +341,6 @@ data:
           labels:
             app.kubernetes.io/gateway: {{ include "gateway.fullname" . }}
         spec:
-          serviceAccountName: endpoint-picker-sa # manually created in workaround w/ proper RBAC
           containers:
             - args:
                 - --poolName

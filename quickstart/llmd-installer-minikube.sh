@@ -275,7 +275,7 @@ install() {
     VALUES_PATH="${CHART_DIR}/values.yaml"
   fi
 
-  if [[ "$(yq -r .auth.hfToken.enabled "${VALUES_PATH}")" == "true" ]]; then
+  if [[ "$(yq -r .sampleApplication.model.huggingface.enabled "${VALUES_PATH}")" == "true" ]]; then
     log_info "🔐 Creating HF token secret (from ${VALUES_PATH})..."
     HF_NAME=$(yq -r .auth.hfToken.name "${VALUES_PATH}")
     HF_KEY=$(yq -r .auth.hfToken.key  "${VALUES_PATH}")

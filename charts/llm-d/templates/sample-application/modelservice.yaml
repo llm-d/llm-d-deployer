@@ -17,31 +17,22 @@ spec:
   baseConfigMapRef:
     name: {{ include "modelservice.fullname" . }}-basic-gpu-with-nixl-preset
   routing:
-    modelName: {{ .Values.sampleApplication.modelName }}
-  modelArtifacts:
-    uri: {{ .Values.sampleApplication.modelArtifactUri }}
+    modelName: {{ include "sampleApplication.sanitizedModelName" . }}
+  {{- include "sampleApplication.modelArtifacts" . | nindent 2 }}
   decode:
     replicas: 1
     containers:
     - name: "vllm"
-      command:
-        - vllm
-        - serve
       args:
-      - "{{ .Values.sampleApplication.modelPath }}"
       - "--served-model-name"
-      - {{ .Values.sampleApplication.modelName }}
+      - {{ include "sampleApplication.modelName" . }},{{ include "sampleApplication.sanitizedModelName" .}}
       resources: {{ .Values.sampleApplication.resources | toYaml | nindent 8 }}
   prefill:
     replicas: 1
     containers:
     - name: "vllm"
-      command:
-        - vllm
-        - serve
       args:
-      - "{{ .Values.sampleApplication.modelPath }}"
       - "--served-model-name"
-      - {{ .Values.sampleApplication.modelName }}
+      - {{ include "sampleApplication.modelName" . }},{{ include "sampleApplication.sanitizedModelName" .}}
       resources: {{ .Values.sampleApplication.resources | toYaml | nindent 8 }}
 {{- end }}
