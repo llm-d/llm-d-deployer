@@ -1,0 +1,28 @@
+name: Decorate Github release
+
+on:
+  release:
+    types:
+      - published
+
+permissions:
+  contents: write
+
+jobs:
+  decorate-release:
+    name: Decorate Github release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add workflow status badge to a release
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
+        with:
+          script: |
+            const tag = context.ref.split("/")[2]
+            const owner = context.repo.owner
+            const repo = context.repo.repo
+            const release = await github.rest.repos.getReleaseByTag({ owner, repo, tag });
+
+            const WORKFLOW_URL = `https://github.com/${owner}/${repo}/actions/workflows/test.yaml`
+            const BADGE = `[![Released chart test status](${WORKFLOW_URL}/badge.svg?tag=${tag})](${WORKFLOW_URL})`
+
+            await github.rest.repos.updateRelease({ owner, repo, release_id: release.data.id, body: BADGE + "\n\n" + release.data.body });
