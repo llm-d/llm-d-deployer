@@ -46,7 +46,7 @@ data:
           remote_serde: NULL
           enable_nixl: True
           nixl_role: "sender"
-          nixl_peer_host: "{{ include "sampleApplication.sanitizedModelName" . }}-service-decode"
+          nixl_peer_host: {{`"{{ .DecodeServiceName }}"`}}
           nixl_peer_port: 55555
           nixl_buffer_size: 524288
           nixl_buffer_device: "cuda"
@@ -219,6 +219,9 @@ data:
   decodeService: |
     apiVersion: v1
     kind: Service
+    metadata:
+      labels:
+        llmd.ai/gather-metrics: "true"
     spec:
       clusterIP: None
       ports:
@@ -232,6 +235,9 @@ data:
   prefillService: |
     apiVersion: v1
     kind: Service
+    metadata:
+      labels:
+        llmd.ai/gather-metrics: "true"
     spec:
       clusterIP: None
       ports:
