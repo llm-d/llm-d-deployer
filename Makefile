@@ -39,3 +39,16 @@ helm-upgrade: pre-helm ## Upgrade the release if it exists
 helm-uninstall: ## Uninstall the Helm release
 	@printf "\033[33;1m==== Running helm uninstall ====\033[0m\n"
 	helm uninstall $(RELEASE) --namespace $(NAMESPACE)
+
+
+##@ Automation
+
+.Phony: bump-modelservice-crd
+bump-modelservice-crd:
+	git clone git@github.com:neuralmagic/llm-d-model-service.git
+	kustomize build llm-d-model-service/config/crd > charts/llm-d/crds/modelservice-crd.yaml
+	rm -rf llm-d-model-service
+
+.Phony: bump-chart-version
+bump-chart-version:
+	helpers/scripts/increment-chart-version.sh
