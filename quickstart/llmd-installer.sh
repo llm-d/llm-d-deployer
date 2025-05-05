@@ -31,10 +31,6 @@ Usage: $(basename "$0") [OPTIONS]
 Options:
   --hf-token TOKEN           Hugging Face token (or set HF_TOKEN env var)
   --auth-file PATH           Path to containers auth.json
-  --provision-minikube       Provision a local Minikube cluster without GPU support (p/d pods will stay pending)
-  --provision-minikube-gpu   Provision a local Minikube cluster with GPU support
-  --delete-minikube          Delete local Minikube cluster
-  --minikube-storage         Use Minikube-specific PVC manifest for storage
   --storage-size SIZE        Size of storage volume (default: 7Gi)
   --storage-class CLASS      Storage class to use (default: efs-sc)
   --namespace NAME           K8s namespace (default: llm-d)
@@ -90,10 +86,6 @@ parse_args() {
     case "$1" in
       --hf-token)               HF_TOKEN_CLI="$2"; shift 2 ;;
       --auth-file)              AUTH_FILE_CLI="$2"; shift 2 ;;
-      --provision-minikube)     PROVISION_MINIKUBE=true; USE_MINIKUBE_STORAGE=true; shift ;;
-      --provision-minikube-gpu) PROVISION_MINIKUBE_GPU=true; USE_MINIKUBE_STORAGE=true; shift ;;
-      --delete-minikube)        DELETE_MINIKUBE=true; shift ;;
-      --minikube-storage)       USE_MINIKUBE_STORAGE=true; shift ;;
       --storage-size)           STORAGE_SIZE="$2"; shift 2 ;;
       --storage-class)          STORAGE_CLASS="$2"; shift 2 ;;
       --namespace)              NAMESPACE="$2"; shift 2 ;;
