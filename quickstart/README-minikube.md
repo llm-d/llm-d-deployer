@@ -110,15 +110,15 @@ podman run --rm --security-opt=label=disable --device=nvidia.com/gpu=all ubuntu 
 sudo docker run --rm --runtime=nvidia --gpus all ubuntu nvidia-smi
 ```
 
-To Provision a Minikube cluster run the `init-minikube.sh` script.
+To Provision a Minikube cluster run the `llmd-installer-minikube.sh` script.
 
 ```bash
-./llmd-installer.sh --provision-minikube-gpu
+./llmd-installer-minikube.sh --provision-minikube-gpu
 ```
 
 ## llm-d Installation
 
-The llm-d-deployer contains all the helm charts necessary to deploy llm-d. To facilitate the installation of the helm charts, the `llmd-installer.sh` script is provided. This script will populate the necessary manifests in the `manifests` directory. After this, it will apply all the manifests in order to bring up the cluster.
+The llm-d-deployer contains all the helm charts necessary to deploy llm-d. To facilitate the installation of the helm charts, the `llmd-installer-minikube.sh` script is provided. This script will populate the necessary manifests in the `manifests` directory. After this, it will apply all the manifests in order to bring up the cluster.
 
 Before proceeding with the installation, ensure you have installed the required dependencies
 
@@ -127,25 +127,25 @@ Before proceeding with the installation, ensure you have installed the required 
 The installer needs to be run from the `llm-d-deployer/quickstart` directory.
 
 ```bash
-./llmd-installer.sh [OPTIONS]
+./llmd-installer-minikube.sh [OPTIONS]
 ```
 
 ### Flags
 
 | Flag                       | Description                                                                                             | Example                                                   |
 |----------------------------|---------------------------------------------------------------------------------------------------------|-----------------------------------------------------------|
-| `--hf-token TOKEN`         | HuggingFace API token (or set `HF_TOKEN` env var)                                                       | `./llmd-installer.sh --hf-token "abc123"`                        |
-| `--auth-file PATH`         | Path to your registry auth file ig not in one of the two listed files in the auth section of the readme | `./llmd-installer.sh --auth-file ~/.config/containers/auth.json` |
-| `--provision-minikube`     | Provision a local Minikube cluster without GPU support (implies `--minikube-storage`)                   | `./llmd-installer.sh --provision-minikube`                       |
-| `--provision-minikube-gpu` | Provision a local Minikube cluster with GPU support (implies `--minikube-storage`)                      | `./llmd-installer.sh --provision-minikube`                       |
-| `--minikube-storage`       | Use the Minikube-specific PVC manifest for storage                                                      | `./llmd-installer.sh --minikube-storage`                         |
-| `--storage-size SIZE`      | Size of storage volume (default: 7Gi)                                                                   | `./llmd-installer.sh --storage-size 15Gi`                        |
-| `--storage-class CLASS`    | Storage class to use (default: efs-sc)                                                                  | `./llmd-installer.sh --storage-class ocs-storagecluster-cephfs`  |
-| `--delete-minikube`        | Delete local Minikube cluster                                                                           | `./llmd-installer.sh --delete-minikube`                          |
-| `--namespace NAME`         | Kubernetes namespace to use (default: `llm-d`)                                                          | `./llmd-installer.sh --namespace foo`                            |
-| `--values NAME`            | Absolute path to a Helm values.yaml file (default: llm-d-deployer/charts/llm-d/values.yaml)             | `./llmd-installer.sh --values /path/to/values.yaml`              |
-| `--uninstall`              | Uninstall llm-d and cleanup resources                                                                   | `./llmd-installer.sh --uninstall`                                |
-| `-h`, `--help`             | Show help and exit                                                                                      | `./llmd-installer.sh --help`                                     |
+| `--hf-token TOKEN`         | HuggingFace API token (or set `HF_TOKEN` env var)                                                       | `./llmd-installer-minikube.sh --hf-token "abc123"`                        |
+| `--auth-file PATH`         | Path to your registry auth file ig not in one of the two listed files in the auth section of the readme | `./llmd-installer-minikube.sh --auth-file ~/.config/containers/auth.json` |
+| `--provision-minikube`     | Provision a local Minikube cluster without GPU support (implies `--minikube-storage`)                   | `./llmd-installer-minikube.sh --provision-minikube`                       |
+| `--provision-minikube-gpu` | Provision a local Minikube cluster with GPU support (implies `--minikube-storage`)                      | `./llmd-installer-minikube.sh --provision-minikube`                       |
+| `--minikube-storage`       | Use the Minikube-specific PVC manifest for storage                                                      | `./llmd-installer-minikube.sh --minikube-storage`                         |
+| `--storage-size SIZE`      | Size of storage volume (default: 7Gi)                                                                   | `./llmd-installer-minikube.sh --storage-size 15Gi`                        |
+| `--storage-class CLASS`    | Storage class to use (default: efs-sc)                                                                  | `./llmd-installer-minikube.sh --storage-class ocs-storagecluster-cephfs`  |
+| `--delete-minikube`        | Delete local Minikube cluster                                                                           | `./llmd-installer-minikube.sh --delete-minikube`                          |
+| `--namespace NAME`         | Kubernetes namespace to use (default: `llm-d`)                                                          | `./llmd-installer-minikube.sh --namespace foo`                            |
+| `--values NAME`            | Absolute path to a Helm values.yaml file (default: llm-d-deployer/charts/llm-d/values.yaml)             | `./llmd-installer-minikube.sh --values /path/to/values.yaml`              |
+| `--uninstall`              | Uninstall llm-d and cleanup resources                                                                   | `./llmd-installer-minikube.sh --uninstall`                                |
+| `-h`, `--help`             | Show help and exit                                                                                      | `./llmd-installer-minikube.sh --help`                                     |
 
 ## Examples
 
@@ -155,37 +155,27 @@ If you want to run Minikube with GPU support see [Using NVIDIA GPUs with minikub
 minikube start --driver docker --container-runtime docker --gpus all --gpus all --nodes=3
 ```
 
-### Install llm-d on Existing Kubernetes Cluster
-
-The storage class used is `efs-sc`. Modify [model-storage-rwx-pvc.yaml](../helpers/k8s/model-storage-rwx-pvc.yaml)
-for a different type.
-
-```bash
-export HF_TOKEN="your-token"
-./llmd-installer.sh
-```
-
 ### Provision Minikube cluster without GPU support and install llm-d
 
 **note**: prefill/decode pods will stay in pending status since there is no GPU node to schedule on.
 
 ```bash
 export HF_TOKEN="your-token"
-./llmd-installer.sh --provision-minikube --hf-token "$HF_TOKEN"
+./llmd-installer-minikube.sh --provision-minikube --hf-token "$HF_TOKEN"
 ```
 
 ### Provision Minikube cluster with GPU support and install llm-d
 
 ```bash
 export HF_TOKEN="your-token"
-./llmd-installer.sh --provision-minikube-gpu --hf-token "$HF_TOKEN"
+./llmd-installer-minikube.sh --provision-minikube-gpu --hf-token "$HF_TOKEN"
 ```
 
 ### Use Minikube storage if the minikube cluster is already provisioned to install llm-d
 
 ```bash
 export HF_TOKEN="your-token"
-./llmd-installer.sh --minikube-storage --hf-token "$HF_TOKEN"
+./llmd-installer-minikube.sh --minikube-storage --hf-token "$HF_TOKEN"
 ```
 
 ## Model Service
@@ -246,5 +236,5 @@ This will remove llm-d resources from the cluster. This is useful, especially fo
 make a change, simply uninstall and then run the installer again with any changes you make.
 
 ```bash
-./llmd-installer.sh --uninstall
+./llmd-installer-minikube.sh --uninstall
 ```
