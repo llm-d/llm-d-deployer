@@ -180,10 +180,8 @@ modelservice:
   # -- Modelservice controller image, please change only if appropriate adjustments to the CRD are being made
   image:
     registry: quay.io
-    repository: grpereir/llm-d-model-service-dev
-    tag: "cmd"
-    # repository: llm-d/llm-d-model-service-dev
-    # tag: "0.0.7"
+    repository: llm-d/llm-d-model-service-dev
+    tag: "0.0.7"
     imagePullPolicy: "Always"
 
   # -- Endpoint picker image used in ModelService CR presets
