@@ -47,8 +47,6 @@ spec:
         - endpoint-picker-clusterrole
         - --epp-pull-secrets
         - {{ include "common.images.renderImagePullSecretsString" (dict "images" (list .Values.modelservice.epp.image) "context" $) }}
-        - --pd-cluster-role
-        - prefill-decode-clusterrole
         - --pd-pull-secrets
         - {{ include "common.images.renderImagePullSecretsString" (dict "images" (list .Values.modelservice.vllm.image) "context" $) }}
         # MSV2 HACK END
