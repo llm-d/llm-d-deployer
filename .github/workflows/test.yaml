@@ -46,7 +46,7 @@ jobs:
       - name: Run chart-testing (list-changed)
         id: list-changed
         env:
-          TARGET_BRANCH: ${{ github.event.pull_request.base.ref }}
+          TARGET_BRANCH: ${{ github.event.pull_request.base.ref || 'main^' }}
         run: |
           changed=$(ct list-changed --target-branch "$TARGET_BRANCH")
           if [[ -n "$changed" ]]; then
@@ -132,7 +132,7 @@ jobs:
       - name: Run chart-testing (install)
         if: steps.list-changed.outputs.changed == 'true'
         env:
-          TARGET_BRANCH: ${{ github.event.pull_request.base.ref }}
+          TARGET_BRANCH: ${{ github.event.pull_request.base.ref || 'main^' }}
         run: |
           ct install \
             --debug \
