@@ -8,7 +8,7 @@ NAMESPACE="llm-d"
 PROVISION_MINIKUBE=false
 PROVISION_MINIKUBE_GPU=false
 USE_MINIKUBE_STORAGE=false
-STORAGE_SIZE="7Gi"
+STORAGE_SIZE="15Gi"
 STORAGE_CLASS="efs-sc"
 DELETE_MINIKUBE=false
 ACTION="install"
@@ -158,7 +158,7 @@ validate_hf_token() {
 ### MINIKUBE HANDLERS ###
 provision_minikube() {
   log_info "🌱 Provisioning Minikube cluster..."
-  minikube start --nodes=3
+  minikube start
   log_success "🚀 Minikube started."
 }
 
@@ -167,8 +167,7 @@ provision_minikube_gpu() {
   minikube start \
     --driver docker \
     --container-runtime docker \
-    --gpus all \
-    --nodes=3
+    --gpus all
   log_success "🚀 Minikube GPU cluster started."
 }
 
@@ -248,10 +247,8 @@ install() {
   fi
   log_success "✅ Job manifest patched"
 
-  # This is where all minicube scenarios use glusterfs sc and existing kube clusters use model-storage-rwx-pvc.yaml
   log_info "💾 Provisioning model storage…"
   if [[ "${USE_MINIKUBE_STORAGE}" == "true" ]]; then
-    ensure_gluster_addon_enabled
     # this creates both the hostPath PV and the matching PVC
     setup_minikube_storage
     log_success "✅ PVC created from model-storage-rwx-pvc-minikube.yaml"
@@ -307,7 +304,7 @@ kind: PersistentVolume
 metadata:
   name: redis-hostpath-pv
 spec:
-  storageClassName: glusterfile
+  storageClassName: manual
   capacity:
     storage: 5Gi
   accessModes:
@@ -320,10 +317,10 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: redis-pvc
+  name: redis-data-redis-master
   namespace: ${NAMESPACE}
 spec:
-  storageClassName: glusterfile
+  storageClassName: manual
   accessModes:
     - ReadWriteMany
   resources:
@@ -340,7 +337,7 @@ EOF
 }
 
 setup_minikube_storage() {
-  log_info "📦 Setting up Minikube Gluster RWX Shared Storage..."
+  log_info "📦 Setting up Minikube hostPath RWX Shared Storage..."
   log_info "🔄 Creating PV and PVC for llama model..."
 kubectl apply -f - <<EOF
 apiVersion: v1
@@ -348,9 +345,9 @@ kind: PersistentVolume
 metadata:
   name: llama-hostpath-pv
 spec:
-  storageClassName: glusterfile
+  storageClassName: manual
   capacity:
-    storage: 7Gi
+    storage: ${STORAGE_SIZE}
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
@@ -364,28 +361,15 @@ metadata:
   name: llama-3.2-3b-instruct-pvc
   namespace: ${NAMESPACE}
 spec:
-  storageClassName: glusterfile
+  storageClassName: manual
   accessModes:
     - ReadWriteMany
   resources:
     requests:
-      storage: 7Gi
+      storage: ${STORAGE_SIZE}
   volumeName: llama-hostpath-pv
 EOF
   log_success "✅ llama model PV and PVC created."
-}
-
-ensure_gluster_addon_enabled() {
-  if [[ "${USE_MINIKUBE_STORAGE}" == "true" ]]; then
-    log_info "🔍 Checking if Gluster addon is enabled in Minikube..."
-    if ! minikube addons list | grep -q 'storage-provisioner-gluster.*disabled'; then
-      log_success "✅ Gluster addon already enabled."
-    else
-      log_info "📦 Enabling Gluster addon for Minikube..."
-      minikube addons enable storage-provisioner-gluster
-      log_success "✅ Gluster addon enabled."
-    fi
-  fi
 }
 
 clone_gaie_repo() {
