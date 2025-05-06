@@ -16,42 +16,6 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.annotations "context" $) | nindent 4 }}
     {{- end }}
 data:
-  configMaps: |
-    - apiVersion: v1
-      kind: ConfigMap
-      metadata:
-        name: {{ include "modelservice.fullname" . -}}-config-decoder
-      data:
-        lmcache-decoder-config.yaml: |
-          local_cpu: False
-          max_local_cpu_size: 0
-          max_local_disk_size: 0
-          remote_serde: NULL
-          enable_nixl: True
-          nixl_role: receiver
-          nixl_peer_host: 0.0.0.0
-          nixl_peer_port: 55555
-          nixl_buffer_size: 524288
-          nixl_buffer_device: "cuda"
-          nixl_enable_gc: True
-    - apiVersion: v1
-      kind: ConfigMap
-      metadata:
-        name: {{ include "modelservice.fullname" . -}}-config-prefiller
-      data:
-        lmcache-prefiller-config.yaml: |
-          local_cpu: False
-          max_local_cpu_size: 0
-          max_local_disk_size: 0
-          remote_serde: NULL
-          enable_nixl: True
-          nixl_role: "sender"
-          nixl_peer_host: {{`"{{ .DecodeServiceName }}"`}}
-          nixl_peer_port: 55555
-          nixl_buffer_size: 524288
-          nixl_buffer_device: "cuda"
-          nixl_enable_gc: True
-
   decodeDeployment: |
     apiVersion: apps/v1
     kind: Deployment
@@ -62,18 +26,20 @@ data:
           tolerations:
             {{- toYaml .Values.modelservice.decode.tolerations | nindent 12 }}
           {{- end }}
-          containers:
+          initContainers:
             - name: routing-proxy
               image: {{ include "modelservice.routingProxyImage" . }}
               securityContext:
                 allowPrivilegeEscalation: false
                 runAsNonRoot: true
               args:
-                - "--port=8001"
-                - "--vllm-port=8000"
+                - "--port=8000"
+                - "--vllm-port=8001"
+                - "--connector=nixl"
               ports:
                 - containerPort: 8000
                   protocol: TCP
+          containers:
             - name: vllm
               image: {{ include "modelservice.vllmImage" . }}
               imagePullPolicy: {{ .Values.modelservice.vllm.image.imagePullPolicy }}
@@ -85,31 +51,32 @@ data:
                 - {{ `{{ default (print "/models/" .ModelPath) .HFModelName }}` }}
               args:
                 - "--port"
-                - "8000"
+                - "8001"
                 - "--kv-transfer-config"
-                - '{"kv_connector":"LMCacheConnectorV1","kv_role":"kv_consumer","kv_connector_extra_config": {"discard_partial_chunks": false, "lmcache_rpc_port": "consumer1"}}'
+                - '{"kv_connector":"NixlConnector","kv_role":"kv_both"}'
+                - "--enforce-eager"
               env:
                 - name: HOME
                   value: /home
+                - name: VLLM_NIXL_SIDE_CHANNEL_PORT
+                  value: "5557"
+                - name: VLLM_NIXL_SIDE_CHANNEL_HOST
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: status.podIP
+                - name: VLLM_LOGGING_LEVEL
+                  value: DEBUG
                 - name: POD_IP
                   valueFrom:
                     fieldRef:
                       apiVersion: v1
                       fieldPath: status.podIP
                 - name: LMCACHE_DISTRIBUTED_URL
-                  value: ${POD_IP}:80
+                  value: {{ `"${POD_IP}:80"` }}
                 - name: CUDA_VISIBLE_DEVICES
                   value: "0"
                 - name: UCX_TLS
                   value: "cuda_ipc,cuda_copy,tcp"
-                - name: LMCACHE_USE_EXPERIMENTAL
-                  value: "True"
-                - name: VLLM_ENABLE_V1_MULTIPROCESSING
-                  value: "1"
-                - name: VLLM_WORKER_MULTIPROC_METHOD
-                  value: spawn
-                - name: LMCACHE_CONFIG_FILE
-                  value: /vllm-workspace/lmcache-decoder-config.yaml
                 {{- if .Values.redis.enabled }}
                 - name: LMCACHE_LOOKUP_URL
                   value: {{ include "redis.master.service.fullurl" .}}
@@ -121,8 +88,6 @@ data:
               volumeMounts:
                 - name: home
                   mountPath: /home
-                - name: config-decoder
-                  mountPath: /vllm-workspace
                 {{ `{{- if .HFModelName }}` }}
                 - name: model-cache
                   mountPath: /models
@@ -132,16 +97,11 @@ data:
                   readOnly: true
                 {{ `{{- end }}` }}
               ports:
-                - containerPort: 8001
-                  protocol: TCP
-                - containerPort: 55555
+                - containerPort: 5557
                   protocol: TCP
           volumes:
             - name: home
               emptyDir: {}
-            - name: config-decoder
-              configMap:
-                name: {{ include "modelservice.fullname" . -}}-config-decoder
             {{ `{{- if .HFModelName }}` }}
             - name: model-cache
               emptyDir: {}
@@ -157,18 +117,20 @@ data:
           tolerations:
             {{- toYaml .Values.modelservice.prefill.tolerations | nindent 12 }}
           {{- end }}
-          containers:
+          initContainers:
             - name: "routing-proxy"
               image: {{ include "modelservice.routingProxyImage" . }}
               securityContext:
                 allowPrivilegeEscalation: false
                 runAsNonRoot: true
               args:
-                - "--port=8001"
-                - "--vllm-port=8000"
+                - "--port=8000"
+                - "--vllm-port=8001"
+                - "--connector=nixl"
               ports:
                 - containerPort: 8000
                   protocol: TCP
+          containers:
             - name: vllm
               image: {{ include "modelservice.vllmImage" . }}
               imagePullPolicy: {{ .Values.modelservice.vllm.image.imagePullPolicy }}
@@ -180,31 +142,32 @@ data:
                 - {{ `{{ default (print "/models/" .ModelPath) .HFModelName }}` }}
               args:
                 - "--port"
-                - "8000"
+                - "8001"
                 - "--kv-transfer-config"
-                - '{"kv_connector":"LMCacheConnectorV1","kv_role":"kv_producer","kv_connector_extra_config": {"discard_partial_chunks": false, "lmcache_rpc_port": "producer1"}}'
+                - '{"kv_connector":"NixlConnector","kv_role":"kv_both"}'
+                - "--enforce-eager"
               env:
                 - name: HOME
                   value: /home
+                - name: VLLM_LOGGING_LEVEL
+                  value: DEBUG
+                - name: VLLM_NIXL_SIDE_CHANNEL_PORT
+                  value: "5557"
+                - name: VLLM_NIXL_SIDE_CHANNEL_HOST
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: status.podIP
                 - name: POD_IP
                   valueFrom:
                     fieldRef:
                       apiVersion: v1
                       fieldPath: status.podIP
                 - name: LMCACHE_DISTRIBUTED_URL
-                  value: "${POD_IP}:80"
+                  value: {{ `"${POD_IP}:80"` }}
                 - name: CUDA_VISIBLE_DEVICES
                   value: "0"
                 - name: UCX_TLS
                   value: "cuda_ipc,cuda_copy,tcp"
-                - name: LMCACHE_USE_EXPERIMENTAL
-                  value: "True"
-                - name: VLLM_ENABLE_V1_MULTIPROCESSING
-                  value: "1"
-                - name: VLLM_WORKER_MULTIPROC_METHOD
-                  value: spawn
-                - name: LMCACHE_CONFIG_FILE
-                  value: /vllm-workspace/lmcache-prefiller-config.yaml
                 {{- if .Values.redis.enabled }}
                 - name: LMCACHE_LOOKUP_URL
                   value: {{ include "redis.master.service.fullurl" .}}
@@ -216,8 +179,6 @@ data:
               volumeMounts:
                 - name: home
                   mountPath: /home
-                - name: config-prefiller
-                  mountPath: /vllm-workspace
                 {{ `{{- if .HFModelName }}` }}
                 - name: model-cache
                   mountPath: /models
@@ -227,16 +188,11 @@ data:
                   readOnly: true
                 {{ `{{- end }}` }}
               ports:
-                - containerPort: 8001
-                  protocol: TCP
-                - containerPort: 55555
+                - containerPort: 5557
                   protocol: TCP
           volumes:
             - name: home
               emptyDir: {}
-            - name: config-prefiller
-              configMap:
-                name: {{ include "modelservice.fullname" . -}}-config-prefiller
             {{ `{{ if .HFModelName }}` }}
             - name: model-cache
               emptyDir: {}
@@ -254,7 +210,7 @@ data:
       clusterIP: None
       ports:
       - name: nixl
-        port: 55555
+        port: 5557
         protocol: TCP
       - name: vllm
         port: 8000
@@ -272,7 +228,7 @@ data:
       clusterIP: None
       ports:
       - name: nixl
-        port: 55555
+        port: 5557
         protocol: TCP
       - name: vllm
         port: 8000
@@ -332,6 +288,14 @@ data:
                 - --grpcHealthPort
                 - "9003"
               env:
+              - name: PD_ENABLED
+                value: "true"
+              - name: PD_PROMPT_LEN_THRESHOLD
+                value: "10"
+              {{- if .Values.redis.enabled }}
+              - name: KVCACHE_INDEXER_REDIS_ADDR
+                value: {{ include "redis.master.service.fullurl" . -}}
+              {{- end -}}
               {{/* HACK, waiting on: https://github.com/neuralmagic/llm-d-model-service/issues/123 */}}
               {{ `{{- if .HFModelName }}` }}
               - name: HF_TOKEN

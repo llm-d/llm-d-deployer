@@ -165,7 +165,7 @@ Kubernetes: `>= 1.25.0-0`
 | ingress.tls.enabled | Enable TLS configuration for the host defined at `ingress.host` parameter | bool | `false` |
 | ingress.tls.secretName | The name to which the TLS Secret will be called | string | `""` |
 | kubeVersion | Override Kubernetes version | string | `""` |
-| modelservice | Model service controller configuration | object | See below |
+| modelservice | Model service controller configuration | object | `{"annotations":{},"enabled":true,"epp":{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-gateway-api-inference-extension-dev","tag":"0.0.5-amd64"},"metrics":{"enabled":true}},"fullnameOverride":"","image":{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-model-service","tag":"0.0.6"},"metrics":{"enabled":true},"nameOverride":"","podAnnotations":{},"podLabels":{},"rbac":{"create":true},"replicas":1,"routingProxy":{"image":{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-routing-sidecar-dev","tag":"0.0.6"}},"service":{"enabled":true,"port":8443,"type":"ClusterIP"},"serviceAccount":{"annotations":{},"create":true,"fullnameOverride":"","labels":{},"nameOverride":""},"vllm":{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-dev","tag":"vllm-nixl-0.0.6"},"metrics":{"enabled":true}},"vllmSim":{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/vllm-sim-dev","tag":"0.0.4"}}}` |
 | modelservice.annotations | Annotations to add to all modelservice resources | object | `{}` |
 | modelservice.decode | Decode options | object | See below |
 | modelservice.decode.tolerations | Tolerations configuration to deploy decode pods to tainted nodes | list | See below |

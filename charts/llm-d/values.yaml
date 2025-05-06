@@ -300,8 +300,8 @@ modelservice:
     # -- vLLM image used in ModelService CR presets
     image:
       registry: quay.io
-      repository: llm-d/llm-d-dev
-      tag: "0.0.5"
+      repository: "llm-d/llm-d-dev"
+      tag: "vllm-nixl-0.0.6"
       imagePullPolicy: "IfNotPresent"
 
     metrics:
