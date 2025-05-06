@@ -216,17 +216,16 @@ completions are working.
 
 ```bash
 NAMESPACE=llm-d
-POD_IP=$(kubectl get pods -n ${NAMESPACE} -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.status.podIP}{"\n"}{end}' | grep llama-32-3b-instruct-model-service-decode | awk '{print $2}')
-kubectl run --rm -i curl-temp --image=curlimages/curl --restart=Never -- \
-  curl -X POST \
-  "http://${POD_IP}:8000/v1/chat/completions" \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "model": "Llama-3.2-3B-Instruct",
-    "messages": [{"content": "Who won the World Series in 1986?", "role": "user"}],
-    "stream": false
-  }'
+POD=$(kubectl get pods -n "$NAMESPACE" -l llm-d.ai/role=decode -o jsonpath='{.items[0].metadata.name}')
+kubectl exec -n "$NAMESPACE" -c vllm "$POD" -- \
+  curl -sS -X POST http://localhost:8000/v1/chat/completions \
+    -H 'accept: application/json' \
+    -H 'Content-Type: application/json' \
+    -d '{
+      "model": "Llama-32-3B-Instruct",
+      "messages": [{"role":"user","content":"Who won the World Series in 1986?"}],
+      "stream": false
+    }'
 ```
 
 After the p/d pods are running, you can view the models being run on the GPUs on the host to verify activity.
@@ -247,4 +246,10 @@ make a change, simply uninstall and then run the installer again with any change
 
 ```bash
 ./llmd-installer.sh --uninstall
+```
+
+To remove the minikube cluster this simply wraps the minikube command for convenience.
+
+```bash
+./llmd-installer.sh --delete-minikube
 ```
