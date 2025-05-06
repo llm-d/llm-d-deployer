@@ -70,3 +70,8 @@ Return the proper Docker Image Registry Secret Names
 {{- define "vllmSim.renderImagePullSecrets" -}}
   {{- include "common.images.renderPullSecrets" (dict "images" (list .Values.modelservice.vllmSim.image) "context" $) -}}
 {{- end -}}
+
+
+{{- define "modelservice.imagePullSecretsString" -}}
+{{- join "," .Values.global.imagePullSecrets | quote -}}
+{{- end }}
