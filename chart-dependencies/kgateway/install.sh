@@ -1,3 +1,11 @@
+#!/bin/bash
+
+helm upgrade -i \
+  --namespace kgateway-system \
+  --create-namespace \
+  --version v2.0.0 \
+  kgateway-crds oci://cr.kgateway.dev/kgateway-dev/charts/kgateway-crds
+
 helm upgrade -i \
   --namespace kgateway-system \
   --create-namespace \

@@ -123,11 +123,8 @@ jobs:
 
       - name: Install prerequisites
         if: steps.list-changed.outputs.changed == 'true'
-        run: |
-          pushd chart-dependencies
-          bash ci-deps.sh
-          popd
-
+        shell: bash
+        run: .chart-dependencies/ci-deps.sh
 
       - name: Run chart-testing (install)
         if: steps.list-changed.outputs.changed == 'true'

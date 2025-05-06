@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart for OpenShift
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square)
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for llm-d
@@ -146,11 +146,11 @@ Kubernetes: `>= 1.25.0-0`
 | commonLabels | Labels to add to all deployed objects | object | `{}` |
 | extraDeploy | Array of extra objects to deploy with the release | list | `[]` |
 | fullnameOverride | String to fully override common.names.fullname | string | `""` |
-| gateway | kGateway configuration | object | `{"annotations":{},"enabled":true,"fullnameOverride":"","gatewayClassName":"kgateway","listeners":[{"name":"default","path":"/","port":80,"protocol":"HTTP"}],"nameOverride":"","parameters":{"proxyUID":false},"serviceType":"NodePort"}` |
+| gateway | Gateway configuration | object | `{"annotations":{},"enabled":true,"fullnameOverride":"","gatewayClassName":"kgateway","kGatewayParameters":{"proxyUID":false},"listeners":[{"name":"default","path":"/","port":80,"protocol":"HTTP"}],"nameOverride":"","serviceType":"NodePort"}` |
 | gateway.annotations | Additional annotations provided to the Gateway resource | object | `{}` |
-| gateway.enabled | Deploy resources related to kGateway | bool | `true` |
+| gateway.enabled | Deploy resources related to Gateway | bool | `true` |
 | gateway.fullnameOverride | String to fully override gateway.fullname | string | `""` |
-| gateway.gatewayClassName | Gateway class that determines the backend used | string | `"kgateway"` |
+| gateway.gatewayClassName | Gateway class that determines the backend used Currently supported values: "kgateway" or "istio" | string | `"kgateway"` |
 | gateway.nameOverride | String to partially override gateway.fullname | string | `""` |
 | gateway.serviceType | Gateway's service type. Ingress is only available if the service type is set to NodePort. Accepted values: ["LoadBalancer", "NodePort"] | string | `"NodePort"` |
 | global | Global parameters Global Docker image parameters Please, note that this will override the image parameters, including dependencies, configured to use the global value Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass | object | See below |

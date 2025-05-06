@@ -1,4 +1,5 @@
 {{- if .Values.gateway.enabled }}
+{{ $isIstio := (eq .Values.gateway.gatewayClassName "istio") }}
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
@@ -10,12 +11,18 @@ metadata:
     {{- if .Values.commonLabels }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" . ) | nindent 4 }}
     {{- end }}
+    {{- if $isIstio }}
+    istio.io/enable-inference-extproc: "true"
+    {{- end }}
   annotations:
     {{- if .Values.commonAnnotations }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" . ) | nindent 4 }}
     {{- end }}
     {{- if .Values.gateway.annotations }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.gateway.annotations "context" .) | nindent 4 }}
+    {{- end }}
+    {{- if $isIstio }}
+    networking.istio.io/service-type: ClusterIP
     {{- end }}
 spec:
   gatewayClassName: {{ .Values.gateway.gatewayClassName | quote }}
@@ -25,7 +32,7 @@ spec:
       port: {{ .port }}
       protocol: {{ .protocol }}
   {{- end }}
-  {{- if .Values.gateway.parameters.proxyUID }}
+  {{- if and .Values.gateway.kGatewayParameters.proxyUID  (eq .Values.gateway.gatewayClassName "kgateway") }}
   infrastructure:
     parametersRef:
       name: {{ include "gateway.fullname" . }}
