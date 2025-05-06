@@ -219,7 +219,9 @@ data:
     kind: Service
     metadata:
       labels:
-        llmd.ai/gather-metrics: "true"
+        {{- if .Values.modelservice.vllm.metrics.enabled }}
+        {{ include "metrics.label" . }}
+        {{- end }}
     spec:
       clusterIP: None
       ports:
@@ -235,7 +237,9 @@ data:
     kind: Service
     metadata:
       labels:
-        llmd.ai/gather-metrics: "true"
+        {{- if .Values.modelservice.vllm.metrics.enabled }}
+        {{ include "metrics.label" . }}
+        {{- end }}
     spec:
       clusterIP: None
       ports:
@@ -249,6 +253,12 @@ data:
   eppService: |
     apiVersion: v1
     kind: Service
+    metadata:
+      labels:
+        app.kubernetes.io/gateway: {{ include "gateway.fullname" . }}
+        {{- if .Values.modelservice.epp.metrics.enabled }}
+        {{ include "metrics.label" . }}
+        {{- end}}
     spec:
       ports:
         - port: 9002    # Needs to match the port of the eppDeployment
@@ -261,20 +271,31 @@ data:
           protocol: TCP
           name: metrics
       type: NodePort # accepts "LoadBalancer" or "NodePort"
+      selector:
+        app.kubernetes.io/gateway: {{ include "gateway.fullname" . }}
 
   eppDeployment: |
     apiVersion: apps/v1
     kind: Deployment
+    metadata:
+      labels:
+        app.kubernetes.io/gateway: {{ include "gateway.fullname" . }}
     spec:
+      selector:
+        matchLabels:
+          app.kubernetes.io/gateway: {{ include "gateway.fullname" . }}
       template:
+        metadata:
+          labels:
+            app.kubernetes.io/gateway: {{ include "gateway.fullname" . }}
         spec:
           serviceAccountName: endpoint-picker-sa # manually created in workaround w/ proper RBAC
           containers:
             - args:
                 - --poolName
-                - {{ include "modelservice.fullname" . }}
+                - {{`"{{ .InferencePoolName }}"`}}
                 - --poolNamespace
-                - {{ .Release.Namespace }}
+                - {{`"{{ .ModelServiceNamespace }}"`}}
                 - -v
                 - "4"
                 - --zap-encoder
@@ -301,7 +322,7 @@ data:
               #   failureThreshold: 3
               #   grpc:
               #     port: 9003
-              #     service: "llama-32-3b-instruct-epp-service"
+              #     service: {{`"{{ .EPPServiceName }}"`}}
               #   initialDelaySeconds: 5
               #   periodSeconds: 10
               #   successThreshold: 1
@@ -310,7 +331,7 @@ data:
               #   failureThreshold: 3
               #   grpc:
               #     port: 9003
-              #     service: "llama-32-3b-instruct-epp-service"
+              #     service: {{`"{{ .EPPServiceName }}"`}}
               #   initialDelaySeconds: 5
               #   periodSeconds: 10
               #   successThreshold: 1

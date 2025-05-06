@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart for OpenShift
 
-![Version: 0.0.9](https://img.shields.io/badge/Version-0.0.9-informational?style=flat-square)
+![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for llm-d
@@ -168,12 +168,13 @@ Kubernetes: `>= 1.25.0-0`
 | ingress.tls.enabled | Enable TLS configuration for the host defined at `ingress.host` parameter | bool | `false` |
 | ingress.tls.secretName | The name to which the TLS Secret will be called | string | `""` |
 | kubeVersion | Override Kubernetes version | string | `""` |
-| modelservice | Model service controller configuration | object | `{"annotations":{},"enabled":true,"epp":{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-gateway-api-inference-extension-dev","tag":"0.0.5-amd64"}},"fullnameOverride":"","image":{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-model-service-dev","tag":"0.0.7"},"nameOverride":"","podAnnotations":{},"podLabels":{},"rbac":{"create":true},"replicas":1,"routingProxy":{"image":{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-routing-sidecar-dev","tag":"0.0.6"}},"service":{"enabled":true,"port":8443,"type":"ClusterIP"},"serviceAccount":{"annotations":{},"create":true,"fullnameOverride":"","labels":{},"nameOverride":""},"vllm":{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-dev","tag":"0.0.5"}},"vllmSim":{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/vllm-sim-dev","tag":"0.0.4"}}}` |
+| modelservice | Model service controller configuration | object | `{"annotations":{},"enabled":true,"epp":{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-gateway-api-inference-extension-dev","tag":"0.0.5-amd64"},"metrics":{"enabled":true}},"fullnameOverride":"","image":{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-model-service","tag":"0.0.6"},"metrics":{"enabled":true},"nameOverride":"","podAnnotations":{},"podLabels":{},"rbac":{"create":true},"replicas":1,"routingProxy":{"image":{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-routing-sidecar-dev","tag":"0.0.6"}},"service":{"enabled":true,"port":8443,"type":"ClusterIP"},"serviceAccount":{"annotations":{},"create":true,"fullnameOverride":"","labels":{},"nameOverride":""},"vllm":{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-dev","tag":"0.0.5"},"metrics":{"enabled":true}},"vllmSim":{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/vllm-sim-dev","tag":"0.0.4"}}}` |
 | modelservice.annotations | Annotations to add to all modelservice resources | object | `{}` |
 | modelservice.enabled | Toggle to deploy modelservice controller related resources | bool | `true` |
-| modelservice.epp | Endpoint picker image used in ModelService CR presets | object | `{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-gateway-api-inference-extension-dev","tag":"0.0.5-amd64"}}` |
+| modelservice.epp | Endpoint picker image used in ModelService CR presets | object | `{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-gateway-api-inference-extension-dev","tag":"0.0.5-amd64"},"metrics":{"enabled":true}}` |
 | modelservice.fullnameOverride | String to fully override modelservice.fullname | string | `""` |
-| modelservice.image | Modelservice controller image, please change only if appropriate adjustments to the CRD are being made | object | `{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-model-service-dev","tag":"0.0.7"}` |
+| modelservice.image | Modelservice controller image, please change only if appropriate adjustments to the CRD are being made | object | `{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-model-service","tag":"0.0.6"}` |
+| modelservice.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true}` |
 | modelservice.nameOverride | String to partially override modelservice.fullname | string | `""` |
 | modelservice.podAnnotations | Pod annotations for modelservice | object | `{}` |
 | modelservice.podLabels | Pod labels for modelservice | object | `{}` |
@@ -189,15 +190,15 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.serviceAccount.fullnameOverride | String to fully override modelservice.serviceAccountName, defaults to modelservice.fullname | string | `""` |
 | modelservice.serviceAccount.labels | Additional custom labels to the service ServiceAccount. | object | `{}` |
 | modelservice.serviceAccount.nameOverride | String to partially override modelservice.serviceAccountName, defaults to modelservice.fullname | string | `""` |
-| modelservice.vllm | vLLM image used in ModelService CR presets | object | `{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-dev","tag":"0.0.5"}}` |
+| modelservice.vllm | vLLM image used in ModelService CR presets | object | `{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-dev","tag":"0.0.5"},"metrics":{"enabled":true}}` |
 | modelservice.vllmSim | vLLM sim image used in ModelService CR presets | object | `{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/vllm-sim-dev","tag":"0.0.4"}}` |
 | nameOverride | String to partially override common.names.fullname | string | `""` |
 | redis | Bitnami/Redis chart configuration | object | Use sane defaults for minimal Redis deployment |
-| sampleApplication | Sample application deploying a p-d pair of specific model | object | `{"enabled":true,"inferencePoolPort":8000,"modelArtifactUri":"pvc://llama-3.2-3b-instruct-pvc/models/meta-llama/Llama-32-3B-Instruct","modelName":"Llama-32-3B-Instruct","modelPath":"/cache/models/meta-llama/Llama-3.2-3B-Instruct","resources":{"limits":{"nvidia.com/gpu":1},"requests":{"nvidia.com/gpu":1}}}` |
+| sampleApplication | Sample application deploying a p-d pair of specific model | object | `{"enabled":true,"inferencePoolPort":8000,"modelArtifactUri":"pvc://llama-3.2-3b-instruct-pvc/models/meta-llama/Llama-32-3B-Instruct","modelName":"Llama-3.2-3B-Instruct","modelPath":"/cache/models/meta-llama/Llama-3.2-3B-Instruct","resources":{"limits":{"nvidia.com/gpu":1},"requests":{"nvidia.com/gpu":1}}}` |
 | sampleApplication.enabled | Enable rendering of sample application resources | bool | `true` |
 | sampleApplication.inferencePoolPort | InferencePool port configuration | int | `8000` |
 | sampleApplication.modelArtifactUri | Location where the model can be loaded from. Currently supports pvc:// backed by preexisting PVC | string | `"pvc://llama-3.2-3b-instruct-pvc/models/meta-llama/Llama-32-3B-Instruct"` |
-| sampleApplication.modelName | Specify the model name as it is available to the api | string | `"Llama-32-3B-Instruct"` |
+| sampleApplication.modelName | Specify the model name as it is available to the api | string | `"Llama-3.2-3B-Instruct"` |
 | sampleApplication.modelPath | Specify the filepath for the model | string | `"/cache/models/meta-llama/Llama-3.2-3B-Instruct"` |
 | sampleApplication.resources | Resource requests/limits <br /> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-requests-and-limits-of-pod-and-container | object | `{"limits":{"nvidia.com/gpu":1},"requests":{"nvidia.com/gpu":1}}` |
 | test | Helm tests | object | `{"enabled":false}` |
