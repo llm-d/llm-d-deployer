@@ -46,11 +46,11 @@ spec:
         - --epp-cluster-role
         - endpoint-picker-clusterrole
         - --epp-pull-secrets
-        - {{ include "modelservice.imagePullSecretsString" . }}
+        - {{ include "common.images.renderImagePullSecretsString" (dict "images" (list .Values.modelservice.epp.image) "context" $) }}
         - --pd-cluster-role
         - prefill-decode-clusterrole
         - --pd-pull-secrets
-        - {{ include "modelservice.imagePullSecretsString" . }}
+        - {{ include "common.images.renderImagePullSecretsString" (dict "images" (list .Values.modelservice.vllm.image) "context" $) }}
         # MSV2 HACK END
         command:
         - /manager
