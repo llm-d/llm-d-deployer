@@ -42,7 +42,7 @@ jobs:
             ~/.cache/pre-commit
             ~/.cache/go-build
             ~/go/pkg/mod
-          key: ${{ runner.os }}-py${{ steps.python.outputs.python-version }}-go${{ steps.go.outputs.go-version }}-${{ hashFiles('**/pre-commit-config.yaml') }}
+          key: ${{ runner.os }}-py${{ steps.python.outputs.python-version }}-go${{ steps.go.outputs.go-version }}-${{ hashFiles('**/.pre-commit-config.yaml') }}
 
       - run: python -m pip install pre-commit
         shell: bash
