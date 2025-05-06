@@ -44,4 +44,4 @@ yq e -i ".version = \"$new_version\"" "$CHART_FILE"
 
 echo "Version updated: $current_version → $new_version"
 
-pre-commit run -a
+SKIP=vale pre-commit run -a

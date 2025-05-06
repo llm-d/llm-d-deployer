@@ -42,6 +42,8 @@ spec:
         - --metrics-bind-address=:8443
         - --leader-elect=false
         - --health-probe-bind-address=:8081
+        - --epp-cluster-role
+        - endpoint-picker-role
         command:
         - /manager
         image: {{ include "modelservice.image" . }}

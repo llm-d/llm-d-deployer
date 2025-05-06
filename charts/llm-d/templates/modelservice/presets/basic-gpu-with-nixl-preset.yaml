@@ -76,7 +76,6 @@ data:
               securityContext:
                 allowPrivilegeEscalation: false
               args:
-                - {{ .Values.sampleApplication.modelPath }}
                 - "--port"
                 - "8000"
                 - "--kv-transfer-config"
@@ -158,7 +157,6 @@ data:
               securityContext:
                 allowPrivilegeEscalation: false
               args:
-                - {{ .Values.sampleApplication.modelPath }}
                 - "--port"
                 - "8000"
                 - "--kv-transfer-config"
