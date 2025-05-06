@@ -24,11 +24,16 @@ jobs:
           persist-credentials: true
 
       - name: Configure Git
-        env:
-          GITHUB_ACTOR: ${{ github.actor }}
         run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git config user.name "BUMPER bot (llm-d)"
+          git config user.email "1229152+bumper-bot-llm-d@users.noreply.github.com"
+
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2
+        with:
+          app_id: "1229152"
+          private_key: ${{ secrets.BUMPER_GITHUB_APP_PRIVATE_KEY }}
 
       - name: Add dependencies
         run: |
@@ -39,7 +44,7 @@ jobs:
         with:
           config: cr.yaml
         env:
-          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CR_TOKEN: ${{ steps.generate_token.outputs.token }}
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
