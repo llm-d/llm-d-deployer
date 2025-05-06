@@ -225,6 +225,34 @@ modelservice:
       tag: "0.0.4"
       imagePullPolicy: "IfNotPresent"
 
+  # -- Prometheus ServiceMonitor configuration
+  # <br /> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md
+  serviceMonitor:
+
+    # -- Additional annotations provided to the ServiceMonitor
+    annotations: {}
+
+    # -- Additional labels provided to the ServiceMonitor
+    labels: {}
+
+    # -- ServiceMonitor endpoint port
+    port: "vllm"
+
+    # -- ServiceMonitor endpoint path
+    path: "/metrics"
+
+    # -- ServiceMonitor endpoint interval at which metrics should be scraped
+    interval: "15s"
+
+    # -- ServiceMonitor namespace selector
+    namespaceSelector:
+      any: false
+      matchNames: []
+
+    # -- ServiceMonitor selector matchLabels
+    # </br> matchLabels must match labels on modelservice Services
+    selector:
+      matchLabels: {}
 
   # -- Annotations to add to all modelservice resources
   annotations: {}

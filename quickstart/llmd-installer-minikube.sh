@@ -163,8 +163,22 @@ provision_minikube_gpu() {
   minikube start \
     --driver docker \
     --container-runtime docker \
-    --gpus all
+    --gpus all \
+    --addons ingress
   log_success "🚀 Minikube GPU cluster started."
+}
+
+install_prometheus_grafana() {
+  log_info "🌱 Provisioning Prometheus operator…"
+  helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+  helm repo update
+  kubectl create namespace monitoring
+  helm install prometheus prometheus-community/kube-prometheus-stack \
+  --namespace monitoring \
+  --set grafana.adminPassword=admin \
+  --set grafana.ingress.enabled=true \
+  --set grafana.ingress.hosts[0]=grafana.local
+  log_success "🚀 Prometheus and Grafana installed."
 }
 
 delete_minikube() {
@@ -426,8 +440,10 @@ main() {
   if [[ "$ACTION" == "install" ]]; then
     if [[ "$PROVISION_MINIKUBE_GPU" == "true" ]]; then
       provision_minikube_gpu
+      install_prometheus_grafana
     elif [[ "$PROVISION_MINIKUBE" == "true" ]]; then
       provision_minikube
+      install_prometheus_grafana
     fi
   install
   elif [[ "$ACTION" == "uninstall" ]]; then
