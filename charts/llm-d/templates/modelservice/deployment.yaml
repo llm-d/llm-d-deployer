@@ -42,8 +42,16 @@ spec:
         - --metrics-bind-address=:8443
         - --leader-elect=false
         - --health-probe-bind-address=:8081
+        # MSV2 HACK BEGIN
         - --epp-cluster-role
-        - endpoint-picker-role
+        - endpoint-picker-clusterrole
+        - --epp-pull-secrets
+        - endpoint-picker-pull-secret
+        - --pd-cluster-role
+        - prefill-decode-clusterrole
+        - --pd-pull-secrets
+        - prefill-decode-pull-secret
+        # MSV2 HACK END
         command:
         - /manager
         image: {{ include "modelservice.image" . }}

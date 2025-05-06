@@ -36,6 +36,7 @@ rules:
   - list
   - watch
   - create
+  - update
 - apiGroups:
   - rbac.authorization.k8s.io
   resources:
@@ -46,6 +47,54 @@ rules:
   - list
   - watch
   - create
+  - update
+  # MSV2 HACK BEGIN ---------------
+- apiGroups:
+  - "v1"
+  resources:
+  - "secrets"
+  verbs:
+  - "get"
+  - "list"
+  - "watch"
+- apiGroups:
+  - "inference.networking.x-k8s.io"
+  resources:
+  - "inferencepools"
+  - "inferencemodels"
+  verbs:
+  - "get"
+  - "watch"
+  - "list"
+- apiGroups:
+  - ""
+  resources:
+  - "pods"
+  verbs:
+  - "get"
+  - "watch"
+  - "list"
+- apiGroups:
+  - "discovery.k8s.io"
+  resources:
+  - "endpointslices"
+  verbs:
+  - "get"
+  - "watch"
+  - "list"
+- apiGroups:
+  - "authentication.k8s.io"
+  resources:
+  - "tokenreviews"
+  verbs:
+  - "create"
+- apiGroups:
+  - "authorization.k8s.io"
+  resources:
+  - "subjectaccessreviews"
+  verbs:
+  - "create"
+  # MSV2 HACK END ---------------
 - apiGroups:
   - apps
   resources:
