@@ -6,3 +6,7 @@ FDQN for Redis master service in <svc_name>.<namespace>.svc.cluster.local:<port>
 {{- $port := default 6379 .Values.redis.master.service.ports.redis -}}
 {{- printf "%s-redis-master.%s.svc.cluster.local:%v" $name .Release.Namespace $port -}}
 {{- end }}
+
+{{- define "metrics.label" -}}
+llmd.ai/gather-metrics: "true"
+{{- end }}

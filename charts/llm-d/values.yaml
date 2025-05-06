@@ -53,7 +53,7 @@ sampleApplication:
   enabled: true
 
   # -- Specify the model name as it is available to the api
-  modelName: Llama-32-3B-Instruct
+  modelName: Llama-3.2-3B-Instruct
 
   # -- Specify the filepath for the model
   modelPath: /cache/models/meta-llama/Llama-3.2-3B-Instruct
@@ -168,6 +168,10 @@ modelservice:
   # -- Toggle to deploy modelservice controller related resources
   enabled: true
 
+  # -- Enable metrics gathering via podMonitor / ServiceMonitor
+  metrics:
+    enabled: true
+
   # --  String to fully override modelservice.fullname
   fullnameOverride: ""
 
@@ -180,8 +184,8 @@ modelservice:
   # -- Modelservice controller image, please change only if appropriate adjustments to the CRD are being made
   image:
     registry: quay.io
-    repository: llm-d/llm-d-model-service-dev
-    tag: "0.0.7"
+    repository: llm-d/llm-d-model-service
+    tag: "0.0.6"
     imagePullPolicy: "Always"
 
   # -- Endpoint picker image used in ModelService CR presets
@@ -191,6 +195,8 @@ modelservice:
       repository: llm-d/llm-d-gateway-api-inference-extension-dev
       tag: "0.0.5-amd64"
       imagePullPolicy: "IfNotPresent"
+    metrics:
+      enabled: true
 
   # -- vLLM image used in ModelService CR presets
   vllm:
@@ -199,6 +205,8 @@ modelservice:
       repository: llm-d/llm-d-dev
       tag: "0.0.5"
       imagePullPolicy: "IfNotPresent"
+    metrics:
+      enabled: true
 
   # -- Routing proxy image used in ModelService CR presets
   routingProxy:
