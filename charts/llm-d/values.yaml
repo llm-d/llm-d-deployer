@@ -189,7 +189,7 @@ modelservice:
     image:
       registry: quay.io
       repository: llm-d/llm-d-gateway-api-inference-extension-dev
-      tag: "0.0.5"
+      tag: "0.0.5-amd64"
       imagePullPolicy: "IfNotPresent"
 
   # -- vLLM image used in ModelService CR presets
