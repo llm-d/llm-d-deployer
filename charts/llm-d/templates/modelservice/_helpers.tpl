@@ -72,6 +72,27 @@ Return the proper Docker Image Registry Secret Names
 {{- end -}}
 
 
-{{- define "modelservice.imagePullSecretsString" -}}
-{{- join "," .Values.global.imagePullSecrets | quote -}}
+{{- define "common.images.renderImagePullSecretsString" -}}
+  {{- $pullSecrets := list }}
+  {{- $context := .context }}
+
+  {{- range (($context.Values.global).imagePullSecrets) -}}
+    {{- if kindIs "map" . -}}
+      {{- $pullSecrets = append $pullSecrets (include "common.tplvalues.render" (dict "value" .name "context" $context)) -}}
+    {{- else -}}
+      {{- $pullSecrets = append $pullSecrets (include "common.tplvalues.render" (dict "value" . "context" $context)) -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- range .images -}}
+    {{- range .pullSecrets -}}
+      {{- if kindIs "map" . -}}
+        {{- $pullSecrets = append $pullSecrets (include "common.tplvalues.render" (dict "value" .name "context" $context)) -}}
+      {{- else -}}
+        {{- $pullSecrets = append $pullSecrets (include "common.tplvalues.render" (dict "value" . "context" $context)) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- join "," ($pullSecrets | uniq) | quote }}
 {{- end }}
