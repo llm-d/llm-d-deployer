@@ -106,7 +106,7 @@ Verify you have properly installed the container toolkit with the runtime of you
 ```yaml
 # Podman
 podman run --rm --security-opt=label=disable --device=nvidia.com/gpu=all ubuntu nvidia-smi
-        # Docker
+# Docker
 sudo docker run --rm --runtime=nvidia --gpus all ubuntu nvidia-smi
 ```
 
@@ -206,16 +206,18 @@ completions are working.
 
 ```bash
 NAMESPACE=llm-d
-POD=$(kubectl get pods -n "$NAMESPACE" -l llm-d.ai/role=decode -o jsonpath='{.items[0].metadata.name}')
-kubectl exec -n "$NAMESPACE" -c vllm "$POD" -- \
-  curl -sS -X POST http://localhost:8000/v1/chat/completions \
-    -H 'accept: application/json' \
-    -H 'Content-Type: application/json' \
-    -d '{
-      "model": "Llama-32-3B-Instruct",
-      "messages": [{"role":"user","content":"Who won the World Series in 1986?"}],
-      "stream": false
-    }'
+MODEL_ID=Llama-3.2-3B-Instruct
+POD_IP=$(kubectl get pods -n ${NAMESPACE} -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.status.podIP}{"\n"}{end}' | grep decode | awk '{print $2}')
+kubectl run --rm -i curl-temp --image=curlimages/curl --restart=Never -- \
+  curl -X POST \
+  "http://${POD_IP}:8000/v1/chat/completions" \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "model": "'${MODEL_ID}'",
+    "messages": [{"content": "Who are you?", "role": "user"}],
+    "stream": false
+  }'
 ```
 
 After the p/d pods are running, you can view the models being run on the GPUs on the host to verify activity.

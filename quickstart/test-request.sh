@@ -1,5 +1,5 @@
 NAMESPACE=${1:-llm-d}
-MODEL_ID=${2:-Llama-32-3B-Instruct}
+MODEL_ID=${2:-Llama-3.2-3B-Instruct}
 
 POD_IP=$(kubectl get pods -n ${NAMESPACE} -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.status.podIP}{"\n"}{end}' | grep decode | awk '{print $2}')
 echo "Testing request to ${NAMESPACE} at Pod IP ${POD_IP}"

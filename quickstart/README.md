@@ -234,7 +234,7 @@ For additional troubleshooting, you can check to see if the prefill and decode p
 
 ```bash
 NAMESPACE=llm-d
-MODEL_ID=Llama-32-3B-Instruct
+MODEL_ID=Llama-3.2-3B-Instruct
 POD_IP=$(kubectl get pods -n ${NAMESPACE} -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.status.podIP}{"\n"}{end}' | grep decode | awk '{print $2}')
 kubectl run --rm -i curl-temp --image=curlimages/curl --restart=Never -- \
   curl -X POST \
