@@ -47,9 +47,9 @@ Define the model artifact URI if using pvc for BYO model
 {{- define "sampleApplication.modelArtifactURI" -}}
 {{- if .Values.sampleApplication.enabled -}}
 {{- if .Values.sampleApplication.model.pvc.enabled -}}
-pvc://{{ .Values.sampleApplication.model.pvc.modelArtifactURI }}
+{{ .Values.sampleApplication.model.pvc.modelArtifactURI }}
 {{- else if .Values.sampleApplication.model.huggingface.enabled -}}
-hf://{{ .Values.sampleApplication.model.huggingface.modelArtifactURI }}
+{{ .Values.sampleApplication.model.huggingface.modelArtifactURI }}
 {{- end }}
 {{- end }}
 {{- end }}
@@ -59,4 +59,18 @@ Define the model cache path for downloading models via huggingface
 */}}
 {{- define "sampleApplication.huggingFaceCacheDir" -}}
 {{- .Values.sampleApplication.model.huggingface.cache.path | default "/vllm-hf-models" }}
+{{- end }}
+
+{{/*
+Define a normalized modelServe path / repo id to include mountpath in .ModelPath when using pvc
+(HACK MSVC2 - waiting on https://github.com/neuralmagic/llm-d-model-service/issues/110)
+*/}}
+{{- define "sampleApplication.modelServe" -}}
+  {{- if .Values.sampleApplication.enabled -}}
+    {{- if .Values.sampleApplication.model.pvc.enabled -}}
+      {{- .Values.sampleApplication.model.pvc.mountPath }}/{{`{{ .ModelPath }}`}}
+    {{- else if .Values.sampleApplication.model.huggingface.enabled -}}
+      {{`{{ .HFModelName }}`}}
+    {{- end }}
+  {{- end }}
 {{- end }}

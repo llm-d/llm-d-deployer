@@ -82,7 +82,8 @@ data:
               command:
                 - vllm
                 - serve
-                - {{`{{ default .HFModelName .ModelPath }}`}}
+                # MSVC hack, waiting on https://github.com/neuralmagic/llm-d-model-service/issues/110 to remove
+                - {{ include "sampleApplication.modelServe" . }}
               args:
                 - "--port"
                 - "8000"
@@ -136,7 +137,7 @@ data:
                 - name: config-decoder
                   mountPath: /vllm-workspace
                 {{- if .Values.sampleApplication.model.pvc.enabled }}
-                # MSVC hack, waiting on # https://github.com/neuralmagic/llm-d-model-service/issues/110 to remove
+                 # MSVC hack, waiting on https://github.com/neuralmagic/llm-d-model-service/issues/110 to remove
                 - name: model-storage
                   mountPath: {{ .Values.sampleApplication.model.pvc.mountPath }}
                   readOnly: true
@@ -190,7 +191,8 @@ data:
               command:
                 - vllm
                 - serve
-                - {{`{{ default .HFModelName .ModelPath }}`}}
+                # MSVC hack, waiting on https://github.com/neuralmagic/llm-d-model-service/issues/110 to remove
+                - {{ include "sampleApplication.modelServe" . }}
               args:
                 - "--port"
                 - "8000"
@@ -239,7 +241,7 @@ data:
                 - name: config-prefiller
                   mountPath: /vllm-workspace
                 {{- if .Values.sampleApplication.model.pvc.enabled }}
-                # MSVC hack, waiting on # https://github.com/neuralmagic/llm-d-model-service/issues/110 to remove
+                # MSVC hack, waiting on https://github.com/neuralmagic/llm-d-model-service/issues/110 to remove
                 - name: model-storage
                   mountPath: {{ .Values.sampleApplication.model.pvc.mountPath }}
                   readOnly: true
@@ -315,7 +317,7 @@ data:
         {{- end}}
     spec:
       ports:
-        - port: 9002    # Needs to match the port of the eppDeployment
+        - port: 9002
           protocol: TCP
           name: grpc
         - port: 9003
@@ -324,7 +326,7 @@ data:
         - port: 9090
           protocol: TCP
           name: metrics
-      type: NodePort # accepts "LoadBalancer" or "NodePort"
+      type: NodePort
       selector:
         app.kubernetes.io/gateway: {{ include "gateway.fullname" . }}
 
@@ -359,15 +361,15 @@ data:
                 - "9003"
               env:
               {{- if .Values.redis.enabled }}
-                - name: KVCACHE_INDEXER_REDIS_ADDR
-                  value: {{ include "redis.master.service.fullurl" . -}}:8100
+              - name: KVCACHE_INDEXER_REDIS_ADDR
+                value: {{ include "redis.master.service.fullurl" . -}}
               {{- end }}
               {{- if .Values.auth.hfToken.enabled }}
-                - name: HF_TOKEN
-                  valueFrom:
-                    secretKeyRef:
-                      name: {{ .Values.auth.hfToken.name }}
-                      key: {{ .Values.auth.hfToken.key }}
+              - name: HF_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.auth.hfToken.name }}
+                    key: {{ .Values.auth.hfToken.key }}
               {{- end }}
               image: {{ include "modelservice.eppImage" . }}
               imagePullPolicy: {{ .Values.modelservice.epp.image.imagePullPolicy}}

@@ -18,6 +18,7 @@ spec:
     name: {{ include "modelservice.fullname" . }}-basic-gpu-with-nixl-preset
   routing:
     modelName: {{ include "sampleApplication.modelName" . }}
+    # modelName: {{ include "sampleApplication.sanitizedModelName" . }}
   modelArtifacts:
     uri: {{ include "sampleApplication.modelArtifactURI" . }}
   decode:
