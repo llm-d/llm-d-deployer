@@ -75,10 +75,10 @@ sampleApplication:
   # -- InferencePool port configuration
   inferencePoolPort: 8000
 
-# -- kGateway configuration
+# -- Gateway configuration
 gateway:
 
-  # -- Deploy resources related to kGateway
+  # -- Deploy resources related to Gateway
   enabled: true
 
   # --  String to fully override gateway.fullname
@@ -88,13 +88,14 @@ gateway:
   nameOverride: ""
 
   # -- Gateway class that determines the backend used
+  # Currently supported values: "kgateway" or "istio"
   gatewayClassName: kgateway
 
   # -- Additional annotations provided to the Gateway resource
   annotations: {}
 
-  # Special parameters applied via GatewayParameters resource
-  parameters:
+  # Special parameters applied to kGateway via GatewayParameters resource
+  kGatewayParameters:
 
     proxyUID: false
 

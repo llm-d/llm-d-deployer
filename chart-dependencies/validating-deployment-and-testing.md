@@ -16,6 +16,16 @@ There should be no error logs in the `kgateway` pod. If there is a non-correct `
 you will see logs there. This, in combination with there not being a pod from the deployment of the gateway in the namespace in which
 `llm-d` is deployed. If this part is not situated you will not get a valid pod from the deployment as a child resource of the `gateway`.
 
+### Istio
+
+```bash
+$ oc get deployments -n istio-system
+NAME     READY   UP-TO-DATE   AVAILABLE
+istiod   1/1     1            1
+```
+
+Similar to the kGateway setup, Istio can be verified by looking into the `istio-system` namespace. There should be no error logs in the `istiod` pod.
+
 ### LLM-D namespace
 
 #### Deployments

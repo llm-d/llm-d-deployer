@@ -3,8 +3,6 @@ charts/llm-d/tmp.yaml
 charts/llm-d/temp/
 ct-previous-revision*
 
-chart-dependencies/00-base-crds/crd/
-chart-dependencies/00-base-crds/crds-kgateway
 chart-dependencies/quickstart/gateway-api-inference-extension/
 
 # misc

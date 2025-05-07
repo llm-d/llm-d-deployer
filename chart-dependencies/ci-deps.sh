@@ -4,46 +4,29 @@
 # This is a dependency for the CI job .github/workflows/test.yaml
 # Prep installation of dependencies for GAIE
 
-set -x
+set +x
 set -e
 set -o pipefail
 
-if [ -z "$(command -v git)" ] || [ -z "$(command -v kubectl)" ] || [ -z "$(command -v helm)" ]; then
-    echo "This script depends on \`git\`, \`kubectl\` and \`helm\`. Please install them."
+if [ -z "$(command -v kubectl)" ] || [ -z "$(command -v helm)" ]; then
+    echo "This script depends on \`kubectl\` and \`helm\`. Please install them."
     exit 1
 fi
 
-if [ "chart-dependencies" != "${PWD/*\//}" ]; then
-    echo "Script must be invoked within this directory"
-    exit 1
-fi
+CWD=$( dirname -- "$( readlink -f -- "$0"; )"; )
 
 ## Populate manifests
 
-#### GAIE manifests
+### Base CRDs
+echo -e "\e[32m📜 Applying base CRDs\e[0m"
+kubectl apply -k https://github.com/neuralmagic/gateway-api-inference-extension/deploy/components/crds-gateway-api?ref=dev
 
-if [ -d "gateway-api-inference-extension" ]; then # idempotency
-    rm -rf ./gateway-api-inference-extension
-fi
+### GAIE CRDs
+echo -e "\e[32m🚪 Applying GAIE CRDs\e[0m"
+kubectl apply -k https://github.com/neuralmagic/gateway-api-inference-extension/config/crd?ref=dev
 
-git clone --filter=blob:none --no-checkout https://github.com/neuralmagic/gateway-api-inference-extension.git
-pushd gateway-api-inference-extension
+### Install Gateway provider
+backend=$(helm show values $CWD/../charts/llm-d --jsonpath '{.gateway.gatewayClassName}')
 
-git sparse-checkout init --cone
-git checkout dev
-
-git sparse-checkout set config/crd
-
-cp -r config/crd ../00-base-crds
-
-git sparse-checkout set deploy/components
-
-cp -r deploy/components/crds-kgateway ../00-base-crds
-
-popd
-rm -rf gateway-api-inference-extension
-
-#### Apply manifests
-
-kubectl kustomize 00-base-crds --enable-helm=true  | kubectl apply -f -
-01-kgateway-control-plane/helm-install.sh
+echo -e "\e[32m🎒 Installing Gateway provider:\e[0m '\e[34m$backend\e[0m'"
+$CWD/$backend/install.sh
