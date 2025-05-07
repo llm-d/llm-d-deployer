@@ -213,8 +213,8 @@ modelservice:
   routingProxy:
     image:
       registry: quay.io
-      repository: llm-d/llm-d-routing-sidecar-dev
-      tag: "0.0.6"
+      repository: llm-d/llm-d-routing-sidecar
+      tag: "0.0.5"
       imagePullPolicy: "Always"
 
   # -- vLLM sim image used in ModelService CR presets
