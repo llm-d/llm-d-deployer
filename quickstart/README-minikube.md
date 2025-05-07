@@ -132,15 +132,13 @@ The installer needs to be run from the `llm-d-deployer/quickstart` directory.
 
 ### Flags
 
-| Flag                       | Description                                                                                             | Example                                                   |
-|----------------------------|---------------------------------------------------------------------------------------------------------|-----------------------------------------------------------|
+| Flag                       | Description                                                                                             | Example                                                                   |
+|----------------------------|---------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
 | `--hf-token TOKEN`         | HuggingFace API token (or set `HF_TOKEN` env var)                                                       | `./llmd-installer-minikube.sh --hf-token "abc123"`                        |
 | `--auth-file PATH`         | Path to your registry auth file ig not in one of the two listed files in the auth section of the readme | `./llmd-installer-minikube.sh --auth-file ~/.config/containers/auth.json` |
-| `--provision-minikube`     | Provision a local Minikube cluster without GPU support (implies `--minikube-storage`)                   | `./llmd-installer-minikube.sh --provision-minikube`                       |
-| `--provision-minikube-gpu` | Provision a local Minikube cluster with GPU support (implies `--minikube-storage`)                      | `./llmd-installer-minikube.sh --provision-minikube`                       |
-| `--minikube-storage`       | Use the Minikube-specific PVC manifest for storage                                                      | `./llmd-installer-minikube.sh --minikube-storage`                         |
-| `--storage-size SIZE`      | Size of storage volume (default: 7Gi)                                                                   | `./llmd-installer-minikube.sh --storage-size 15Gi`                        |
-| `--storage-class CLASS`    | Storage class to use (default: efs-sc)                                                                  | `./llmd-installer-minikube.sh --storage-class ocs-storagecluster-cephfs`  |
+| `--provision-minikube`     | Provision a local Minikube cluster without GPU support                                                  | `./llmd-installer-minikube.sh --provision-minikube`                       |
+| `--provision-minikube-gpu` | Provision a local Minikube cluster with GPU support                                                     | `./llmd-installer-minikube.sh --provision-minikube`                       |
+| `--storage-size SIZE`      | Size of storage volume (default: 15Gi)                                                                  | `./llmd-installer-minikube.sh --storage-size 15Gi`                        |
 | `--delete-minikube`        | Delete local Minikube cluster                                                                           | `./llmd-installer-minikube.sh --delete-minikube`                          |
 | `--namespace NAME`         | Kubernetes namespace to use (default: `llm-d`)                                                          | `./llmd-installer-minikube.sh --namespace foo`                            |
 | `--values NAME`            | Absolute path to a Helm values.yaml file (default: llm-d-deployer/charts/llm-d/values.yaml)             | `./llmd-installer-minikube.sh --values /path/to/values.yaml`              |
@@ -169,13 +167,6 @@ export HF_TOKEN="your-token"
 ```bash
 export HF_TOKEN="your-token"
 ./llmd-installer-minikube.sh --provision-minikube-gpu --hf-token "$HF_TOKEN"
-```
-
-### Use Minikube storage if the minikube cluster is already provisioned to install llm-d
-
-```bash
-export HF_TOKEN="your-token"
-./llmd-installer-minikube.sh --minikube-storage --hf-token "$HF_TOKEN"
 ```
 
 ## Model Service

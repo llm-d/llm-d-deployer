@@ -7,9 +7,7 @@ set -euo pipefail
 NAMESPACE="llm-d"
 PROVISION_MINIKUBE=false
 PROVISION_MINIKUBE_GPU=false
-USE_MINIKUBE_STORAGE=false
 STORAGE_SIZE="15Gi"
-STORAGE_CLASS="efs-sc"
 DELETE_MINIKUBE=false
 ACTION="install"
 HF_TOKEN_CLI=""
@@ -42,9 +40,7 @@ Options:
   --provision-minikube       Provision a local Minikube cluster without GPU support (p/d pods will stay pending)
   --provision-minikube-gpu   Provision a local Minikube cluster with GPU support
   --delete-minikube          Delete local Minikube cluster
-  --minikube-storage         Use Minikube-specific PVC manifest for storage
   --storage-size SIZE        Size of storage volume (default: 7Gi)
-  --storage-class CLASS      Storage class to use (default: efs-sc)
   --namespace NAME           K8s namespace (default: llm-d)
   --values-file PATH         Path to Helm values.yaml file (default: values.yaml)
   --uninstall                Uninstall the llm-d components from the current cluster
@@ -97,12 +93,10 @@ parse_args() {
     case "$1" in
       --hf-token)               HF_TOKEN_CLI="$2"; shift 2 ;;
       --auth-file)              AUTH_FILE_CLI="$2"; shift 2 ;;
-      --provision-minikube)     PROVISION_MINIKUBE=true; USE_MINIKUBE_STORAGE=true; shift ;;
-      --provision-minikube-gpu) PROVISION_MINIKUBE_GPU=true; USE_MINIKUBE_STORAGE=true; shift ;;
+      --provision-minikube)     PROVISION_MINIKUBE=true; shift ;;
+      --provision-minikube-gpu) PROVISION_MINIKUBE_GPU=true; shift ;;
       --delete-minikube)        DELETE_MINIKUBE=true; shift ;;
-      --minikube-storage)       USE_MINIKUBE_STORAGE=true; shift ;;
       --storage-size)           STORAGE_SIZE="$2"; shift 2 ;;
-      --storage-class)          STORAGE_CLASS="$2"; shift 2 ;;
       --namespace)              NAMESPACE="$2"; shift 2 ;;
       --values-file)            VALUES_FILE="$2"; shift 2 ;;
       --uninstall)              ACTION="uninstall"; shift ;;
@@ -251,16 +245,7 @@ install() {
   fi
   log_success "✅ Job manifest patched"
 
-  log_info "💾 Provisioning model storage…"
-  if [[ "${USE_MINIKUBE_STORAGE}" == "true" ]]; then
-    # this creates both the hostPath PV and the matching PVC
     setup_minikube_storage
-    log_success "✅ PVC created from model-storage-rwx-pvc-minikube.yaml"
-  else
-    eval "echo \"$(cat ${REPO_ROOT}/helpers/k8s/model-storage-rwx-pvc-template.yaml)\"" \
-        | kubectl apply -n "${NAMESPACE}" -f -
-    log_success "✅ PVC created with storageClassName ${STORAGE_CLASS} and size ${STORAGE_SIZE}"
-  fi
 
   log_info "🚀 Launching model download job..."
   kubectl apply -f "${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml" -n "${NAMESPACE}"
@@ -299,7 +284,6 @@ install() {
   log_info "🔁 Restarting pod ${MODELSERVICE_POD} to pick up new image..."
   kubectl delete pod "${MODELSERVICE_POD}" -n "${NAMESPACE}" || true
 
-  if [[ "${USE_MINIKUBE_STORAGE}" == "true" ]]; then
   log_info "🔄 Creating shared hostpath for Minicube PV and PVC for Redis..."
   kubectl delete pvc redis-pvc -n "${NAMESPACE}" --ignore-not-found
   kubectl apply -f - <<EOF
@@ -333,7 +317,6 @@ spec:
   volumeName: ${REDIS_PV_NAME}
 EOF
   log_success "✅ Redis PV and PVC created with Helm annotations."
-  fi
 
   post_install
 
