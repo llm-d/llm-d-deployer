@@ -1,17 +1,4 @@
 {{/*
-Define what will be the positional argument to `vllm serve`
-*/}}
-{{- define "sampleApplication.modelServe" -}}
-  {{- if .Values.sampleApplication.enabled -}}
-    {{- if .Values.sampleApplication.model.pvc.enabled -}}
-      {{- .Values.sampleApplication.model.pvc.mountPath }}/{{`{{ .ModelPath }}`}}
-    {{- else if .Values.sampleApplication.model.huggingface.enabled -}}
-      {{`{{ .HFModelName }}`}}
-    {{- end }}
-  {{- end }}
-{{- end }}
-
-{{/*
 Define the model name to be used
 */}}
 {{- define "sampleApplication.modelName" -}}
@@ -57,14 +44,12 @@ Define the template for ingress host
 {{/*
 Define the model artifact URI if using pvc for BYO model
 */}}
-{{- define "sampleApplication.modelArtifacts" -}}
+{{- define "sampleApplication.modelArtifactURI" -}}
 {{- if .Values.sampleApplication.enabled -}}
 {{- if .Values.sampleApplication.model.pvc.enabled -}}
-modelArtifacts:
-  uri: pvc://{{ .Values.sampleApplication.model.pvc.pvcName }}{{ .Values.sampleApplication.model.pvc.modelPath }}
+pvc://{{ .Values.sampleApplication.model.pvc.modelArtifactURI }}
 {{- else if .Values.sampleApplication.model.huggingface.enabled -}}
-modelArtifacts:
-  uri: hf://{{ .Values.sampleApplication.model.huggingface.repoID }}
+hf://{{ .Values.sampleApplication.model.huggingface.modelArtifactURI }}
 {{- end }}
 {{- end }}
 {{- end }}

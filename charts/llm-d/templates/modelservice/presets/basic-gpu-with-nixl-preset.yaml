@@ -82,7 +82,7 @@ data:
               command:
                 - vllm
                 - serve
-                - {{ include "sampleApplication.modelServe" . }}
+                - {{`{{ default .HFModelName .ModelPath }}`}}
               args:
                 - "--port"
                 - "8000"
@@ -136,6 +136,7 @@ data:
                 - name: config-decoder
                   mountPath: /vllm-workspace
                 {{- if .Values.sampleApplication.model.pvc.enabled }}
+                # MSVC hack, waiting on # https://github.com/neuralmagic/llm-d-model-service/issues/110 to remove
                 - name: model-storage
                   mountPath: {{ .Values.sampleApplication.model.pvc.mountPath }}
                   readOnly: true
@@ -189,7 +190,7 @@ data:
               command:
                 - vllm
                 - serve
-                - {{ include "sampleApplication.modelServe" . }}
+                - {{`{{ default .HFModelName .ModelPath }}`}}
               args:
                 - "--port"
                 - "8000"
@@ -238,6 +239,7 @@ data:
                 - name: config-prefiller
                   mountPath: /vllm-workspace
                 {{- if .Values.sampleApplication.model.pvc.enabled }}
+                # MSVC hack, waiting on # https://github.com/neuralmagic/llm-d-model-service/issues/110 to remove
                 - name: model-storage
                   mountPath: {{ .Values.sampleApplication.model.pvc.mountPath }}
                   readOnly: true

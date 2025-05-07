@@ -17,8 +17,9 @@ spec:
   baseConfigMapRef:
     name: {{ include "modelservice.fullname" . }}-basic-gpu-with-nixl-preset
   routing:
-    modelName: {{ include "sampleApplication.sanitizedModelName" . }}
-  {{- include "sampleApplication.modelArtifacts" . | nindent 2 }}
+    modelName: {{ include "sampleApplication.modelName" . }}
+  modelArtifacts:
+    uri: {{ include "sampleApplication.modelArtifactURI" . }}
   decode:
     replicas: 1
     containers:
