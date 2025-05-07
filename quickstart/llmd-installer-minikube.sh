@@ -26,6 +26,10 @@ AUTH_FILE=""
 HOSTPATH_DIR=${HOSTPATH_DIR:="/mnt/data/llama-model-storage"}
 VALUES_FILE="values.yaml"
 DEBUG=""
+MODEL_PV_NAME="llama-hostpath-pv"
+MODEL_PVC_NAME="llama-3.2-3b-instruct-pvc"
+REDIS_PV_NAME="redis-hostpath-pv"
+REDIS_PVC_NAME="redis-data-redis-master"
 
 ### HELP & LOGGING ###
 print_help() {
@@ -302,7 +306,7 @@ install() {
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: redis-hostpath-pv
+  name: ${REDIS_PV_NAME}
 spec:
   storageClassName: manual
   capacity:
@@ -317,7 +321,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: redis-data-redis-master
+  name: ${REDIS_PVC_NAME}
   namespace: ${NAMESPACE}
 spec:
   storageClassName: manual
@@ -326,7 +330,7 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  volumeName: redis-hostpath-pv
+  volumeName: ${REDIS_PV_NAME}
 EOF
   log_success "✅ Redis PV and PVC created with Helm annotations."
   fi
@@ -343,7 +347,7 @@ kubectl apply -f - <<EOF
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: llama-hostpath-pv
+  name: ${MODEL_PV_NAME}
 spec:
   storageClassName: manual
   capacity:
@@ -358,7 +362,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: llama-3.2-3b-instruct-pvc
+  name: ${MODEL_PVC_NAME}
   namespace: ${NAMESPACE}
 spec:
   storageClassName: manual
@@ -367,7 +371,7 @@ spec:
   resources:
     requests:
       storage: ${STORAGE_SIZE}
-  volumeName: llama-hostpath-pv
+  volumeName: ${MODEL_PV_NAME}
 EOF
   log_success "✅ llama model PV and PVC created."
 }
