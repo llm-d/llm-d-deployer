@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart for OpenShift
 
-![Version: 0.4.0](https://img.shields.io/badge/Version-0.4.0-informational?style=flat-square)
+![Version: 0.5.0](https://img.shields.io/badge/Version-0.5.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for llm-d
@@ -168,7 +168,7 @@ Kubernetes: `>= 1.25.0-0`
 | ingress.tls.enabled | Enable TLS configuration for the host defined at `ingress.host` parameter | bool | `false` |
 | ingress.tls.secretName | The name to which the TLS Secret will be called | string | `""` |
 | kubeVersion | Override Kubernetes version | string | `""` |
-| modelservice | Model service controller configuration | object | `{"annotations":{},"enabled":true,"epp":{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-gateway-api-inference-extension-dev","tag":"0.0.5-amd64"},"metrics":{"enabled":true}},"fullnameOverride":"","image":{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-model-service","tag":"0.0.6"},"metrics":{"enabled":true},"nameOverride":"","podAnnotations":{},"podLabels":{},"rbac":{"create":true},"replicas":1,"routingProxy":{"image":{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-routing-sidecar-dev","tag":"0.0.6"}},"service":{"enabled":true,"port":8443,"type":"ClusterIP"},"serviceAccount":{"annotations":{},"create":true,"fullnameOverride":"","labels":{},"nameOverride":""},"vllm":{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-dev","tag":"0.0.5"},"metrics":{"enabled":true}},"vllmSim":{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/vllm-sim","tag":"0.0.4"}}}` |
+| modelservice | Model service controller configuration | object | `{"annotations":{},"enabled":true,"epp":{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-gateway-api-inference-extension-dev","tag":"0.0.5-amd64"},"metrics":{"enabled":true}},"fullnameOverride":"","image":{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-model-service","tag":"0.0.6"},"metrics":{"enabled":true},"nameOverride":"","podAnnotations":{},"podLabels":{},"rbac":{"create":true},"replicas":1,"routingProxy":{"image":{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-routing-sidecar","tag":"0.0.5"}},"service":{"enabled":true,"port":8443,"type":"ClusterIP"},"serviceAccount":{"annotations":{},"create":true,"fullnameOverride":"","labels":{},"nameOverride":""},"vllm":{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-dev","tag":"0.0.5"},"metrics":{"enabled":true}},"vllmSim":{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/vllm-sim","tag":"0.0.4"}}}` |
 | modelservice.annotations | Annotations to add to all modelservice resources | object | `{}` |
 | modelservice.enabled | Toggle to deploy modelservice controller related resources | bool | `true` |
 | modelservice.epp | Endpoint picker image used in ModelService CR presets | object | `{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-gateway-api-inference-extension-dev","tag":"0.0.5-amd64"},"metrics":{"enabled":true}}` |
@@ -180,7 +180,7 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.podLabels | Pod labels for modelservice | object | `{}` |
 | modelservice.rbac.create | Enable the creation of RBAC resources | bool | `true` |
 | modelservice.replicas | Number of controller replicas | int | `1` |
-| modelservice.routingProxy | Routing proxy image used in ModelService CR presets | object | `{"image":{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-routing-sidecar-dev","tag":"0.0.6"}}` |
+| modelservice.routingProxy | Routing proxy image used in ModelService CR presets | object | `{"image":{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-routing-sidecar","tag":"0.0.5"}}` |
 | modelservice.service.enabled | Toggle to deploy a Service resource for Model service controller | bool | `true` |
 | modelservice.service.port | Port number exposed from Model Service controller | int | `8443` |
 | modelservice.service.type | Service type | string | `"ClusterIP"` |
