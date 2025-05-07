@@ -68,13 +68,6 @@ jobs:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
 
-      - name: login to registry.redhat.io
-        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
-        with:
-          registry: registry.redhat.io
-          username: ${{ secrets.REG_RH_USER }}
-          password: ${{ secrets.REG_RH_PASS }}
-
       - name: Create KIND Cluster
         if: steps.list-changed.outputs.changed == 'true'
         uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0

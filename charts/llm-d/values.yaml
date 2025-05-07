@@ -275,9 +275,9 @@ redis:
   enabled: true
   architecture: standalone
   image:
-    registry: registry.redhat.io
-    repository: rhel9/redis-7
-    tag: 9.5-1744185101
+    registry: quay.io
+    repository: sclorg/redis-7-c9s
+    tag: c9s
   master:
     kind: Deployment
     resources:
