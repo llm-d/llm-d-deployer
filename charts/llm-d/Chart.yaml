@@ -1,7 +1,7 @@
 apiVersion: v2
 name: llm-d
 type: application
-version: 0.5.5
+version: 0.5.6
 appVersion: "0.0.1"
 icon: data:null
 description: A Helm chart for llm-d
