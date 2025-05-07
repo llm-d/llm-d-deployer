@@ -39,8 +39,8 @@ Options:
   --auth-file PATH           Path to containers auth.json
   --provision-minikube       Provision a local Minikube cluster without GPU support (p/d pods will stay pending)
   --provision-minikube-gpu   Provision a local Minikube cluster with GPU support
-  --delete-minikube          Delete local Minikube cluster
-  --storage-size SIZE        Size of storage volume (default: 7Gi)
+  --delete-minikube          Delete the minikube cluster and exit
+  --storage-size SIZE        Size of storage volume (default: 15Gi)
   --namespace NAME           K8s namespace (default: llm-d)
   --values-file PATH         Path to Helm values.yaml file (default: values.yaml)
   --uninstall                Uninstall the llm-d components from the current cluster

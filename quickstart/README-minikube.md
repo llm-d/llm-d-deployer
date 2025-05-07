@@ -147,26 +147,44 @@ The installer needs to be run from the `llm-d-deployer/quickstart` directory.
 
 ## Examples
 
-If you want to run Minikube with GPU support see [Using NVIDIA GPUs with minikube](https://minikube.sigs.k8s.io/docs/tutorials/nvidia/).
+For additional information regarding Minikube support with GPUs see [Using NVIDIA GPUs with minikube](https://minikube.sigs.k8s.io/docs/tutorials/nvidia/).
 
-```yaml
-minikube start --driver docker --container-runtime docker --gpus all --gpus all --nodes=3
+### Provision Minikube cluster with GPU support and install llm-d
+
+A hugging-face token is required either exported in your environment or passed via the `--hf-token` flag.
+
+```bash
+export HF_TOKEN="your-token"
+./llmd-installer-minikube.sh --provision-minikube-gpu
+```
+
+### Install on an existing llm-d minikube cluster
+
+- If you have already installed a minikube cluster and don't want to reinstall the cluster, simply rerun the installer
+with no flags. Note: you should run `llmd-installer-minikube.sh --uninstall` prior to reinstalling to reset the cluster
+to avoid any conflicts with existing deployments.
+
+```bash
+export HF_TOKEN="your-token"
+./llmd-installer-minikube.sh
 ```
 
 ### Provision Minikube cluster without GPU support and install llm-d
 
-**note**: prefill/decode pods will stay in pending status since there is no GPU node to schedule on.
+**note**: prefill/decode pods will stay in pending status since there is no GPU node to schedule on. This scenario
+would be for testing component functionality up until p/d pod deployments and would not require any GPUs on the host.
 
 ```bash
 export HF_TOKEN="your-token"
-./llmd-installer-minikube.sh --provision-minikube --hf-token "$HF_TOKEN"
+./llmd-installer-minikube.sh --provision-minikube
 ```
 
-### Provision Minikube cluster with GPU support and install llm-d
+### Manually minikube operations
+
+If you prefer to start the minikube cluster manually simply run:
 
 ```bash
-export HF_TOKEN="your-token"
-./llmd-installer-minikube.sh --provision-minikube-gpu --hf-token "$HF_TOKEN"
+minikube start --driver docker --container-runtime docker --gpus all
 ```
 
 ## Model Service
@@ -233,4 +251,10 @@ To remove the minikube cluster this simply wraps the minikube command for conven
 
 ```bash
 ./llmd-installer.sh --delete-minikube
+```
+
+To manually delete the running cluster run:
+
+```bash
+minikube delete
 ```
