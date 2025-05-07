@@ -22,6 +22,8 @@ AUTH_FILE=""
 VALUES_FILE="values.yaml"
 DEBUG=""
 SKIP_INFRA=false
+DISABLE_METRICS=false
+MONITORING_NAMESPACE="llm-d-monitoring"
 
 ### HELP & LOGGING ###
 print_help() {
@@ -38,6 +40,7 @@ Options:
   --uninstall                Uninstall the llm-d components from the current cluster
   --debug                    Add debug mode to the helm install
   --skip-infra               Skip the infrastructure components of the installation
+  --disable-metrics-collection Disable metrics collection (Prometheus will not be installed)
   -h, --help                 Show this help and exit
 EOF
 }
@@ -93,6 +96,7 @@ parse_args() {
       --uninstall)              ACTION="uninstall"; shift ;;
       --debug)                  DEBUG="--debug"; shift;;
       --skip-infra)             SKIP_INFRA=true; shift;;
+      --disable-metrics-collection) DISABLE_METRICS=true; shift;;
       -h|--help)                print_help; exit 0 ;;
       *)                        die "Unknown option: $1" ;;
     esac
@@ -159,6 +163,12 @@ install() {
     rm -rf gateway-api-inference-extension
     log_success "✅ GAIE infra applied"
   fi
+
+  if kubectl get namespace "${MONITORING_NAMESPACE}" &>/dev/null; then
+    log_info "🧹 Cleaning up existing monitoring namespace..."
+    kubectl delete namespace "${MONITORING_NAMESPACE}" --ignore-not-found
+  fi
+
   log_info "📦 Creating namespace ${NAMESPACE}..."
   kubectl create namespace "${NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
   kubectl config set-context --current --namespace="${NAMESPACE}"
@@ -212,7 +222,7 @@ install() {
   log_success "✅ ModelService CRD applied"
 
   log_info "📝 Patching load-model job manifest with HF secret name='${HF_NAME}', key='${HF_KEY}'"
-  # try brew’s yq first; if that fails, fall back to linux installed pkg syntax -_-
+  # try brew's yq first; if that fails, fall back to linux installed pkg syntax -_-
   if ! yq -i ".spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.name = \"${HF_NAME}\"" "${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml"; then
     yq -i -y ".spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.name = \"${HF_NAME}\"" "${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml"
   fi
@@ -226,8 +236,6 @@ install() {
   eval "echo \"$(cat ${REPO_ROOT}/helpers/k8s/model-storage-rwx-pvc-template.yaml)\"" \
        | kubectl apply -n "${NAMESPACE}" -f -
   log_success "✅ PVC created with storageClassName ${STORAGE_CLASS} and size ${STORAGE_SIZE}"
-
-
 
   log_info "🚀 Launching model download job..."
   kubectl apply -f "${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml" -n "${NAMESPACE}"
@@ -248,6 +256,32 @@ install() {
 
   BASE_OCP_DOMAIN=$(kubectl get ingresscontroller default -n openshift-ingress-operator -o jsonpath='{.status.domain}')
 
+  local metrics_enabled="true"
+  if [[ "${DISABLE_METRICS}" == "true" ]]; then
+    metrics_enabled="false"
+    log_info "ℹ️ Metrics collection disabled by user request"
+  elif ! check_servicemonitor_crd; then
+    log_info "⚠️ ServiceMonitor CRD (monitoring.coreos.com) not found"
+  fi
+
+  if is_openshift; then
+    if ! check_openshift_monitoring; then
+      log_info "⚠️ Metrics collection may not work properly in OpenShift without user workload monitoring enabled"
+    fi
+    log_info "ℹ️ Using OpenShift's built-in monitoring stack"
+    DISABLE_METRICS=true # don't install prometheus if in OpenShift
+    metrics_enabled="true"
+  fi
+
+  # Install Prometheus if not disabled, not on OpenShift, and ServiceMonitor CRD doesn't exist
+  if [[ "${DISABLE_METRICS}" == "false" ]]; then
+    if ! check_servicemonitor_crd; then
+      install_prometheus_grafana
+    else
+      log_info "ℹ️ Skipping Prometheus installation as ServiceMonitor CRD already exists"
+    fi
+  fi
+
   log_info "🚚 Deploying llm-d chart with ${VALUES_PATH}..."
   helm upgrade -i llm-d . \
     ${DEBUG} \
@@ -255,6 +289,7 @@ install() {
     --values "${VALUES_PATH}" \
     --set gateway.parameters.proxyUID="${PROXY_UID}" \
     --set ingress.clusterRouterBase="${BASE_OCP_DOMAIN}"
+    --set modelservice.metrics.enabled="${metrics_enabled}"
   log_success "✅ llm-d deployed"
 
   log_info "🔄 Patching all ServiceAccounts with pull-secret..."
@@ -313,9 +348,124 @@ uninstall() {
   helm uninstall llm-d --namespace "${NAMESPACE}" || true
   log_info "🗑️ Deleting namespace ${NAMESPACE}..."
   kubectl delete namespace "${NAMESPACE}" || true
+  log_info "🗑️ Deleting monitoring namespace..."
+  kubectl delete namespace "${MONITORING_NAMESPACE}" --ignore-not-found || true
   log_info "🗑️ Deleting PVCs..."
   kubectl delete pv llama-hostpath-pv --ignore-not-found
   log_success "💀 Uninstallation complete"
+}
+
+check_servicemonitor_crd() {
+  log_info "🔍 Checking for ServiceMonitor CRD (monitoring.coreos.com)..."
+  if ! kubectl get crd servicemonitors.monitoring.coreos.com &>/dev/null; then
+    log_info "⚠️ ServiceMonitor CRD (monitoring.coreos.com) not found"
+    return 1
+  fi
+
+  API_VERSION=$(kubectl get crd servicemonitors.monitoring.coreos.com -o jsonpath='{.spec.versions[?(@.served)].name}' 2>/dev/null || echo "")
+
+  if [[ -z "$API_VERSION" ]]; then
+    log_info "⚠️ Could not determine ServiceMonitor CRD API version"
+    return 1
+  fi
+
+  if [[ "$API_VERSION" == "v1" ]]; then
+    log_success "✅ ServiceMonitor CRD (monitoring.coreos.com/v1) found"
+    return 0
+  else
+    log_info "⚠️ Found ServiceMonitor CRD but with unexpected API version: ${API_VERSION}"
+    return 1
+  fi
+}
+
+check_openshift_monitoring() {
+  if ! is_openshift; then
+    return 0
+  fi
+
+  log_info "🔍 Checking OpenShift user workload monitoring configuration..."
+
+  # Check if user workload monitoring is enabled
+  if ! kubectl get configmap cluster-monitoring-config -n openshift-monitoring -o yaml | grep -q "enableUserWorkload: true"; then
+    log_info "⚠️ OpenShift user workload monitoring is not enabled"
+    log_info "⚠️ To enable metrics collection in OpenShift, please enable user workload monitoring:"
+    log_info "   oc create -f - <<EOF"
+    log_info "   apiVersion: v1"
+    log_info "   kind: ConfigMap"
+    log_info "   metadata:"
+    log_info "     name: cluster-monitoring-config"
+    log_info "     namespace: openshift-monitoring"
+    log_info "   data:"
+    log_info "     config.yaml: |"
+    log_info "       enableUserWorkload: true"
+    log_info "   EOF"
+    return 1
+  fi
+
+  log_success "✅ OpenShift user workload monitoring is properly configured"
+  return 0
+}
+
+is_openshift() {
+  # Check for OpenShift-specific resources
+  if kubectl get clusterversion &>/dev/null; then
+    return 0
+  fi
+  return 1
+}
+
+install_prometheus_grafana() {
+  log_info "🌱 Provisioning Prometheus operator…"
+
+  if ! kubectl get namespace "${MONITORING_NAMESPACE}" &>/dev/null; then
+    log_info "📦 Creating monitoring namespace..."
+    kubectl create namespace "${MONITORING_NAMESPACE}"
+  else
+    log_info "📦 Monitoring namespace already exists"
+  fi
+
+  if ! helm repo list 2>/dev/null | grep -q "prometheus-community"; then
+    log_info "📚 Adding prometheus-community helm repo..."
+    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+    helm repo update
+  fi
+
+  if helm list -n "${MONITORING_NAMESPACE}" | grep -q "prometheus"; then
+    log_info "⚠️ Prometheus stack already installed in ${MONITORING_NAMESPACE} namespace"
+    return 0
+  fi
+
+  log_info "🚀 Installing Prometheus stack..."
+  # Install minimal Prometheus stack with only essential configurations:
+  # - Basic ClusterIP services for Prometheus and Grafana
+  # - ServiceMonitor discovery enabled across namespaces
+  # - Default admin password for Grafana
+  # Note: Ingress and other advanced configurations are left to the user to customize
+  cat <<EOF > /tmp/prometheus-values.yaml
+grafana:
+  adminPassword: admin
+  service:
+    type: ClusterIP
+prometheus:
+  service:
+    type: ClusterIP
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelector: {}
+    serviceMonitorNamespaceSelector: {}
+EOF
+
+  helm install prometheus prometheus-community/kube-prometheus-stack \
+    --namespace "${MONITORING_NAMESPACE}" \
+    -f /tmp/prometheus-values.yaml
+
+  rm -f /tmp/prometheus-values.yaml
+
+  log_info "⏳ Waiting for Prometheus stack pods to be ready..."
+  kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=prometheus -n "${MONITORING_NAMESPACE}" --timeout=300s || true
+  kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=grafana -n "${MONITORING_NAMESPACE}" --timeout=300s || true
+
+  log_success "🚀 Prometheus and Grafana installed."
 }
 
 main() {
