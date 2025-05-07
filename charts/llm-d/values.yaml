@@ -221,7 +221,7 @@ modelservice:
   vllmSim:
     image:
       registry: quay.io
-      repository: llm-d/vllm-sim-dev
+      repository: llm-d/vllm-sim
       tag: "0.0.4"
       imagePullPolicy: "IfNotPresent"
 
