@@ -7,9 +7,7 @@ set -euo pipefail
 NAMESPACE="llm-d"
 PROVISION_MINIKUBE=false
 PROVISION_MINIKUBE_GPU=false
-USE_MINIKUBE_STORAGE=false
 STORAGE_SIZE="15Gi"
-STORAGE_CLASS="efs-sc"
 DELETE_MINIKUBE=false
 ACTION="install"
 HF_TOKEN_CLI=""
@@ -26,6 +24,10 @@ AUTH_FILE=""
 HOSTPATH_DIR=${HOSTPATH_DIR:="/mnt/data/llama-model-storage"}
 VALUES_FILE="values.yaml"
 DEBUG=""
+MODEL_PV_NAME="llama-hostpath-pv"
+MODEL_PVC_NAME="llama-3.2-3b-instruct-pvc"
+REDIS_PV_NAME="redis-hostpath-pv"
+REDIS_PVC_NAME="redis-data-redis-master"
 
 ### HELP & LOGGING ###
 print_help() {
@@ -37,10 +39,8 @@ Options:
   --auth-file PATH           Path to containers auth.json
   --provision-minikube       Provision a local Minikube cluster without GPU support (p/d pods will stay pending)
   --provision-minikube-gpu   Provision a local Minikube cluster with GPU support
-  --delete-minikube          Delete local Minikube cluster
-  --minikube-storage         Use Minikube-specific PVC manifest for storage
-  --storage-size SIZE        Size of storage volume (default: 7Gi)
-  --storage-class CLASS      Storage class to use (default: efs-sc)
+  --delete-minikube          Delete the minikube cluster and exit
+  --storage-size SIZE        Size of storage volume (default: 15Gi)
   --namespace NAME           K8s namespace (default: llm-d)
   --values-file PATH         Path to Helm values.yaml file (default: values.yaml)
   --uninstall                Uninstall the llm-d components from the current cluster
@@ -93,12 +93,10 @@ parse_args() {
     case "$1" in
       --hf-token)               HF_TOKEN_CLI="$2"; shift 2 ;;
       --auth-file)              AUTH_FILE_CLI="$2"; shift 2 ;;
-      --provision-minikube)     PROVISION_MINIKUBE=true; USE_MINIKUBE_STORAGE=true; shift ;;
-      --provision-minikube-gpu) PROVISION_MINIKUBE_GPU=true; USE_MINIKUBE_STORAGE=true; shift ;;
+      --provision-minikube)     PROVISION_MINIKUBE=true; shift ;;
+      --provision-minikube-gpu) PROVISION_MINIKUBE_GPU=true; shift ;;
       --delete-minikube)        DELETE_MINIKUBE=true; shift ;;
-      --minikube-storage)       USE_MINIKUBE_STORAGE=true; shift ;;
       --storage-size)           STORAGE_SIZE="$2"; shift 2 ;;
-      --storage-class)          STORAGE_CLASS="$2"; shift 2 ;;
       --namespace)              NAMESPACE="$2"; shift 2 ;;
       --values-file)            VALUES_FILE="$2"; shift 2 ;;
       --uninstall)              ACTION="uninstall"; shift ;;
@@ -247,16 +245,7 @@ install() {
   fi
   log_success "✅ Job manifest patched"
 
-  log_info "💾 Provisioning model storage…"
-  if [[ "${USE_MINIKUBE_STORAGE}" == "true" ]]; then
-    # this creates both the hostPath PV and the matching PVC
     setup_minikube_storage
-    log_success "✅ PVC created from model-storage-rwx-pvc-minikube.yaml"
-  else
-    eval "echo \"$(cat ${REPO_ROOT}/helpers/k8s/model-storage-rwx-pvc-template.yaml)\"" \
-        | kubectl apply -n "${NAMESPACE}" -f -
-    log_success "✅ PVC created with storageClassName ${STORAGE_CLASS} and size ${STORAGE_SIZE}"
-  fi
 
   log_info "🚀 Launching model download job..."
   kubectl apply -f "${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml" -n "${NAMESPACE}"
@@ -295,14 +284,13 @@ install() {
   log_info "🔁 Restarting pod ${MODELSERVICE_POD} to pick up new image..."
   kubectl delete pod "${MODELSERVICE_POD}" -n "${NAMESPACE}" || true
 
-  if [[ "${USE_MINIKUBE_STORAGE}" == "true" ]]; then
   log_info "🔄 Creating shared hostpath for Minicube PV and PVC for Redis..."
   kubectl delete pvc redis-pvc -n "${NAMESPACE}" --ignore-not-found
   kubectl apply -f - <<EOF
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: redis-hostpath-pv
+  name: ${REDIS_PV_NAME}
 spec:
   storageClassName: manual
   capacity:
@@ -317,7 +305,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: redis-data-redis-master
+  name: ${REDIS_PVC_NAME}
   namespace: ${NAMESPACE}
 spec:
   storageClassName: manual
@@ -326,10 +314,9 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  volumeName: redis-hostpath-pv
+  volumeName: ${REDIS_PV_NAME}
 EOF
   log_success "✅ Redis PV and PVC created with Helm annotations."
-  fi
 
   post_install
 
@@ -343,7 +330,7 @@ kubectl apply -f - <<EOF
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: llama-hostpath-pv
+  name: ${MODEL_PV_NAME}
 spec:
   storageClassName: manual
   capacity:
@@ -358,7 +345,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: llama-3.2-3b-instruct-pvc
+  name: ${MODEL_PVC_NAME}
   namespace: ${NAMESPACE}
 spec:
   storageClassName: manual
@@ -367,7 +354,7 @@ spec:
   resources:
     requests:
       storage: ${STORAGE_SIZE}
-  volumeName: llama-hostpath-pv
+  volumeName: ${MODEL_PV_NAME}
 EOF
   log_success "✅ llama model PV and PVC created."
 }

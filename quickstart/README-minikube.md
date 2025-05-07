@@ -132,15 +132,13 @@ The installer needs to be run from the `llm-d-deployer/quickstart` directory.
 
 ### Flags
 
-| Flag                       | Description                                                                                             | Example                                                   |
-|----------------------------|---------------------------------------------------------------------------------------------------------|-----------------------------------------------------------|
+| Flag                       | Description                                                                                             | Example                                                                   |
+|----------------------------|---------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
 | `--hf-token TOKEN`         | HuggingFace API token (or set `HF_TOKEN` env var)                                                       | `./llmd-installer-minikube.sh --hf-token "abc123"`                        |
 | `--auth-file PATH`         | Path to your registry auth file ig not in one of the two listed files in the auth section of the readme | `./llmd-installer-minikube.sh --auth-file ~/.config/containers/auth.json` |
-| `--provision-minikube`     | Provision a local Minikube cluster without GPU support (implies `--minikube-storage`)                   | `./llmd-installer-minikube.sh --provision-minikube`                       |
-| `--provision-minikube-gpu` | Provision a local Minikube cluster with GPU support (implies `--minikube-storage`)                      | `./llmd-installer-minikube.sh --provision-minikube`                       |
-| `--minikube-storage`       | Use the Minikube-specific PVC manifest for storage                                                      | `./llmd-installer-minikube.sh --minikube-storage`                         |
-| `--storage-size SIZE`      | Size of storage volume (default: 7Gi)                                                                   | `./llmd-installer-minikube.sh --storage-size 15Gi`                        |
-| `--storage-class CLASS`    | Storage class to use (default: efs-sc)                                                                  | `./llmd-installer-minikube.sh --storage-class ocs-storagecluster-cephfs`  |
+| `--provision-minikube`     | Provision a local Minikube cluster without GPU support                                                  | `./llmd-installer-minikube.sh --provision-minikube`                       |
+| `--provision-minikube-gpu` | Provision a local Minikube cluster with GPU support                                                     | `./llmd-installer-minikube.sh --provision-minikube`                       |
+| `--storage-size SIZE`      | Size of storage volume (default: 15Gi)                                                                  | `./llmd-installer-minikube.sh --storage-size 15Gi`                        |
 | `--delete-minikube`        | Delete local Minikube cluster                                                                           | `./llmd-installer-minikube.sh --delete-minikube`                          |
 | `--namespace NAME`         | Kubernetes namespace to use (default: `llm-d`)                                                          | `./llmd-installer-minikube.sh --namespace foo`                            |
 | `--values NAME`            | Absolute path to a Helm values.yaml file (default: llm-d-deployer/charts/llm-d/values.yaml)             | `./llmd-installer-minikube.sh --values /path/to/values.yaml`              |
@@ -149,33 +147,44 @@ The installer needs to be run from the `llm-d-deployer/quickstart` directory.
 
 ## Examples
 
-If you want to run Minikube with GPU support see [Using NVIDIA GPUs with minikube](https://minikube.sigs.k8s.io/docs/tutorials/nvidia/).
+For additional information regarding Minikube support with GPUs see [Using NVIDIA GPUs with minikube](https://minikube.sigs.k8s.io/docs/tutorials/nvidia/).
 
-```yaml
-minikube start --driver docker --container-runtime docker --gpus all --gpus all --nodes=3
+### Provision Minikube cluster with GPU support and install llm-d
+
+A hugging-face token is required either exported in your environment or passed via the `--hf-token` flag.
+
+```bash
+export HF_TOKEN="your-token"
+./llmd-installer-minikube.sh --provision-minikube-gpu
+```
+
+### Install on an existing llm-d minikube cluster
+
+- If you have already installed a minikube cluster and don't want to reinstall the cluster, simply rerun the installer
+with no flags. Note: you should run `llmd-installer-minikube.sh --uninstall` prior to reinstalling to reset the cluster
+to avoid any conflicts with existing deployments.
+
+```bash
+export HF_TOKEN="your-token"
+./llmd-installer-minikube.sh
 ```
 
 ### Provision Minikube cluster without GPU support and install llm-d
 
-**note**: prefill/decode pods will stay in pending status since there is no GPU node to schedule on.
+**note**: prefill/decode pods will stay in pending status since there is no GPU node to schedule on. This scenario
+would be for testing component functionality up until p/d pod deployments and would not require any GPUs on the host.
 
 ```bash
 export HF_TOKEN="your-token"
-./llmd-installer-minikube.sh --provision-minikube --hf-token "$HF_TOKEN"
+./llmd-installer-minikube.sh --provision-minikube
 ```
 
-### Provision Minikube cluster with GPU support and install llm-d
+### Manually minikube operations
+
+If you prefer to start the minikube cluster manually simply run:
 
 ```bash
-export HF_TOKEN="your-token"
-./llmd-installer-minikube.sh --provision-minikube-gpu --hf-token "$HF_TOKEN"
-```
-
-### Use Minikube storage if the minikube cluster is already provisioned to install llm-d
-
-```bash
-export HF_TOKEN="your-token"
-./llmd-installer-minikube.sh --minikube-storage --hf-token "$HF_TOKEN"
+minikube start --driver docker --container-runtime docker --gpus all
 ```
 
 ## Model Service
@@ -242,4 +251,10 @@ To remove the minikube cluster this simply wraps the minikube command for conven
 
 ```bash
 ./llmd-installer.sh --delete-minikube
+```
+
+To manually delete the running cluster run:
+
+```bash
+minikube delete
 ```
