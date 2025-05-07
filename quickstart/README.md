@@ -104,14 +104,12 @@ Create with Docker:
 
 ```bash
 docker --config ~/.config/containers/ login quay.io
-docker --config ~/.config/containers/ login registry.redhat.io
 ```
 
 Create with Podman:
 
 ```bash
 podman login quay.io --authfile ~/.config/containers/auth.json
-podman login registry.redhat.io --authfile ~/.config/containers/auth.json
 ```
 
 ### Target Platforms

@@ -71,14 +71,12 @@ Create with Docker:
 
 ```bash
 docker --config ~/.config/containers/ login quay.io
-docker --config ~/.config/containers/ login registry.redhat.io
 ```
 
 Create with Podman:
 
 ```bash
 podman login quay.io --authfile ~/.config/containers/auth.json
-podman login registry.redhat.io --authfile ~/.config/containers/auth.json
 ```
 
 > ⚠️ You may need to visit Hugging Face [meta-llama/Llama-3.2-3B-Instruct](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct) and

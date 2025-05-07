@@ -126,11 +126,9 @@ locate_auth_file() {
     echo
     echo "# Docker"
     echo "docker --config ~/.config/containers/ login quay.io"
-    echo "docker --config ~/.config/containers/ login registry.redhat.io"
     echo
     echo "# Podman"
     echo "podman login quay.io  --authfile ~/.config/containers/auth.json"
-    echo "podman login registry.redhat.io  --authfile ~/.config/containers/auth.json"
     exit 1
   fi
   log_success "✅ Auth file: ${AUTH_FILE}"
