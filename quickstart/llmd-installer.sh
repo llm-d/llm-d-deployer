@@ -221,6 +221,14 @@ install() {
   fi
   log_success "✅ Job manifest patched"
 
+  log_info "Checking for a storage class..."
+  STORAGE_CLASS=$(kubectl get sc -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+  if [[ -z "$STORAGE_CLASS" ]]; then
+    log_error "No storage class found; please create one"
+    exit 1
+  fi
+  log_success "✅ Storage class found: ${STORAGE_CLASS}"
+
   log_info "💾 Provisioning model storage…"
   # This now only uses the template based on user-provided storage class and size
   eval "echo \"$(cat ${REPO_ROOT}/helpers/k8s/model-storage-rwx-pvc-template.yaml)\"" \

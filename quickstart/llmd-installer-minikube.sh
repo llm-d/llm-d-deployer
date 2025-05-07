@@ -245,6 +245,14 @@ install() {
 
     setup_minikube_storage
 
+  log_info "Checking for a storage class..."
+  STORAGE_CLASS=$(kubectl get sc -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+  if [[ -z "$STORAGE_CLASS" ]]; then
+    log_error "No storage class found; please create one"
+    exit 1
+  fi
+  log_success "✅ Storage class found: ${STORAGE_CLASS}"
+
   log_info "🚀 Launching model download job..."
   kubectl apply -f "${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml" -n "${NAMESPACE}"
 
