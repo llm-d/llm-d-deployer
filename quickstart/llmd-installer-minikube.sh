@@ -78,7 +78,7 @@ check_cluster_reachability() {
 }
 
 # Derive an OpenShift PROXY_UID; default to 0 if not available
-fetch_proxy_uid() {
+fetch_kgateway_proxy_uid() {
   log_info "Fetching OCP proxy UID..."
   local uid_range
   uid_range=$(kubectl get namespace "${NAMESPACE}" -o jsonpath='{.metadata.annotations.openshift\.io/sa\.scc\.uid-range}' 2>/dev/null || true)
@@ -285,7 +285,7 @@ install() {
     log_success "✅ HF token secret created"
   fi
 
-  fetch_proxy_uid
+  fetch_kgateway_proxy_uid
 
   log_info "📜 Applying modelservice CRD..."
   kubectl apply -f crds/modelservice-crd.yaml
@@ -325,7 +325,7 @@ install() {
     ${DEBUG} \
     --namespace "${NAMESPACE}" \
     --values "${VALUES_PATH}" \
-    --set gateway.parameters.proxyUID="${PROXY_UID}"
+    --set gateway.kGatewayParameters.proxyUID="${PROXY_UID}"
   log_success "✅ llm-d deployed"
 
   log_info "🔄 Patching all ServiceAccounts with pull-secret..."

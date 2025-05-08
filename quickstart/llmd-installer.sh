@@ -71,7 +71,7 @@ check_cluster_reachability() {
 }
 
 # Derive an OpenShift PROXY_UID; default to 0 if not available
-fetch_proxy_uid() {
+fetch_kgateway_proxy_uid() {
   log_info "Fetching OCP proxy UID..."
   local uid_range
   uid_range=$(kubectl get namespace "${NAMESPACE}" -o jsonpath='{.metadata.annotations.openshift\.io/sa\.scc\.uid-range}' 2>/dev/null || true)
@@ -215,7 +215,8 @@ install() {
     log_success "✅ HF token secret created"
   fi
 
-  fetch_proxy_uid
+  # can be fetched non-invasily if using kgateway or not
+  fetch_kgateway_proxy_uid
 
   log_info "📜 Applying modelservice CRD..."
   kubectl apply -f crds/modelservice-crd.yaml
@@ -234,7 +235,7 @@ install() {
   log_info "💾 Provisioning model storage…"
   # This now only uses the template based on user-provided storage class and size
   eval "echo \"$(cat ${REPO_ROOT}/helpers/k8s/model-storage-rwx-pvc-template.yaml)\"" \
-       | kubectl apply -n "${NAMESPACE}" -f -
+    | kubectl apply -n "${NAMESPACE}" -f -
   log_success "✅ PVC created with storageClassName ${STORAGE_CLASS} and size ${STORAGE_SIZE}"
 
   log_info "🚀 Launching model download job..."
@@ -287,8 +288,8 @@ install() {
     ${DEBUG} \
     --namespace "${NAMESPACE}" \
     --values "${VALUES_PATH}" \
-    --set gateway.parameters.proxyUID="${PROXY_UID}" \
-    --set ingress.clusterRouterBase="${BASE_OCP_DOMAIN}"
+    --set gateway.kGatewayParameters.proxyUID="${PROXY_UID}" \
+    --set ingress.clusterRouterBase="${BASE_OCP_DOMAIN}" \
     --set modelservice.metrics.enabled="${metrics_enabled}"
   log_success "✅ llm-d deployed"
 
