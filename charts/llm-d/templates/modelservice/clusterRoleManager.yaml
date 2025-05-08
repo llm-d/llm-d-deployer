@@ -48,53 +48,42 @@ rules:
   - watch
   - create
   - update
-  # MSV2 HACK BEGIN ---------------
 - apiGroups:
-  - "v1"
+  - v1
   resources:
-  - "secrets"
+  - secrets
   verbs:
-  - "get"
-  - "list"
-  - "watch"
-- apiGroups:
-  - "inference.networking.x-k8s.io"
-  resources:
-  - "inferencepools"
-  - "inferencemodels"
-  verbs:
-  - "get"
-  - "watch"
-  - "list"
+  - get
+  - list
+  - watch
 - apiGroups:
   - ""
   resources:
-  - "pods"
+  - pods
   verbs:
-  - "get"
-  - "watch"
-  - "list"
+  - get
+  - watch
+  - list
 - apiGroups:
-  - "discovery.k8s.io"
+  - discovery.k8s.io
   resources:
-  - "endpointslices"
+  - endpointslices
   verbs:
-  - "get"
-  - "watch"
-  - "list"
+  - get
+  - watch
+  - list
 - apiGroups:
-  - "authentication.k8s.io"
+  - authentication.k8s.io
   resources:
-  - "tokenreviews"
+  - tokenreviews
   verbs:
-  - "create"
+  - create
 - apiGroups:
-  - "authorization.k8s.io"
+  - authorization.k8s.io
   resources:
-  - "subjectaccessreviews"
+  - subjectaccessreviews
   verbs:
-  - "create"
-  # MSV2 HACK END ---------------
+  - create
 - apiGroups:
   - apps
   resources:
@@ -117,8 +106,8 @@ rules:
 - apiGroups:
   - inference.networking.x-k8s.io
   resources:
-  - inferencemodel
-  - inferencepool
+  - inferencemodels
+  - inferencepools
   verbs:
   - create
   - delete
