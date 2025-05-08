@@ -201,7 +201,7 @@ modelservice:
     tag: "0.0.8"
     imagePullPolicy: "Always"
 
-  # -- Endpoint picker container options
+  # -- Endpoint picker configuration
   # @default -- See below
   epp:
     # -- Endpoint picker image used in ModelService CR presets
@@ -215,6 +215,57 @@ modelservice:
 
       # -- Enable metrics scraping from endpoint picker service, see `modelservice.serviceMonitor` for configuration
       enabled: true
+    # -- Default environment variables for endpoint picker, use `extraEnvVars` to override default behavior by defining the same variable again.
+    # Ref: https://github.com/neuralmagic/gateway-api-inference-extension/tree/dev?tab=readme-ov-file#temporary-fork-configuration
+    defaultEnvVars:
+      - name: ENABLE_KVCACHE_AWARE_SCORER
+        value: "{{ .Values.redis.enabled }}"
+      - name: KVCACHE_AWARE_SCORER_WEIGHT
+        value: "1.0"
+      - name: KVCACHE_INDEXER_REDIS_ADDR
+        value: '{{ if .Values.redis.enabled }}{{ include "redis.master.service.fullurl" . }}{{ end }}'
+      - name: ENABLE_PREFIX_AWARE_SCORER
+        value: "true"
+      - name: PREFIX_AWARE_SCORER_WEIGHT
+        value: "1.0"
+      - name: ENABLE_LOAD_AWARE_SCORER
+        value: "true"
+      - name: LOAD_AWARE_SCORER_WEIGHT
+        value: "1.0"
+      - name: ENABLE_SESSION_AWARE_SCORER
+        value: "true"
+      - name: SESSION_AWARE_SCORER_WEIGHT
+        value: "1.0"
+      - name: PD_ENABLED
+        value: "true"
+      - name: PD_PROMPT_LEN_THRESHOLD
+        value: "10"
+      - name: PREFILL_ENABLE_KVCACHE_AWARE_SCORER
+        value: "true"
+      - name: PREFILL_KVCACHE_AWARE_SCORER_WEIGHT
+        value: "1.0"
+      - name: PREFILL_ENABLE_LOAD_AWARE_SCORER
+        value: "true"
+      - name: PREFILL_LOAD_AWARE_SCORER_WEIGHT
+        value: "1.0"
+      - name: PREFILL_ENABLE_PREFIX_AWARE_SCORER
+        value: "true"
+      - name: PREFILL_PREFIX_AWARE_SCORER_WEIGHT
+        value: "1.0"
+      - name: DECODE_ENABLE_KVCACHE_AWARE_SCORER
+        value: "true"
+      - name: DECODE_KVCACHE_AWARE_SCORER_WEIGHT
+        value: "1.0"
+      - name: DECODE_ENABLE_LOAD_AWARE_SCORER
+        value: "true"
+      - name: DECODE_LOAD_AWARE_SCORER_WEIGHT
+        value: "1.0"
+      - name: DECODE_ENABLE_PREFIX_AWARE_SCORER
+        value: "true"
+      - name: DECODE_PREFIX_AWARE_SCORER_WEIGHT
+        value: "1.0"
+    # -- Additional environment variables for endpoint picker
+    extraEnvVars: []
 
   # -- Prefill options
   # @default -- See below
