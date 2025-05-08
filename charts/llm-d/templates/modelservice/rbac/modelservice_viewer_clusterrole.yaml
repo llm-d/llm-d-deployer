@@ -1,8 +1,9 @@
 {{- if and .Values.modelservice.enabled .Values.modelservice.rbac.create }}
+# Ref: https://github.com/neuralmagic/llm-d-model-service/blob/dev/config/rbac/modelservice_viewer_role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+kind: ClusterRole
 metadata:
-  name: {{ include "modelservice.fullname" . }}-metrics-auth-rolebinding
+  name: {{ include "modelservice.fullname" . }}-viewer
   labels:
     {{- include "common.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: modelservice
@@ -16,13 +17,19 @@ metadata:
     {{- if .Values.modelservice.annotations }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.annotations "context" $) | nindent 4 }}
     {{- end }}
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: {{ include "modelservice.fullname" . }}-metrics-auth-role
-subjects:
-- kind: ServiceAccount
-  apiGroup: ""
-  name: {{ include "modelservice.serviceAccountName" . }}
-  namespace: {{ .Release.Namespace }}
+rules:
+- apiGroups:
+  - llm-d.ai
+  resources:
+  - modelservices
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - llm-d.ai
+  resources:
+  - modelservices/status
+  verbs:
+  - get
 {{- end }}
