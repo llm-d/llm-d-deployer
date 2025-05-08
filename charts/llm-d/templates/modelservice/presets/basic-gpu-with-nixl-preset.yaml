@@ -82,8 +82,7 @@ data:
               command:
                 - vllm
                 - serve
-                {{/* MSVC hack, waiting on https://github.com/neuralmagic/llm-d-model-service/issues/110 to remove */}}
-                - {{ include "sampleApplication.modelServe" . }}
+                - {{ `{{ default (print "/bar/" .ModelPath) .HFModelName }}` }}
               args:
                 - "--port"
                 - "8000"
@@ -115,17 +114,23 @@ data:
                 - name: LMCACHE_LOOKUP_URL
                   value: {{ include "redis.master.service.fullurl" .}}
                 {{- end }}
-                {{- if eq (include "sampleApplication.modelArtifactType" . ) "hf" }}
+                {{ `{{ if .HFModelName }}` }}
                 - name: HF_HUB_CACHE
-                  value: {{ include "sampleApplication.huggingFaceCacheDir" . }}
-                {{- end }}
-                {{- if and ( eq (include "sampleApplication.modelArtifactType" . ) "hf") .Values.auth.hfToken.enabled }}
-                - name: HF_TOKEN
-                  valueFrom:
-                    secretKeyRef:
-                      name: {{ .Values.auth.hfToken.name }}
-                      key: {{ .Values.auth.hfToken.key }}
-                {{- end }}
+                  value: /foo
+                {{`{{ else }}`}}
+              volumeMounts:
+                - name: home
+                  mountPath: /home
+                - name: config-prefiller
+                  mountPath: /vllm-workspace
+                {{ `{{ if .HFModelName }}` }}
+                - name: model-cache
+                  mountPath: /bar
+                {{`{{ else }}`}}
+                - name: model-storage
+                  mountPath: /bar
+                  readOnly: true
+                {{`{{ end }}`}}
               ports:
                 - containerPort: 8001
                   protocol: TCP
@@ -136,30 +141,24 @@ data:
                   mountPath: /home
                 - name: config-decoder
                   mountPath: /vllm-workspace
-                {{- if eq (include "sampleApplication.modelArtifactType" . ) "pvc" }}
-                 {{/* MSVC hack, waiting on https://github.com/neuralmagic/llm-d-model-service/issues/110 to remove */}}
-                - name: model-storage
-                  mountPath: {{ .Values.sampleApplication.model.pvc.mountPath }}
-                  readOnly: true
-                {{- else if eq (include "sampleApplication.modelArtifactType" . ) "hf"  }}
+                {{ `{{ if .HFModelName }}` }}
                 - name: model-cache
-                  mountPath: {{ include "sampleApplication.huggingFaceCacheDir" . }}
-                {{- end}}
+                  mountPath: /bar
+                {{`{{ else }}`}}
+                - name: model-storage
+                  mountPath: /bar
+                  readOnly: true
+                {{`{{ end }}`}}
           volumes:
             - name: home
               emptyDir: {}
             - name: config-decoder
               configMap:
                 name: {{ include "modelservice.fullname" . -}}-config-decoder
-            {{- if eq (include "sampleApplication.modelArtifactType" . ) "hf"  }}
+            {{ `{{ if .HFModelName }}` }}
             - name: model-cache
-              {{- if .Values.sampleApplication.model.huggingface.cache.sizeLimit }}
-              emptyDir:
-                sizeLimit: {{ .Values.sampleApplication.model.huggingface.cache.sizeLimit }}
-              {{- else }}
               emptyDir: {}
-              {{- end -}}
-            {{- end }}
+            {{ `{{ end }}` }}
 
   prefillDeployment: |
     apiVersion: apps/v1
@@ -191,8 +190,7 @@ data:
               command:
                 - vllm
                 - serve
-                {{/* MSVC hack, waiting on https://github.com/neuralmagic/llm-d-model-service/issues/110 to remove */}}
-                - {{ include "sampleApplication.modelServe" . }}
+                - {{ `{{ default (print "/bar/" .ModelPath) .HFModelName }}` }}
               args:
                 - "--port"
                 - "8000"
@@ -224,31 +222,23 @@ data:
                 - name: LMCACHE_LOOKUP_URL
                   value: {{ include "redis.master.service.fullurl" .}}
                 {{- end }}
-                {{- if eq (include "sampleApplication.modelArtifactType" . ) "hf"}}
+                {{ `{{ if .HFModelName }}` }}
                 - name: HF_HUB_CACHE
-                  value: {{ include "sampleApplication.huggingFaceCacheDir" . }}
-                {{- end }}
-                {{- if and ( eq (include "sampleApplication.modelArtifactType" . ) "hf" ) .Values.auth.hfToken.enabled }}
-                - name: HF_TOKEN
-                  valueFrom:
-                    secretKeyRef:
-                      name: {{ .Values.auth.hfToken.name }}
-                      key: {{ .Values.auth.hfToken.key }}
-                {{- end }}
+                  value: /foo
+                {{`{{ else }}`}}
               volumeMounts:
                 - name: home
                   mountPath: /home
                 - name: config-prefiller
                   mountPath: /vllm-workspace
-                {{- if eq (include "sampleApplication.modelArtifactType" . ) "pvc" }}
-                {{/* MSVC hack, waiting on https://github.com/neuralmagic/llm-d-model-service/issues/110 to remove */}}
-                - name: model-storage
-                  mountPath: {{ .Values.sampleApplication.model.pvc.mountPath }}
-                  readOnly: true
-                {{- else if eq (include "sampleApplication.modelArtifactType" . ) "hf"}}
+                {{ `{{ if .HFModelName }}` }}
                 - name: model-cache
-                  mountPath: {{ include "sampleApplication.huggingFaceCacheDir" . }}
-                {{- end}}
+                  mountPath: /bar
+                {{`{{ else }}`}}
+                - name: model-storage
+                  mountPath: /bar
+                  readOnly: true
+                {{`{{ end }}`}}
               ports:
                 - containerPort: 8001
                   protocol: TCP
@@ -260,15 +250,10 @@ data:
             - name: config-prefiller
               configMap:
                 name: {{ include "modelservice.fullname" . -}}-config-prefiller
-            {{- if eq (include "sampleApplication.modelArtifactType" . ) "hf"}}
+            {{ `{{ if .HFModelName }}` }}
             - name: model-cache
-              {{- if .Values.sampleApplication.model.huggingface.cache.sizeLimit }}
-              emptyDir:
-                sizeLimit: {{ .Values.sampleApplication.model.huggingface.cache.sizeLimit }}
-              {{- else }}
               emptyDir: {}
-              {{- end }}
-            {{- end }}
+            {{ `{{ end }}` }}
 
   decodeService: |
     apiVersion: v1

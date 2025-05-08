@@ -206,11 +206,12 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.vllmSim | vLLM sim image used in ModelService CR presets | object | `{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/vllm-sim","tag":"0.0.4"}}` |
 | nameOverride | String to partially override common.names.fullname | string | `""` |
 | redis | Bitnami/Redis chart configuration | object | Use sane defaults for minimal Redis deployment |
-| sampleApplication | Sample application deploying a p-d pair of specific model | object | `{"enabled":true,"inferencePoolPort":8000,"model":{"huggingface":{"cache":{"path":"","sizeLimit":""},"enabled":false,"modelName":"Llama-3.2-3B-Instruct","repoID":"meta-llama/Llama-3.2-3B-Instruct"},"pvc":{"enabled":true,"modelName":"Llama-3.2-3B-Instruct","modelPath":"/models/meta-llama/Llama-3.2-3B-Instruct","mountPath":"/cache","pvcName":"llama-3.2-3b-instruct-pvc"}},"resources":{"limits":{"nvidia.com/gpu":1},"requests":{"nvidia.com/gpu":1}}}` |
+| sampleApplication | Sample application deploying a p-d pair of specific model | object | `{"enabled":true,"inferencePoolPort":8000,"model":{"modelArtifactURI":"hf://meta-llama/Llama-3.2-3B-Instruct","modelName":"Llama-3.2-3B-Instruct","servedModelNames":[]},"resources":{"limits":{"nvidia.com/gpu":1},"requests":{"nvidia.com/gpu":1}}}` |
 | sampleApplication.enabled | Enable rendering of sample application resources | bool | `true` |
 | sampleApplication.inferencePoolPort | InferencePool port configuration | int | `8000` |
-| sampleApplication.model.huggingface.cache.path | specify override path for HF_HUB_CACHE. Defaults to `/vllm-hf-models` | string | `""` |
-| sampleApplication.model.huggingface.cache.sizeLimit | specify a maximum volume size for HF_HUB_CACHE | string | `""` |
+| sampleApplication.model.modelArtifactURI | Fully qualified pvc URI: pvc://<pvc-name>/<model-path> modelArtifactURI: pvc://llama-3.2-3b-instruct-pvc/models/meta-llama/Llama-3.2-3B-Instruct # -- Fully qualified hf URI: pvc://<pvc-name>/<model-path> | string | `"hf://meta-llama/Llama-3.2-3B-Instruct"` |
+| sampleApplication.model.modelName | Name of the model | string | `"Llama-3.2-3B-Instruct"` |
+| sampleApplication.model.servedModelNames | Aliases to the Model named vllm will serve with | list | `[]` |
 | sampleApplication.resources | Resource requests/limits <br /> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-requests-and-limits-of-pod-and-container | object | `{"limits":{"nvidia.com/gpu":1},"requests":{"nvidia.com/gpu":1}}` |
 | test | Helm tests | object | `{"enabled":false}` |
 | test.enabled | Enable rendering of helm test resources | bool | `false` |

@@ -29,6 +29,14 @@ spec:
       - "--served-model-name"
       - {{ include "sampleApplication.servedModelNames" .}}
       resources: {{ .Values.sampleApplication.resources | toYaml | nindent 8 }}
+      env:
+      {{- if and ( eq (include "sampleApplication.modelArtifactType" . ) "hf" ) .Values.auth.hfToken.enabled }}
+      - name: HF_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: {{ .Values.auth.hfToken.name }}
+            key: {{ .Values.auth.hfToken.key }}
+      {{- end }}
   prefill:
     replicas: 1
     containers:
@@ -37,4 +45,12 @@ spec:
       - "--served-model-name"
       - {{ include "sampleApplication.servedModelNames" .}}
       resources: {{ .Values.sampleApplication.resources | toYaml | nindent 8 }}
+      env:
+      {{- if and ( eq (include "sampleApplication.modelArtifactType" . ) "hf" ) .Values.auth.hfToken.enabled }}
+      - name: HF_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: {{ .Values.auth.hfToken.name }}
+            key: {{ .Values.auth.hfToken.key }}
+      {{- end }}
 {{- end }}

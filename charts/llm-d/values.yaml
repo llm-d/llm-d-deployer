@@ -55,32 +55,16 @@ sampleApplication:
   model:
     # -- Fully qualified pvc URI: pvc://<pvc-name>/<model-path>
     # modelArtifactURI: pvc://llama-3.2-3b-instruct-pvc/models/meta-llama/Llama-3.2-3B-Instruct
-    
+
     # # -- Fully qualified hf URI: pvc://<pvc-name>/<model-path>
     modelArtifactURI: hf://meta-llama/Llama-3.2-3B-Instruct
-    
+
     # -- Name of the model
     modelName: "Llama-3.2-3B-Instruct"
-
-    # -- If `.Values.sampleApplication.model.modelArtifactURI` starts wth `pvc://` what huggingface repo to load onto the pvc
-    hfModelID: "meta-llama/Llama-3.2-3B-Instruct"
 
     # -- Aliases to the Model named vllm will serve with
     servedModelNames: []
 
-    pvc:
-      # -- Directory to mount the PVC at
-      mountPath: "/cache"
-      # -- If the installer should create the PVC and download the model onto the PVC
-      createAndDownloadModel: true
-
-    huggingface:
-      # -- HF cache settings
-      cache:
-        # -- specify override path for HF_HUB_CACHE. Defaults to `/vllm-hf-models`
-        path: ""
-        # -- specify a maximum volume size for HF_HUB_CACHE
-        sizeLimit: ""
 
   # -- Modify resource limits/requests available to the pods
   # -- Resource requests/limits

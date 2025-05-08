@@ -39,26 +39,7 @@ Define the type of the modelArtifactURI
   {{- end }}
 {{- end }}
 
-{{/*
-Define the model cache path for downloading models via huggingface
-*/}}
-{{- define "sampleApplication.huggingFaceCacheDir" -}}
-{{- .Values.sampleApplication.model.huggingface.cache.path | default "/vllm-hf-models" }}
-{{- end }}
 
-{{/*
-Define a normalized modelServe path / repo id to include mountpath in .ModelPath when using pvc
-(HACK MSVC2 - waiting on https://github.com/neuralmagic/llm-d-model-service/issues/110)
-*/}}
-{{- define "sampleApplication.modelServe" -}}
-  {{- if .Values.sampleApplication.enabled -}}
-    {{- if ( eq (include "sampleApplication.modelArtifactType" . ) "pvc" )  -}}
-      {{- .Values.sampleApplication.model.pvc.mountPath }}/{{`{{ .ModelPath }}`}}
-    {{- else if ( eq (include "sampleApplication.modelArtifactType" . ) "hf") -}}
-      {{`{{ .HFModelName }}`}}
-    {{- end }}
-  {{- end }}
-{{- end }}
 
 {{/*
 Define served model names for vllm
