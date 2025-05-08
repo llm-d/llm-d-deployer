@@ -350,6 +350,13 @@ uninstall() {
   kubectl delete namespace "${NAMESPACE}" || true
   log_info "🗑️ Deleting monitoring namespace..."
   kubectl delete namespace "${MONITORING_NAMESPACE}" --ignore-not-found || true
+
+  # Check if we installed the Prometheus stack and delete the ServiceMonitor CRD if we did
+  if helm list -n "${MONITORING_NAMESPACE}" | grep -q "prometheus" 2>/dev/null; then
+    log_info "🗑️ Deleting ServiceMonitor CRD..."
+    kubectl delete crd servicemonitors.monitoring.coreos.com --ignore-not-found || true
+  fi
+
   log_info "🗑️ Deleting PVCs..."
   kubectl delete pv llama-hostpath-pv --ignore-not-found
   log_success "💀 Uninstallation complete"
