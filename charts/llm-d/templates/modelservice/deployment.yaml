@@ -36,6 +36,9 @@ spec:
         {{- if .Values.modelservice.podAnnotations }}
         {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.podAnnotations "context" $ ) | nindent 8 }}
         {{- end }}
+        {{- range (list "gpu-with-nixl") }}
+        checksum/preset-{{ include "modelservice.fullname" $ }}-basic-gpu-with-nixl-preset: {{ pick ( include (print $.Template.BasePath "/modelservice/presets/basic-" . "-preset.yaml") $ | fromYaml ) "data" | toYaml | sha256sum }}
+        {{- end }}
     spec:
       containers:
       - args:
