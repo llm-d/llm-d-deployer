@@ -24,6 +24,7 @@ DEBUG=""
 SKIP_INFRA=false
 DISABLE_METRICS=false
 MONITORING_NAMESPACE="llm-d-monitoring"
+DOWNLOAD_MODEL=false
 
 ### HELP & LOGGING ###
 print_help() {
@@ -41,6 +42,7 @@ Options:
   --debug                    Add debug mode to the helm install
   --skip-infra               Skip the infrastructure components of the installation
   --disable-metrics-collection Disable metrics collection (Prometheus will not be installed)
+  -d, --download-model       Download the model to PVC if modelArtifactURI is pvc based
   -h, --help                 Show this help and exit
 EOF
 }
@@ -97,6 +99,8 @@ parse_args() {
       --debug)                  DEBUG="--debug"; shift;;
       --skip-infra)             SKIP_INFRA=true; shift;;
       --disable-metrics-collection) DISABLE_METRICS=true; shift;;
+      -d)                       DOWNLOAD_MODEL=true; shift;;
+      --download-model)         DOWNLOAD_MODEL=true; shift;;
       -h|--help)                print_help; exit 0 ;;
       *)                        die "Unknown option: $1" ;;
     esac
@@ -149,7 +153,7 @@ validate_hf_token() {
 
 clone_gaie_repo() {
   if [[ ! -d gateway-api-inference-extension ]]; then
-    git clone https://github.com/neuralmagic/gateway-api-inference-extension.git
+    git clone --branch main https://github.com/neuralmagic/gateway-api-inference-extension.git
   fi
 }
 
@@ -164,15 +168,15 @@ create_pvc_and_download_model_if_needed() {
     fi
     if [[ -z "${HF_MODEL_ID}" ]]; then
         log_error "Error, \`modelArtifactURI\` indicates model from PVC, but no 
-        Please set the \`.sampleApplication.model.hfModelID\` in the values file."
+        Please set the \`.sampleApplication.downloadModelJob.hfModelID\` in the values file."
         exit 1
     fi
     if [[ -z "${HF_TOKEN_SECRET_NAME}" ]]; then
-        log_error "Error, no HF token secret name. Please set the \`.auth.hfToken.name\` in the values file."
+        log_error "Error, no HF token secret name. Please set the \`.sampleApplication.model.auth.hfToken.name\` in the values file."
         exit 1
     fi
     if [[ -z "${HF_TOKEN_SECRET_KEY}" ]]; then
-        log_error "Error, no HF token secret key. Please set the \`.auth.hfToken.key\` in the values file."
+        log_error "Error, no HF token secret key. Please set the \`.sampleApplication.model.auth.hfToken.key\` in the values file."
         exit 1
     fi
     if [[ -z "${PVC_NAME}" ]]; then
@@ -187,17 +191,16 @@ create_pvc_and_download_model_if_needed() {
 
   case "$PROTOCOL" in
   pvc)
-    CREATE_PVC_AND_DOWNLOAD_MODEL=$(cat "${VALUES_PATH}" | yq .sampleApplication.model.pvc.createAndDownloadModel)
-    if [[ "${CREATE_PVC_AND_DOWNLOAD_MODEL}" == "true" ]]; then
+    # Used in both conditionals, for logging in else
+    PVC_AND_MODEL_PATH="${MODEL_ARTIFACT_URI#*://}"
+    PVC_NAME="${PVC_AND_MODEL_PATH%%/*}"
+    MODEL_PATH="${PVC_AND_MODEL_PATH#*/}"
+    if [[ "${DOWNLOAD_MODEL}" == "true" ]]; then
       log_info "💾 Provisioning model storage…"
 
-      PVC_AND_MODEL_PATH="${MODEL_ARTIFACT_URI#*://}"
-      PVC_NAME="${PVC_AND_MODEL_PATH%%/*}"
-      MODEL_PATH="${PVC_AND_MODEL_PATH#*/}"
-
-      HF_MODEL_ID=$(cat ${VALUES_PATH} | yq .sampleApplication.model.hfModelID)
-      HF_TOKEN_SECRET_NAME=$(cat ${VALUES_PATH} | yq .auth.hfToken.name)
-      HF_TOKEN_SECRET_KEY=$(cat ${VALUES_PATH} | yq .auth.hfToken.key)
+      HF_MODEL_ID=$(cat ${VALUES_PATH} | yq .sampleApplication.downloadModelJob.hfModelID)
+      HF_TOKEN_SECRET_NAME=$(cat ${VALUES_PATH} | yq .sampleApplication.model.auth.hfToken.name)
+      HF_TOKEN_SECRET_KEY=$(cat ${VALUES_PATH} | yq .sampleApplication.model.auth.hfToken.key)
 
       DOWNLOAD_MODEL_JOB_TEMPLATE_FILE_PATH=$(realpath "${REPO_ROOT}/helpers/k8s/load-model-on-pvc-template.yaml")
       
@@ -233,7 +236,7 @@ create_pvc_and_download_model_if_needed() {
 
       log_success "✅ Model downloaded"
     else
-      log_info "⏭️ Model download to PVC skipped: \`.sampleApplication.model.pvc.createAndDownloadModel\` not set to \`true\` in values.yaml."
+      log_info "⏭️ Model download to PVC skipped: \`--download-model\` flag not set, assuming PVC ${PVC_NAME} exists and contains model at path: \`${MODEL_PATH}\`."
     fi
     ;;
   hf)
@@ -299,10 +302,10 @@ install() {
     VALUES_PATH="${CHART_DIR}/values.yaml"
   fi
 
-  if [[ "$(yq -r .auth.hfToken.enabled "${VALUES_PATH}")" == "true" ]]; then
+  if [[ "$(yq -r .sampleApplication.model.auth.hfToken.create "${VALUES_PATH}")" == "true" ]]; then
     log_info "🔐 Creating HF token secret (from ${VALUES_PATH})..."
-    HF_NAME=$(yq -r .auth.hfToken.name "${VALUES_PATH}")
-    HF_KEY=$(yq -r .auth.hfToken.key  "${VALUES_PATH}")
+    HF_NAME=$(yq -r .sampleApplication.model.auth.hfToken.name "${VALUES_PATH}")
+    HF_KEY=$(yq -r .sampleApplication.model.auth.hfToken.key  "${VALUES_PATH}")
     kubectl create secret generic "${HF_NAME}" \
       --from-literal="${HF_KEY}=${HF_TOKEN}" \
       --dry-run=client -o yaml | kubectl apply -f -
@@ -369,15 +372,6 @@ install() {
   kubectl patch serviceaccount default --namespace="${NAMESPACE}" --type merge --patch "${patch}"
   log_success "✅ ServiceAccounts patched"
 
-  # Restart modelservice pod to pick up potential image changes (e.g., via pull secret)
-  MODELSERVICE_POD=$(kubectl get pods -n "${NAMESPACE}" | grep "modelservice" | awk 'NR==1{print $1}')
-  if [[ -n "$MODELSERVICE_POD" ]]; then
-    log_info "🔁 Restarting pod ${MODELSERVICE_POD} to pick up new image..."
-    kubectl delete pod "${MODELSERVICE_POD}" -n "${NAMESPACE}" || true
-  else
-    log_info "➡️ No modelservice pod found to restart."
-  fi
-
   post_install
 
   log_success "🎉 Installation complete."
@@ -413,18 +407,20 @@ uninstall() {
     popd >/dev/null
     rm -rf gateway-api-inference-extension
   fi
-  log_info "🗑️ Uninstalling llm-d chart..."
-  helm uninstall llm-d --namespace "${NAMESPACE}" || true
-  MODEL_ARTIFACT_URI=$(cat ${VALUES_PATH} | yq .sampleApplication.model.modelArtifactURI)
+  MODEL_ARTIFACT_URI=$(kubectl get modelservice --ignore-not-found -n ${NAMESPACE} -o yaml | yq '.items[].spec.modelArtifacts.uri')
   PROTOCOL="${MODEL_ARTIFACT_URI%%://*}"
   if [[ "${PROTOCOL}" == "pvc" ]]; then
-    INFERENCING_DEPLOYMENT=$(kubectl get deployments -n ${NAMESPACE} -l llm-d.ai/inferenceServing=true | tail -n 1 | awk '{print $1}')
-    PVC_NAME=$( kubectl get deployment $INFERENCING_DEPLOYMENT -n ${NAMESPACE} -o yaml | yq '.spec.template.spec.volumes[] | select(has("persistentVolumeClaim"))' | yq .claimName)
-    PV_NAME=$(kubectl get pvc ${PVC_NAME} -n ${NAMESPACE} -o yaml | yq .spec.volumeName)
+    INFERENCING_DEPLOYMENT=$(kubectl get deployments --ignore-not-found  -n ${NAMESPACE} -l llm-d.ai/inferenceServing=true | tail -n 1 | awk '{print $1}')
+    PVC_NAME=$( kubectl get deployments --ignore-not-found  $INFERENCING_DEPLOYMENT -n ${NAMESPACE} -o yaml | yq '.spec.template.spec.volumes[] | select(has("persistentVolumeClaim"))' | yq .claimName)
+    PV_NAME=$(kubectl get pvc ${PVC_NAME} --ignore-not-found  -n ${NAMESPACE} -o yaml | yq .spec.volumeName)
     kubectl delete job download-model --ignore-not-found || true
   fi
+  log_info "🗑️ Uninstalling llm-d chart..."
+  helm uninstall llm-d --ignore-not-found --namespace "${NAMESPACE}" || true
+  
   log_info "🗑️ Deleting namespace ${NAMESPACE}..."
-  kubectl delete namespace "${NAMESPACE}" || true
+  kubectl delete namespace "${NAMESPACE}" --ignore-not-found || true
+  
   log_info "🗑️ Deleting monitoring namespace..."
   kubectl delete namespace "${MONITORING_NAMESPACE}" --ignore-not-found || true
 
@@ -433,11 +429,13 @@ uninstall() {
     log_info "🗑️ Deleting ServiceMonitor CRD..."
     kubectl delete crd servicemonitors.monitoring.coreos.com --ignore-not-found || true
   fi
+
   if [[ "${PROTOCOL}" == "pvc" ]]; then
-    # cleanup pvcs and pv after pods have died removing their finalizers
-    log_info "🗑️ Deleting Model PVC and PV..."
-    kubectl delete pvc ${PVC_NAME} -n ${NAMESPACE} --ignore-not-found
-    kubectl delete pv ${PV_NAME} --ignore-not-found
+    # enforce PV cleanup - PVC should go with namespace
+    if [[ -n ${PV_NAME} ]]; then
+      log_info "🗑️ Deleting Model PV..."
+      kubectl delete pv ${PV_NAME} --ignore-not-found
+    fi
   else 
     log_info "⏭️ skipping deletion of PV and PVCS..."
   fi

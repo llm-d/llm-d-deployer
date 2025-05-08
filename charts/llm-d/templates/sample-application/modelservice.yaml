@@ -18,7 +18,6 @@ spec:
     name: {{ include "modelservice.fullname" . }}-basic-gpu-with-nixl-preset
   routing:
     modelName: {{ .Values.sampleApplication.model.modelName }}
-    # modelName: {{ include "sampleApplication.sanitizedModelName" . }}
   modelArtifacts:
     uri: {{ .Values.sampleApplication.model.modelArtifactURI }}
   decode:
@@ -30,12 +29,12 @@ spec:
       - {{ include "sampleApplication.servedModelNames" .}}
       resources: {{ .Values.sampleApplication.resources | toYaml | nindent 8 }}
       env:
-      {{- if and ( eq (include "sampleApplication.modelArtifactType" . ) "hf" ) .Values.auth.hfToken.enabled }}
+      {{- if eq (include "sampleApplication.modelArtifactType" . ) "hf" }}
       - name: HF_TOKEN
         valueFrom:
           secretKeyRef:
-            name: {{ .Values.auth.hfToken.name }}
-            key: {{ .Values.auth.hfToken.key }}
+            name: {{ .Values.sampleApplication.model.auth.hfToken.name }}
+            key: {{ .Values.sampleApplication.model.auth.hfToken.key }}
       {{- end }}
   prefill:
     replicas: 1
@@ -46,11 +45,11 @@ spec:
       - {{ include "sampleApplication.servedModelNames" .}}
       resources: {{ .Values.sampleApplication.resources | toYaml | nindent 8 }}
       env:
-      {{- if and ( eq (include "sampleApplication.modelArtifactType" . ) "hf" ) .Values.auth.hfToken.enabled }}
+      {{- if eq (include "sampleApplication.modelArtifactType" . ) "hf" }}
       - name: HF_TOKEN
         valueFrom:
           secretKeyRef:
-            name: {{ .Values.auth.hfToken.name }}
-            key: {{ .Values.auth.hfToken.key }}
+            name: {{ .Values.sampleApplication.model.auth.hfToken.name }}
+            key: {{ .Values.sampleApplication.model.auth.hfToken.key }}
       {{- end }}
 {{- end }}

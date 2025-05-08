@@ -275,10 +275,10 @@ install() {
     VALUES_PATH="${CHART_DIR}/values.yaml"
   fi
 
-  if [[ "$(yq -r .sampleApplication.model.huggingface.enabled "${VALUES_PATH}")" == "true" ]]; then
+  if [[ "$(yq -r .sampleApplication.model.auth.hfToken.create "${VALUES_PATH}")" == "true" ]]; then
     log_info "🔐 Creating HF token secret (from ${VALUES_PATH})..."
-    HF_NAME=$(yq -r .auth.hfToken.name "${VALUES_PATH}")
-    HF_KEY=$(yq -r .auth.hfToken.key  "${VALUES_PATH}")
+    HF_NAME=$(yq -r .sampleApplication.model.auth.hfToken.name "${VALUES_PATH}")
+    HF_KEY=$(yq -r .sampleApplication.model.auth.hfToken.key  "${VALUES_PATH}")
     kubectl create secret generic "${HF_NAME}" \
       --from-literal="${HF_KEY}=${HF_TOKEN}" \
       --dry-run=client -o yaml | kubectl apply -f -

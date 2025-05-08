@@ -82,7 +82,7 @@ data:
               command:
                 - vllm
                 - serve
-                - {{ `{{ default (print "/bar/" .ModelPath) .HFModelName }}` }}
+                - {{ `{{ default (print "/models/" .ModelPath) .HFModelName }}` }}
               args:
                 - "--port"
                 - "8000"
@@ -114,51 +114,38 @@ data:
                 - name: LMCACHE_LOOKUP_URL
                   value: {{ include "redis.master.service.fullurl" .}}
                 {{- end }}
-                {{ `{{ if .HFModelName }}` }}
+                {{ `{{- if .HFModelName }}` }}
                 - name: HF_HUB_CACHE
-                  value: /foo
-                {{`{{ else }}`}}
-              volumeMounts:
-                - name: home
-                  mountPath: /home
-                - name: config-prefiller
-                  mountPath: /vllm-workspace
-                {{ `{{ if .HFModelName }}` }}
-                - name: model-cache
-                  mountPath: /bar
-                {{`{{ else }}`}}
-                - name: model-storage
-                  mountPath: /bar
-                  readOnly: true
-                {{`{{ end }}`}}
-              ports:
-                - containerPort: 8001
-                  protocol: TCP
-                - containerPort: 55555
-                  protocol: TCP
+                  value: /models
+                {{ `{{- end }}` }}
               volumeMounts:
                 - name: home
                   mountPath: /home
                 - name: config-decoder
                   mountPath: /vllm-workspace
-                {{ `{{ if .HFModelName }}` }}
+                {{ `{{- if .HFModelName }}` }}
                 - name: model-cache
-                  mountPath: /bar
-                {{`{{ else }}`}}
+                  mountPath: /models
+                {{ `{{- else }}` }}
                 - name: model-storage
-                  mountPath: /bar
+                  mountPath: /models
                   readOnly: true
-                {{`{{ end }}`}}
+                {{ `{{- end }}` }}
+              ports:
+                - containerPort: 8001
+                  protocol: TCP
+                - containerPort: 55555
+                  protocol: TCP
           volumes:
             - name: home
               emptyDir: {}
             - name: config-decoder
               configMap:
                 name: {{ include "modelservice.fullname" . -}}-config-decoder
-            {{ `{{ if .HFModelName }}` }}
+            {{ `{{- if .HFModelName }}` }}
             - name: model-cache
               emptyDir: {}
-            {{ `{{ end }}` }}
+            {{ `{{- end }}` }}
 
   prefillDeployment: |
     apiVersion: apps/v1
@@ -190,7 +177,7 @@ data:
               command:
                 - vllm
                 - serve
-                - {{ `{{ default (print "/bar/" .ModelPath) .HFModelName }}` }}
+                - {{ `{{ default (print "/models/" .ModelPath) .HFModelName }}` }}
               args:
                 - "--port"
                 - "8000"
@@ -222,23 +209,23 @@ data:
                 - name: LMCACHE_LOOKUP_URL
                   value: {{ include "redis.master.service.fullurl" .}}
                 {{- end }}
-                {{ `{{ if .HFModelName }}` }}
+                {{ `{{- if .HFModelName }}` }}
                 - name: HF_HUB_CACHE
-                  value: /foo
-                {{`{{ else }}`}}
+                  value: /models
+                {{ `{{- end }}` }}
               volumeMounts:
                 - name: home
                   mountPath: /home
                 - name: config-prefiller
                   mountPath: /vllm-workspace
-                {{ `{{ if .HFModelName }}` }}
+                {{ `{{- if .HFModelName }}` }}
                 - name: model-cache
-                  mountPath: /bar
-                {{`{{ else }}`}}
+                  mountPath: /models
+                {{ `{{- else }}` }}
                 - name: model-storage
-                  mountPath: /bar
+                  mountPath: /models
                   readOnly: true
-                {{`{{ end }}`}}
+                {{ `{{- end }}` }}
               ports:
                 - containerPort: 8001
                   protocol: TCP
@@ -348,14 +335,15 @@ data:
               {{- if .Values.redis.enabled }}
               - name: KVCACHE_INDEXER_REDIS_ADDR
                 value: {{ include "redis.master.service.fullurl" . -}}
-              {{- end }}
-              {{- if .Values.auth.hfToken.enabled }}
+              {{- end -}}
+              {{/* HACK, waiting on: https://github.com/neuralmagic/llm-d-model-service/issues/123 */}}
+              {{ `{{- if .HFModelName }}` }}
               - name: HF_TOKEN
                 valueFrom:
                   secretKeyRef:
-                    name: {{ .Values.auth.hfToken.name }}
-                    key: {{ .Values.auth.hfToken.key }}
-              {{- end }}
+                    name: {{ .Values.sampleApplication.model.auth.hfToken.name }}
+                    key: {{ .Values.sampleApplication.model.auth.hfToken.key }}
+              {{ `{{- end }}` }}
               image: {{ include "modelservice.eppImage" . }}
               imagePullPolicy: {{ .Values.modelservice.epp.image.imagePullPolicy}}
               # livenessProbe:

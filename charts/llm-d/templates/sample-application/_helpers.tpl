@@ -28,6 +28,7 @@ Define the template for ingress host
 
 {{/*
 Define the type of the modelArtifactURI
+(Used in MSVC - will be removed once templating in MSVC supported)
 */}}
 {{- define "sampleApplication.modelArtifactType" -}}
   {{- if hasPrefix "pvc://" .Values.sampleApplication.model.modelArtifactURI -}}
@@ -45,10 +46,5 @@ Define the type of the modelArtifactURI
 Define served model names for vllm
 */}}
 {{- define "sampleApplication.servedModelNames" -}}
-  {{- if .Values.sampleApplication.model.servedModelNames }}
-    {{- $servedModelNames := join " " .Values.sampleApplication.model.servedModelNames -}}
-    {{- include "sampleApplication.sanitizedModelName" . }} {{ $servedModelNames }}
-  {{- else }}
-    {{- include "sampleApplication.sanitizedModelName" . }}
-  {{- end }}
+  {{- .Values.sampleApplication.model.modelName }} {{ join " " .Values.sampleApplication.model.servedModelNames -}}
 {{- end }}
