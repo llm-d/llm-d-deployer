@@ -1,21 +1,8 @@
 {{/*
-Define the model name to be used
-*/}}
-{{- define "sampleApplication.modelName" -}}
-  {{- if .Values.sampleApplication.enabled -}}
-    {{- if .Values.sampleApplication.model.pvc.enabled -}}
-      {{- .Values.sampleApplication.model.pvc.modelName }}
-    {{- else if .Values.sampleApplication.model.huggingface.enabled }}
-      {{- .Values.sampleApplication.model.huggingface.modelName }}
-    {{- end }}
-  {{- end }}
-{{- end }}
-
-{{/*
 Sanitize the model name into a valid k8s label.
 */}}
 {{- define "sampleApplication.sanitizedModelName" -}}
-  {{- $name := include "sampleApplication.modelName" . | lower | trim -}}
+  {{- $name := .Values.sampleApplication.model.modelName | lower | trim -}}
   {{- $name = regexReplaceAll "[^a-z0-9_.-]" $name "-" -}}
   {{- $name = regexReplaceAll "^[\\-._]+" $name "" -}}
   {{- $name = regexReplaceAll "[\\-._]+$" $name "" -}}
@@ -39,19 +26,17 @@ Define the template for ingress host
   {{- end}}
 {{- end}}
 
-
-
 {{/*
-Define the model artifact URI if using pvc for BYO model
+Define the type of the modelArtifactURI
 */}}
-{{- define "sampleApplication.modelArtifactURI" -}}
-{{- if .Values.sampleApplication.enabled -}}
-{{- if .Values.sampleApplication.model.pvc.enabled -}}
-{{ .Values.sampleApplication.model.pvc.modelArtifactURI }}
-{{- else if .Values.sampleApplication.model.huggingface.enabled -}}
-{{ .Values.sampleApplication.model.huggingface.modelArtifactURI }}
-{{- end }}
-{{- end }}
+{{- define "sampleApplication.modelArtifactType" -}}
+  {{- if hasPrefix "pvc://" .Values.sampleApplication.model.modelArtifactURI -}}
+    pvc
+  {{- else if hasPrefix "hf://" .Values.sampleApplication.model.modelArtifactURI -}}
+    hf
+  {{- else }}
+    {{- fail "Values.sampleApplication.model.modelArtifactURI supports hf:// and pvc://" }}
+  {{- end }}
 {{- end }}
 
 {{/*
@@ -67,10 +52,22 @@ Define a normalized modelServe path / repo id to include mountpath in .ModelPath
 */}}
 {{- define "sampleApplication.modelServe" -}}
   {{- if .Values.sampleApplication.enabled -}}
-    {{- if .Values.sampleApplication.model.pvc.enabled -}}
+    {{- if ( eq (include "sampleApplication.modelArtifactType" . ) "pvc" )  -}}
       {{- .Values.sampleApplication.model.pvc.mountPath }}/{{`{{ .ModelPath }}`}}
-    {{- else if .Values.sampleApplication.model.huggingface.enabled -}}
+    {{- else if ( eq (include "sampleApplication.modelArtifactType" . ) "hf") -}}
       {{`{{ .HFModelName }}`}}
     {{- end }}
+  {{- end }}
+{{- end }}
+
+{{/*
+Define served model names for vllm
+*/}}
+{{- define "sampleApplication.servedModelNames" -}}
+  {{- if .Values.sampleApplication.model.servedModelNames }}
+    {{- $servedModelNames := join " " .Values.sampleApplication.model.servedModelNames -}}
+    {{- include "sampleApplication.sanitizedModelName" . }} {{ $servedModelNames }}
+  {{- else }}
+    {{- include "sampleApplication.sanitizedModelName" . }}
   {{- end }}
 {{- end }}

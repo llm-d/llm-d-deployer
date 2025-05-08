@@ -153,6 +153,100 @@ clone_gaie_repo() {
   fi
 }
 
+create_pvc_and_download_model_if_needed() {
+  MODEL_ARTIFACT_URI=$(cat ${VALUES_PATH} | yq .sampleApplication.model.modelArtifactURI)
+  PROTOCOL="${MODEL_ARTIFACT_URI%%://*}"
+
+  verify_env() {
+    if [[ -z "${MODEL_ARTIFACT_URI}" ]]; then
+        log_error "No Model Artifact URI set. Please set the \`.sampleApplication.model.modelArtifactURI\` in the values file."
+        exit 1
+    fi
+    if [[ -z "${HF_MODEL_ID}" ]]; then
+        log_error "Error, \`modelArtifactURI\` indicates model from PVC, but no 
+        Please set the \`.sampleApplication.model.hfModelID\` in the values file."
+        exit 1
+    fi
+    if [[ -z "${HF_TOKEN_SECRET_NAME}" ]]; then
+        log_error "Error, no HF token secret name. Please set the \`.auth.hfToken.name\` in the values file."
+        exit 1
+    fi
+    if [[ -z "${HF_TOKEN_SECRET_KEY}" ]]; then
+        log_error "Error, no HF token secret key. Please set the \`.auth.hfToken.key\` in the values file."
+        exit 1
+    fi
+    if [[ -z "${PVC_NAME}" ]]; then
+        log_error "Invalid \$MODEL_ARTIFACT_URI, could not parse PVC name out of \`.sampleApplication.model.modelArtifactURI\`."
+        exit 1
+    fi
+    if [[ -z "${MODEL_PATH}" ]]; then
+        log_error "Invalid \$MODEL_ARTIFACT_URI, could not parse Model Path out of \`.sampleApplication.model.modelArtifactURI\`."
+        exit 1
+    fi
+  }
+
+  case "$PROTOCOL" in
+  pvc)
+    CREATE_PVC_AND_DOWNLOAD_MODEL=$(cat "${VALUES_PATH}" | yq .sampleApplication.model.pvc.createAndDownloadModel)
+    if [[ "${CREATE_PVC_AND_DOWNLOAD_MODEL}" == "true" ]]; then
+      log_info "💾 Provisioning model storage…"
+
+      PVC_AND_MODEL_PATH="${MODEL_ARTIFACT_URI#*://}"
+      PVC_NAME="${PVC_AND_MODEL_PATH%%/*}"
+      MODEL_PATH="${PVC_AND_MODEL_PATH#*/}"
+
+      HF_MODEL_ID=$(cat ${VALUES_PATH} | yq .sampleApplication.model.hfModelID)
+      HF_TOKEN_SECRET_NAME=$(cat ${VALUES_PATH} | yq .auth.hfToken.name)
+      HF_TOKEN_SECRET_KEY=$(cat ${VALUES_PATH} | yq .auth.hfToken.key)
+
+      DOWNLOAD_MODEL_JOB_TEMPLATE_FILE_PATH=$(realpath "${REPO_ROOT}/helpers/k8s/load-model-on-pvc-template.yaml")
+      
+      verify_env
+
+      eval "echo \"$(cat ${REPO_ROOT}/helpers/k8s/model-storage-rwx-pvc-template.yaml)\"" \
+        | kubectl apply -n "${NAMESPACE}" -f -
+      log_success "✅ PVC \`${PVC_NAME}\` created with storageClassName ${STORAGE_CLASS} and size ${STORAGE_SIZE}"
+
+      log_info "🚀 Launching model download job..."
+      yq eval "
+      (.spec.template.spec.containers[0].env[] | select(.name == \"MODEL_PATH\")).value = \"${MODEL_PATH}\" |
+      (.spec.template.spec.containers[0].env[] | select(.name == \"HF_MODEL_ID\")).value = \"${HF_MODEL_ID}\" |
+      (.spec.template.spec.containers[0].env[] | select(.name == \"HF_TOKEN\")).valueFrom.secretKeyRef.name = \"${HF_TOKEN_SECRET_NAME}\" |
+      (.spec.template.spec.containers[0].env[] | select(.name == \"HF_TOKEN\")).valueFrom.secretKeyRef.key = \"${HF_TOKEN_SECRET_KEY}\" |
+      (.spec.template.spec.volumes[] | select(.name == \"model-cache\")).persistentVolumeClaim.claimName = \"${PVC_NAME}\"
+      " "${DOWNLOAD_MODEL_JOB_TEMPLATE_FILE_PATH}" | kubectl apply -f -
+
+      log_info "⏳ Waiting 30 seconds pod to start running model download job ..."
+      kubectl wait --for=condition=Ready pod/$(kubectl get pod --selector=job-name=download-model -o json | jq -r '.items[0].metadata.name') --timeout=60s || {
+        log_error "🙀 No pod picked up model download job";
+        log_info "Please check your storageclass configuration for the \`download-model\` - if the PVC fails to spin the job will never get a pod"
+        kubectl logs job/download-model -n "${NAMESPACE}";
+      }
+
+      log_info "⏳ Waiting up to 3m for model download job to complete; this may take a while depending on connection speed and model size..."
+      kubectl wait --for=condition=complete --timeout=180s job/download-model -n "${NAMESPACE}" || {
+        log_error "🙀 Model download job failed or timed out";
+        JOB_POD=$(kubectl get pod --selector=job-name=download-model -o json | jq -r '.items[0].metadata.name')
+        kubectl logs pod/${JOB_POD} -n "${NAMESPACE}";
+        exit 1;
+      }
+
+      log_success "✅ Model downloaded"
+    else
+      log_info "⏭️ Model download to PVC skipped: \`.sampleApplication.model.pvc.createAndDownloadModel\` not set to \`true\` in values.yaml."
+    fi
+    ;;
+  hf)
+    log_info "⏭️ Model download to PVC skipped: BYO model via HF repo_id selected."
+    echo "protocol hf chosen - models will be downloaded JIT in inferencing pods."
+    ;;
+  *)
+    log_error "🤮 Unsupported protocol: $PROTOCOL. Check back soon for more supported types of model source 😉."
+    exit 1
+    ;;
+  esac
+}
+
 install() {
   if [[ "${SKIP_INFRA}" == "false" ]]; then
     log_info "🏗️ Installing GAIE Kubernetes infrastructure…"
@@ -222,46 +316,7 @@ install() {
   kubectl apply -f crds/modelservice-crd.yaml
   log_success "✅ ModelService CRD applied"
 
-  log_info "📝 Patching load-model job manifest with HF secret name='${HF_NAME}', key='${HF_KEY}'"
-  # try brew's yq first; if that fails, fall back to linux installed pkg syntax -_-
-  if ! yq -i ".spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.name = \"${HF_NAME}\"" "${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml"; then
-    yq -i -y ".spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.name = \"${HF_NAME}\"" "${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml"
-  fi
-  if ! yq -i ".spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.key  = \"${HF_KEY}\""  "${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml"; then
-    yq -i -y ".spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.key  = \"${HF_KEY}\""  "${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml"
-  fi
-  log_success "✅ Job manifest patched"
-
-  RUN_MODEL_DOWNLOAD=$(cat ${VALUES_PATH} | yq .sampleApplication.model.pvc.enabled)
-
-  if [[ "${RUN_MODEL_DOWNLOAD}" == "true" ]]; then
-    log_info "💾 Provisioning model storage…"
-    # This now only uses the template based on user-provided storage class and size
-    eval "echo \"$(cat ${REPO_ROOT}/helpers/k8s/model-storage-rwx-pvc-template.yaml)\"" \
-        | kubectl apply -n "${NAMESPACE}" -f -
-    log_success "✅ PVC created with storageClassName ${STORAGE_CLASS} and size ${STORAGE_SIZE}"
-
-    log_info "🚀 Launching model download job..."
-    kubectl apply -f "${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml" -n "${NAMESPACE}"
-
-    log_info "⏳ Waiting 30 seconds pod to start running model download job ..."
-    kubectl wait --for=condition=Ready pod/$(kubectl get pod --selector=job-name=download-model -o json | jq -r '.items[0].metadata.name') --timeout=60s || {
-      log_error "🙀 No pod picked up model download job";
-      log_info "Please check your storageclass configuration for the \`download-model\` - if the PVC fails to spin the job will never get a pod"
-      kubectl logs job/download-model -n "${NAMESPACE}";
-    }
-
-    log_info "⏳ Waiting up to 3m for model download job to complete; this may take a while depending on connection speed and model size..."
-    kubectl wait --for=condition=complete --timeout=180s job/download-model -n "${NAMESPACE}" || {
-      log_error "🙀 Model download job failed or timed out";
-      JOB_POD=$(kubectl get pod --selector=job-name=download-model -o json | jq -r '.items[0].metadata.name')
-      kubectl logs pod/${JOB_POD} -n "${NAMESPACE}";
-      exit 1;
-    }
-    log_success "✅ Model downloaded"
-  else
-    log_info "⏭️ Model download to PVC skipped - BYO model via HF repo_id, will happen in inferencing pods"
-  fi
+  create_pvc_and_download_model_if_needed
 
   helm repo add bitnami  https://charts.bitnami.com/bitnami
   log_info "🛠️ Building Helm chart dependencies..."
@@ -360,6 +415,14 @@ uninstall() {
   fi
   log_info "🗑️ Uninstalling llm-d chart..."
   helm uninstall llm-d --namespace "${NAMESPACE}" || true
+  MODEL_ARTIFACT_URI=$(cat ${VALUES_PATH} | yq .sampleApplication.model.modelArtifactURI)
+  PROTOCOL="${MODEL_ARTIFACT_URI%%://*}"
+  if [[ "${PROTOCOL}" == "pvc" ]]; then
+    INFERENCING_DEPLOYMENT=$(kubectl get deployments -n ${NAMESPACE} -l llm-d.ai/inferenceServing=true | tail -n 1 | awk '{print $1}')
+    PVC_NAME=$( kubectl get deployment $INFERENCING_DEPLOYMENT -n ${NAMESPACE} -o yaml | yq '.spec.template.spec.volumes[] | select(has("persistentVolumeClaim"))' | yq .claimName)
+    PV_NAME=$(kubectl get pvc ${PVC_NAME} -n ${NAMESPACE} -o yaml | yq .spec.volumeName)
+    kubectl delete job download-model --ignore-not-found || true
+  fi
   log_info "🗑️ Deleting namespace ${NAMESPACE}..."
   kubectl delete namespace "${NAMESPACE}" || true
   log_info "🗑️ Deleting monitoring namespace..."
@@ -370,9 +433,14 @@ uninstall() {
     log_info "🗑️ Deleting ServiceMonitor CRD..."
     kubectl delete crd servicemonitors.monitoring.coreos.com --ignore-not-found || true
   fi
-
-  log_info "🗑️ Deleting PVCs..."
-  kubectl delete pv llama-hostpath-pv --ignore-not-found
+  if [[ "${PROTOCOL}" == "pvc" ]]; then
+    # cleanup pvcs and pv after pods have died removing their finalizers
+    log_info "🗑️ Deleting Model PVC and PV..."
+    kubectl delete pvc ${PVC_NAME} -n ${NAMESPACE} --ignore-not-found
+    kubectl delete pv ${PV_NAME} --ignore-not-found
+  else 
+    log_info "⏭️ skipping deletion of PV and PVCS..."
+  fi
   log_success "💀 Uninstallation complete"
 }
 

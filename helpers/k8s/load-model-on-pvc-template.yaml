@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: download-model
+spec:
+  template:
+    spec:
+      containers:
+        - name: downloader
+          image: python:3.10
+          command: ["/bin/sh", "-c"]
+          args:
+            - mkdir -p "${MOUNT_PATH}/${MODEL_PATH}" && pip install huggingface_hub && export PATH="${PATH}:${HOME}/.local/bin" && huggingface-cli login --token "${HF_TOKEN}" && huggingface-cli download "${HF_MODEL_ID}" --local-dir "/cache/${MODEL_PATH}"
+          env:
+            - name: MODEL_PATH
+              value:
+            - name: HF_MODEL_ID
+              value:
+            - name: HF_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name:
+                  key:
+            - name: HF_HOME
+              value: /tmp/huggingface
+            - name: HOME
+              value: /tmp
+            - name: MOUNT_PATH
+              value: /cache
+          volumeMounts:
+            - name: model-cache
+              mountPath: /cache
+      restartPolicy: OnFailure
+      volumes:
+        - name: model-cache
+          persistentVolumeClaim:
+            claimName:

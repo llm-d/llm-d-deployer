@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: llama-3.2-3b-instruct-pvc
+  name: ${PVC_NAME}
 spec:
   accessModes:
   - ReadWriteMany
