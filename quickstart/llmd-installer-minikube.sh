@@ -449,12 +449,19 @@ uninstall() {
     INFRASTRUCTURE_OVERRIDE=true make clean.environment.dev.kubernetes.infrastructure
   popd >/dev/null
   rm -rf gateway-api-inference-extension
+  # Check if we installed the Prometheus stack and delete the ServiceMonitor CRD if we did
+  if helm list -n "${MONITORING_NAMESPACE}" | grep -q "prometheus" 2>/dev/null; then
+    log_info "🗑️ Deleting ServiceMonitor CRD..."
+    kubectl delete crd servicemonitors.monitoring.coreos.com --ignore-not-found || true
+  fi
   log_info "🗑️ Uninstalling llm-d chart..."
   helm uninstall llm-d --namespace "${NAMESPACE}" || true
   log_info "🗑️ Deleting namespace ${NAMESPACE}..."
   kubectl delete namespace "${NAMESPACE}" || true
   log_info "🗑️ Deleting monitoring namespace..."
   kubectl delete namespace "${MONITORING_NAMESPACE}" --ignore-not-found || true
+
+
   log_info "🗑️ Deleting PVCs..."
   kubectl delete pv llama-hostpath-pv --ignore-not-found
   kubectl delete pvc redis-pvc -n "${NAMESPACE}" --ignore-not-found
@@ -498,6 +505,11 @@ main() {
       else
         log_info "ℹ️ Metrics collection disabled by user request"
       fi
+    fi
+    if [[ "${DISABLE_METRICS}" == "false" ]]; then
+      install_prometheus_grafana
+    else
+      log_info "ℹ️ Metrics collection disabled by user request"
     fi
     install
   elif [[ "$ACTION" == "uninstall" ]]; then
