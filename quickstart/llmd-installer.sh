@@ -246,12 +246,15 @@ install() {
   helm dependency build .
   log_success "✅ Dependencies built"
 
+  BASE_OCP_DOMAIN=$(kubectl get ingresscontroller default -n openshift-ingress-operator -o jsonpath='{.status.domain}')
+
   log_info "🚚 Deploying llm-d chart with ${VALUES_PATH}..."
   helm upgrade -i llm-d . \
     ${DEBUG} \
     --namespace "${NAMESPACE}" \
     --values "${VALUES_PATH}" \
-    --set gateway.parameters.proxyUID="${PROXY_UID}"
+    --set gateway.parameters.proxyUID="${PROXY_UID}" \
+    --set ingress.clusterRouterBase="${BASE_OCP_DOMAIN}"
   log_success "✅ llm-d deployed"
 
   log_info "🔄 Patching all ServiceAccounts with pull-secret..."
