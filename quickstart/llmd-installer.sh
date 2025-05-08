@@ -158,6 +158,7 @@ clone_gaie_repo() {
 }
 
 create_pvc_and_download_model_if_needed() {
+  YQ_TYPE=$(yq --version 2>/dev/null | grep -q 'version' && echo 'go' || echo 'py')
   MODEL_ARTIFACT_URI=$(cat ${VALUES_PATH} | yq .sampleApplication.model.modelArtifactURI)
   PROTOCOL="${MODEL_ARTIFACT_URI%%://*}"
 
@@ -167,7 +168,7 @@ create_pvc_and_download_model_if_needed() {
         exit 1
     fi
     if [[ -z "${HF_MODEL_ID}" ]]; then
-        log_error "Error, \`modelArtifactURI\` indicates model from PVC, but no 
+        log_error "Error, \`modelArtifactURI\` indicates model from PVC, but no
         Please set the \`.sampleApplication.downloadModelJob.hfModelID\` in the values file."
         exit 1
     fi
@@ -203,7 +204,7 @@ create_pvc_and_download_model_if_needed() {
       HF_TOKEN_SECRET_KEY=$(cat ${VALUES_PATH} | yq .sampleApplication.model.auth.hfToken.key)
 
       DOWNLOAD_MODEL_JOB_TEMPLATE_FILE_PATH=$(realpath "${REPO_ROOT}/helpers/k8s/load-model-on-pvc-template.yaml")
-      
+
       verify_env
 
       eval "echo \"$(cat ${REPO_ROOT}/helpers/k8s/model-storage-rwx-pvc-template.yaml)\"" \
@@ -211,13 +212,34 @@ create_pvc_and_download_model_if_needed() {
       log_success "✅ PVC \`${PVC_NAME}\` created with storageClassName ${STORAGE_CLASS} and size ${STORAGE_SIZE}"
 
       log_info "🚀 Launching model download job..."
-      yq eval "
-      (.spec.template.spec.containers[0].env[] | select(.name == \"MODEL_PATH\")).value = \"${MODEL_PATH}\" |
-      (.spec.template.spec.containers[0].env[] | select(.name == \"HF_MODEL_ID\")).value = \"${HF_MODEL_ID}\" |
-      (.spec.template.spec.containers[0].env[] | select(.name == \"HF_TOKEN\")).valueFrom.secretKeyRef.name = \"${HF_TOKEN_SECRET_NAME}\" |
-      (.spec.template.spec.containers[0].env[] | select(.name == \"HF_TOKEN\")).valueFrom.secretKeyRef.key = \"${HF_TOKEN_SECRET_KEY}\" |
-      (.spec.template.spec.volumes[] | select(.name == \"model-cache\")).persistentVolumeClaim.claimName = \"${PVC_NAME}\"
-      " "${DOWNLOAD_MODEL_JOB_TEMPLATE_FILE_PATH}" | kubectl apply -f -
+      if [[ "${YQ_TYPE}" == "go" ]]; then
+        yq eval "
+        (.spec.template.spec.containers[0].env[] | select(.name == \"MODEL_PATH\")).value = \"${MODEL_PATH}\" |
+        (.spec.template.spec.containers[0].env[] | select(.name == \"HF_MODEL_ID\")).value = \"${HF_MODEL_ID}\" |
+        (.spec.template.spec.containers[0].env[] | select(.name == \"HF_TOKEN\")).valueFrom.secretKeyRef.name = \"${HF_TOKEN_SECRET_NAME}\" |
+        (.spec.template.spec.containers[0].env[] | select(.name == \"HF_TOKEN\")).valueFrom.secretKeyRef.key = \"${HF_TOKEN_SECRET_KEY}\" |
+        (.spec.template.spec.volumes[] | select(.name == \"model-cache\")).persistentVolumeClaim.claimName = \"${PVC_NAME}\"
+        " "${DOWNLOAD_MODEL_JOB_TEMPLATE_FILE_PATH}" | kubectl apply -f -
+      elif [[ "${YQ_TYPE}" == "py" ]]; then
+        kubectl apply -f ${DOWNLOAD_MODEL_JOB_TEMPLATE_FILE_PATH} --dry-run=client -o yaml |
+        yq -r | \
+        jq \
+        --arg modelPath "${MODEL_PATH}" \
+        --arg hfModelId "${HF_MODEL_ID}" \
+        --arg hfTokenSecretName "${HF_TOKEN_SECRET_NAME}" \
+        --arg hfTokenSecretKey "${HF_TOKEN_SECRET_KEY}" \
+        --arg pvcName "${PVC_NAME}" \
+        '
+        (.spec.template.spec.containers[] | select(.name == "downloader").env[] | select(.name == "MODEL_PATH")).value = $modelPath |
+        (.spec.template.spec.containers[] | select(.name == "downloader").env[] | select(.name == "HF_MODEL_ID")).value = $hfModelId |
+        (.spec.template.spec.containers[] | select(.name == "downloader").env[] | select(.name == "HF_TOKEN")).valueFrom.secretKeyRef.name = $hfTokenSecretName |
+        (.spec.template.spec.containers[] | select(.name == "downloader").env[] | select(.name == "HF_TOKEN")).valueFrom.secretKeyRef.key = $hfTokenSecretKey |
+        (.spec.template.spec.volumes[] | select(.name == "model-cache")).persistentVolumeClaim.claimName = $pvcName
+        ' | yq -y | kubectl apply -n ${NAMESPACE} -f - 
+      else
+        log_error "unrecognized yq distro -- error"
+        exit 1
+      fi
 
       log_info "⏳ Waiting 30 seconds pod to start running model download job ..."
       kubectl wait --for=condition=Ready pod/$(kubectl get pod --selector=job-name=download-model -o json | jq -r '.items[0].metadata.name') --timeout=60s || {
@@ -417,10 +439,10 @@ uninstall() {
   fi
   log_info "🗑️ Uninstalling llm-d chart..."
   helm uninstall llm-d --ignore-not-found --namespace "${NAMESPACE}" || true
-  
+
   log_info "🗑️ Deleting namespace ${NAMESPACE}..."
   kubectl delete namespace "${NAMESPACE}" --ignore-not-found || true
-  
+
   log_info "🗑️ Deleting monitoring namespace..."
   kubectl delete namespace "${MONITORING_NAMESPACE}" --ignore-not-found || true
 
@@ -436,7 +458,7 @@ uninstall() {
       log_info "🗑️ Deleting Model PV..."
       kubectl delete pv ${PV_NAME} --ignore-not-found
     fi
-  else 
+  else
     log_info "⏭️ skipping deletion of PV and PVCS..."
   fi
   log_success "💀 Uninstallation complete"
