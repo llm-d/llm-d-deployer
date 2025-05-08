@@ -121,19 +121,19 @@ ingress:
   # -- Additional annotations for the Ingress resource
   annotations: {}
 
-  # -- Hostname to be used to expose the route to access the backstage application (e.g: backstage.IP.nip.io)
+  # -- Hostname to be used to expose the NodePort service to the inferencing gateway
   host: ""
 
   # -- List of additional hostnames to be covered with this ingress record (e.g. a CNAME)
   # <!-- E.g.
   # extraHosts:
-  #   - name: backstage.env.example.com
+  #   - name: llm-d.env.example.com
   #     path: / (Optional)
   #     pathType: Prefix (Optional)
   #     port: 7007 (Optional) -->
   extraHosts: []
 
-  # -- Path to be used to expose the full route to access the backstage application (e.g: IP.nip.io/backstage)
+  # -- Path to be used to expose the full route to access the inferencing gateway
   path: "/"
 
   # -- Ingress TLS parameters
@@ -150,8 +150,8 @@ ingress:
   # <!-- E.g.
   # extraTls:
   #   - hosts:
-  #     - backstage.env.example.com
-  #     secretName: backstage-env -->
+  #     - llm-d.env.example.com
+  #     secretName: llm-d-env -->
   extraTls: []
 
 auth:

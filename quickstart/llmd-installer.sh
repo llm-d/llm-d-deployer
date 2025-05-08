@@ -254,7 +254,7 @@ install() {
     --namespace "${NAMESPACE}" \
     --values "${VALUES_PATH}" \
     --set gateway.parameters.proxyUID="${PROXY_UID}" \
-    --set ingress.host="${BASE_OCP_DOMAIN}"
+    --set ingress.clusterRouterBase="${BASE_OCP_DOMAIN}"
   log_success "✅ llm-d deployed"
 
   log_info "🔄 Patching all ServiceAccounts with pull-secret..."
