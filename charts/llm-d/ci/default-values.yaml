@@ -8,3 +8,7 @@ redis:
   master:
     persistence:
       enabled: false
+
+modelservice:
+  metrics:
+    enabled: false

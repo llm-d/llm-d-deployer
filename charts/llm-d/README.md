@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart for OpenShift
 
-![Version: 0.5.0](https://img.shields.io/badge/Version-0.5.0-informational?style=flat-square)
+![Version: 0.5.6](https://img.shields.io/badge/Version-0.5.6-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for llm-d
@@ -159,17 +159,19 @@ Kubernetes: `>= 1.25.0-0`
 | ingress | Ingress configuration | object | `{"annotations":{},"enabled":true,"extraHosts":[],"extraTls":[],"host":"","ingressClassName":"","path":"/","tls":{"enabled":false,"secretName":""}}` |
 | ingress.annotations | Additional annotations for the Ingress resource | object | `{}` |
 | ingress.enabled | Deploy Ingress | bool | `true` |
-| ingress.extraHosts | List of additional hostnames to be covered with this ingress record (e.g. a CNAME) <!-- E.g. extraHosts:   - name: backstage.env.example.com     path: / (Optional)     pathType: Prefix (Optional)     port: 7007 (Optional) --> | list | `[]` |
-| ingress.extraTls | The TLS configuration for additional hostnames to be covered with this ingress record. <br /> Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls <!-- E.g. extraTls:   - hosts:     - backstage.env.example.com     secretName: backstage-env --> | list | `[]` |
-| ingress.host | Hostname to be used to expose the route to access the backstage application (e.g: backstage.IP.nip.io) | string | `""` |
+| ingress.extraHosts | List of additional hostnames to be covered with this ingress record (e.g. a CNAME) <!-- E.g. extraHosts:   - name: llm-d.env.example.com     path: / (Optional)     pathType: Prefix (Optional)     port: 7007 (Optional) --> | list | `[]` |
+| ingress.extraTls | The TLS configuration for additional hostnames to be covered with this ingress record. <br /> Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls <!-- E.g. extraTls:   - hosts:     - llm-d.env.example.com     secretName: llm-d-env --> | list | `[]` |
+| ingress.host | Hostname to be used to expose the NodePort service to the inferencing gateway | string | `""` |
 | ingress.ingressClassName | Name of the IngressClass cluster resource which defines which controller will implement the resource (e.g nginx) | string | `""` |
-| ingress.path | Path to be used to expose the full route to access the backstage application (e.g: IP.nip.io/backstage) | string | `"/"` |
+| ingress.path | Path to be used to expose the full route to access the inferencing gateway | string | `"/"` |
 | ingress.tls | Ingress TLS parameters | object | `{"enabled":false,"secretName":""}` |
 | ingress.tls.enabled | Enable TLS configuration for the host defined at `ingress.host` parameter | bool | `false` |
 | ingress.tls.secretName | The name to which the TLS Secret will be called | string | `""` |
 | kubeVersion | Override Kubernetes version | string | `""` |
-| modelservice | Model service controller configuration | object | `{"annotations":{},"enabled":true,"epp":{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-gateway-api-inference-extension-dev","tag":"0.0.5-amd64"},"metrics":{"enabled":true}},"fullnameOverride":"","image":{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-model-service","tag":"0.0.6"},"metrics":{"enabled":true},"nameOverride":"","podAnnotations":{},"podLabels":{},"rbac":{"create":true},"replicas":1,"routingProxy":{"image":{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-routing-sidecar","tag":"0.0.5"}},"service":{"enabled":true,"port":8443,"type":"ClusterIP"},"serviceAccount":{"annotations":{},"create":true,"fullnameOverride":"","labels":{},"nameOverride":""},"vllm":{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-dev","tag":"0.0.5"},"metrics":{"enabled":true}},"vllmSim":{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/vllm-sim","tag":"0.0.4"}}}` |
+| modelservice | Model service controller configuration | object | `{"annotations":{},"decode":{"tolerations":[{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}]},"enabled":true,"epp":{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-gateway-api-inference-extension-dev","tag":"0.0.5-amd64"},"metrics":{"enabled":true}},"fullnameOverride":"","image":{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-model-service","tag":"0.0.6"},"metrics":{"enabled":true},"nameOverride":"","podAnnotations":{},"podLabels":{},"prefill":{"tolerations":[{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}]},"rbac":{"create":true},"replicas":1,"routingProxy":{"image":{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-routing-sidecar","tag":"0.0.5"}},"service":{"enabled":true,"port":8443,"type":"ClusterIP"},"serviceAccount":{"annotations":{},"create":true,"fullnameOverride":"","labels":{},"nameOverride":""},"serviceMonitor":{"annotations":{},"interval":"15s","labels":{},"namespaceSelector":{"any":false,"matchNames":[]},"path":"/metrics","port":"vllm","selector":{"matchLabels":{}}},"vllm":{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-dev","tag":"0.0.5"},"metrics":{"enabled":true}},"vllmSim":{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/vllm-sim","tag":"0.0.4"}}}` |
 | modelservice.annotations | Annotations to add to all modelservice resources | object | `{}` |
+| modelservice.decode | Tolerations configuration to deploy decode pods to tainted nodes | object | `{"tolerations":[{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}]}` |
+| modelservice.decode.tolerations[0] | default NVIDIA GPU toleration | object | `{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}` |
 | modelservice.enabled | Toggle to deploy modelservice controller related resources | bool | `true` |
 | modelservice.epp | Endpoint picker image used in ModelService CR presets | object | `{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-gateway-api-inference-extension-dev","tag":"0.0.5-amd64"},"metrics":{"enabled":true}}` |
 | modelservice.fullnameOverride | String to fully override modelservice.fullname | string | `""` |
@@ -178,6 +180,8 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.nameOverride | String to partially override modelservice.fullname | string | `""` |
 | modelservice.podAnnotations | Pod annotations for modelservice | object | `{}` |
 | modelservice.podLabels | Pod labels for modelservice | object | `{}` |
+| modelservice.prefill | Tolerations configuration to deploy prefill pods to tainted nodes | object | `{"tolerations":[{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}]}` |
+| modelservice.prefill.tolerations[0] | default NVIDIA GPU toleration | object | `{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}` |
 | modelservice.rbac.create | Enable the creation of RBAC resources | bool | `true` |
 | modelservice.replicas | Number of controller replicas | int | `1` |
 | modelservice.routingProxy | Routing proxy image used in ModelService CR presets | object | `{"image":{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-routing-sidecar","tag":"0.0.5"}}` |
@@ -190,6 +194,14 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.serviceAccount.fullnameOverride | String to fully override modelservice.serviceAccountName, defaults to modelservice.fullname | string | `""` |
 | modelservice.serviceAccount.labels | Additional custom labels to the service ServiceAccount. | object | `{}` |
 | modelservice.serviceAccount.nameOverride | String to partially override modelservice.serviceAccountName, defaults to modelservice.fullname | string | `""` |
+| modelservice.serviceMonitor | Prometheus ServiceMonitor configuration <br /> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md | object | `{"annotations":{},"interval":"15s","labels":{},"namespaceSelector":{"any":false,"matchNames":[]},"path":"/metrics","port":"vllm","selector":{"matchLabels":{}}}` |
+| modelservice.serviceMonitor.annotations | Additional annotations provided to the ServiceMonitor | object | `{}` |
+| modelservice.serviceMonitor.interval | ServiceMonitor endpoint interval at which metrics should be scraped | string | `"15s"` |
+| modelservice.serviceMonitor.labels | Additional labels provided to the ServiceMonitor | object | `{}` |
+| modelservice.serviceMonitor.namespaceSelector | ServiceMonitor namespace selector | object | `{"any":false,"matchNames":[]}` |
+| modelservice.serviceMonitor.path | ServiceMonitor endpoint path | string | `"/metrics"` |
+| modelservice.serviceMonitor.port | ServiceMonitor endpoint port | string | `"vllm"` |
+| modelservice.serviceMonitor.selector | ServiceMonitor selector matchLabels </br> matchLabels must match labels on modelservice Services | object | `{"matchLabels":{}}` |
 | modelservice.vllm | vLLM image used in ModelService CR presets | object | `{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-dev","tag":"0.0.5"},"metrics":{"enabled":true}}` |
 | modelservice.vllmSim | vLLM sim image used in ModelService CR presets | object | `{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/vllm-sim","tag":"0.0.4"}}` |
 | nameOverride | String to partially override common.names.fullname | string | `""` |

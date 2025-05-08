@@ -174,6 +174,7 @@ The installer needs to be run from the `llm-d-deployer/quickstart` directory.
 | `--namespace NAME`         | Kubernetes namespace to use (default: `llm-d`)                                                          | `./llmd-installer.sh --namespace foo`                            |
 | `--values NAME`            | Absolute path to a Helm values.yaml file (default: llm-d-deployer/charts/llm-d/values.yaml)             | `./llmd-installer.sh --values /path/to/values.yaml`              |
 | `--uninstall`              | Uninstall llm-d and cleanup resources                                                                   | `./llmd-installer.sh --uninstall`                                |
+| `--disable-metrics-collection` | Disable metrics collection (Prometheus will not be installed)                                    | `./llmd-installer.sh --disable-metrics-collection`               |
 | `-h`, `--help`             | Show help and exit                                                                                      | `./llmd-installer.sh --help`                                     |
 
 ## Examples
@@ -228,29 +229,106 @@ kubectl run --rm -i curl-temp --image=curlimages/curl --restart=Never -- \
   }'
 ```
 
-For additional troubleshooting, you can check to see if the prefill and decode pods responding to requests.
+### Metrics Collection
+
+llm-d includes built-in support for metrics collection using Prometheus and Grafana. This feature is enabled by default but can be disabled using the
+`--disable-metrics-collection` flag during installation. In OpenShift, llm-d applies ServiceMonitors for llm-d components that trigger Prometheus
+scrape targets for the built-in user workload monitoring Prometheus stack.
+
+#### Accessing the Metrics UIs
+
+If running in OpenShift, skip to [Option 3: OpenShift](#option-3-openshift).
+
+##### Option 1: Port Forwarding (Default)
+
+Once installed, you can access the metrics UIs through port-forwarding:
+
+- Prometheus UI (port 9090):
 
 ```bash
-NAMESPACE=llm-d
-MODEL_ID=Llama-3.2-3B-Instruct
-POD_IP=$(kubectl get pods -n ${NAMESPACE} -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.status.podIP}{"\n"}{end}' | grep decode | awk '{print $2}')
-kubectl run --rm -i curl-temp --image=curlimages/curl --restart=Never -- \
-  curl -X POST \
-  "http://${POD_IP}:8000/v1/chat/completions" \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "model": "'${MODEL_ID}'",
-    "messages": [{"content": "Who are you?", "role": "user"}],
-    "stream": false
-  }'
+kubectl port-forward -n llm-d-monitoring --address 0.0.0.0 svc/prometheus-kube-prometheus-prometheus 9090:9090
 ```
 
-After the p/d pods are running, you can view the models being run on the GPUs on the host to verify activity.
+- Grafana UI (port 3000):
+
+```bash
+kubectl port-forward -n llm-d-monitoring --address 0.0.0.0 svc/prometheus-grafana 3000:80
+```
+
+Access the UIs at:
+
+- Prometheus: <http://YOUR_IP:9090>
+- Grafana: <http://YOUR_IP:3000> (default credentials: admin/admin)
+
+##### Option 2: Ingress (Optional)
+
+For production environments, you can configure ingress for both Prometheus and Grafana. Add the following to your values.yaml:
 
 ```yaml
-nvidia-smi --query-gpu=index,name,utilization.gpu,utilization.memory,memory.used,memory.total --format=csv
+prometheus:
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+    hosts:
+      - prometheus.your-domain.com
+    tls:
+      - secretName: prometheus-tls
+        hosts:
+          - prometheus.your-domain.com
+
+grafana:
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+    hosts:
+      - grafana.your-domain.com
+    tls:
+      - secretName: grafana-tls
+        hosts:
+          - grafana.your-domain.com
 ```
+
+##### Option 3: OpenShift
+
+If you're using OpenShift with user workload monitoring enabled, you can access the metrics through the OpenShift console:
+
+1. Navigate to the OpenShift console
+2. In the left navigation bar, click on "Observe"
+3. You can access:
+   - Metrics: Click on "Metrics" to view and query metrics using the built-in Prometheus UI
+   - Targets: Click on "Targets" to see all monitored endpoints and their status
+
+The metrics are automatically integrated into the OpenShift monitoring stack, providing a seamless experience for viewing and analyzing your llm-d metrics.
+The llm-d-deployer does not install Grafana in OpenShift, but it's recommended that users install Grafana to view metrics and import dashboards.
+
+Follow the [OpenShift Grafana setup guide](https://github.com/neuralmagic/llm-d/blob/dev/observability/openshift/README.md#step-2-set-up-grafana-optional)
+The guide includes manifests to install the following:
+
+- Grafana instance
+- Grafana Prometheus datasource from user workload monitoring stack
+- Grafana llm-d dashboard
+
+#### Available Metrics
+
+The metrics collection includes:
+
+- Model inference performance metrics
+- Request latency and throughput
+- Resource utilization (CPU, memory, GPU)
+- Cache hit/miss rates
+- Error rates and types
+
+#### Security Note
+
+When running in a cloud environment (like EC2), make sure to:
+
+1. Configure your security groups to allow inbound traffic on ports 9090 and 3000 (if using port-forwarding)
+2. Use the `--address 0.0.0.0` flag with port-forward to allow external access
+3. Consider setting up proper authentication for production environments
+4. If using ingress, ensure proper TLS configuration and authentication
+5. For OpenShift, consider using the built-in OAuth integration for Grafana
 
 ### Troubleshooting
 

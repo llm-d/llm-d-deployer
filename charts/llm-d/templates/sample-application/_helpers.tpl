@@ -14,3 +14,12 @@ Sanitize the model name into a valid k8s label.
 
 {{- $name -}}
 {{- end }}
+
+
+{{- define "sampleApplication.ingressHost" -}}
+  {{- if .Values.ingress.host -}}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.ingress.host "context" $ ) }}
+  {{- else }}
+    {{- include "gateway.fullname" . }}.{{ default "localhost" .Values.ingress.clusterRouterBase }}
+  {{- end}}
+{{- end }}

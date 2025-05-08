@@ -50,6 +50,10 @@ data:
     spec:
       template:
         spec:
+          {{- if .Values.modelservice.decode.tolerations }}
+          tolerations:
+            {{- toYaml .Values.modelservice.decode.tolerations | nindent 12 }}
+          {{- end }}
           initContainers:
             - name: routing-proxy
               image: {{ include "modelservice.routingProxyImage" . }}
@@ -111,6 +115,10 @@ data:
     spec:
       template:
         spec:
+          {{- if .Values.modelservice.prefill.tolerations }}
+          tolerations:
+            {{- toYaml .Values.modelservice.prefill.tolerations | nindent 12 }}
+          {{- end }}
           containers:
             - name: vllm
               image: {{ include "modelservice.vllmImage" . }}

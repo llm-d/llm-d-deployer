@@ -1,10 +1,12 @@
 {{- if and .Values.gateway.enabled .Values.ingress.enabled (eq .Values.gateway.serviceType "NodePort") }}
+{{- $gatewayFullname := include "gateway.fullname" . }}
+{{- $host := include "sampleApplication.ingressHost" . }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "gateway.fullname" . }}
+  name: {{ $gatewayFullname }}
   labels: {{ include "common.labels.standard" $ | nindent 4 }}
-    app.kubernetes.io/gateway: {{ include "gateway.fullname" . }}
+    app.kubernetes.io/gateway: {{ $gatewayFullname }}
     app.kubernetes.io/component: sample-application
     {{- if $.Values.commonLabels }}
     {{- include "common.tplvalues.render" ( dict "value" $.Values.commonLabels "context" $ ) | nindent 4 }}
@@ -24,7 +26,7 @@ spec:
   tls:
     {{- if .Values.ingress.tls.enabled }}
     - hosts:
-      - {{ include "common.tplvalues.render" ( dict "value" .Values.ingress.host "context" $ ) }}
+      - {{ $host }}
       secretName: {{ include "common.tplvalues.render" ( dict "value" .Values.ingress.tls.secretName "context" $ ) }}
     {{- end }}
     {{- if .Values.ingress.extraTls }}
@@ -33,16 +35,14 @@ spec:
   {{- end }}
   rules:
     {{- range .Values.gateway.listeners }}
-    - {{ if $.Values.ingress.host -}}
-      host: {{ include "common.tplvalues.render" ( dict "value" $.Values.ingress.host "context" $ ) }}
-      {{ end -}}
+    - host: {{ $host }}
       http:
         paths:
           - path: {{ .path }}
             pathType: Prefix
             backend:
               service:
-                name: {{ include "gateway.fullname" $ }}
+                name: {{ $gatewayFullname }}
                 port:
                   number: {{ .port }}
     {{- end }}

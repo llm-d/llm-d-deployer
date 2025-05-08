@@ -121,19 +121,19 @@ ingress:
   # -- Additional annotations for the Ingress resource
   annotations: {}
 
-  # -- Hostname to be used to expose the route to access the backstage application (e.g: backstage.IP.nip.io)
+  # -- Hostname to be used to expose the NodePort service to the inferencing gateway
   host: ""
 
   # -- List of additional hostnames to be covered with this ingress record (e.g. a CNAME)
   # <!-- E.g.
   # extraHosts:
-  #   - name: backstage.env.example.com
+  #   - name: llm-d.env.example.com
   #     path: / (Optional)
   #     pathType: Prefix (Optional)
   #     port: 7007 (Optional) -->
   extraHosts: []
 
-  # -- Path to be used to expose the full route to access the backstage application (e.g: IP.nip.io/backstage)
+  # -- Path to be used to expose the full route to access the inferencing gateway
   path: "/"
 
   # -- Ingress TLS parameters
@@ -150,8 +150,8 @@ ingress:
   # <!-- E.g.
   # extraTls:
   #   - hosts:
-  #     - backstage.env.example.com
-  #     secretName: backstage-env -->
+  #     - llm-d.env.example.com
+  #     secretName: llm-d-env -->
   extraTls: []
 
 auth:
@@ -199,6 +199,22 @@ modelservice:
     metrics:
       enabled: true
 
+  # -- Tolerations configuration to deploy prefill pods to tainted nodes
+  prefill:
+    tolerations:
+      # -- default NVIDIA GPU toleration
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+
+  # -- Tolerations configuration to deploy decode pods to tainted nodes
+  decode:
+    tolerations:
+      # -- default NVIDIA GPU toleration
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+
   # -- vLLM image used in ModelService CR presets
   vllm:
     image:
@@ -225,6 +241,34 @@ modelservice:
       tag: "0.0.4"
       imagePullPolicy: "IfNotPresent"
 
+  # -- Prometheus ServiceMonitor configuration
+  # <br /> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md
+  serviceMonitor:
+
+    # -- Additional annotations provided to the ServiceMonitor
+    annotations: {}
+
+    # -- Additional labels provided to the ServiceMonitor
+    labels: {}
+
+    # -- ServiceMonitor endpoint port
+    port: "vllm"
+
+    # -- ServiceMonitor endpoint path
+    path: "/metrics"
+
+    # -- ServiceMonitor endpoint interval at which metrics should be scraped
+    interval: "15s"
+
+    # -- ServiceMonitor namespace selector
+    namespaceSelector:
+      any: false
+      matchNames: []
+
+    # -- ServiceMonitor selector matchLabels
+    # </br> matchLabels must match labels on modelservice Services
+    selector:
+      matchLabels: {}
 
   # -- Annotations to add to all modelservice resources
   annotations: {}

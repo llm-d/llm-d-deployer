@@ -130,17 +130,16 @@ The installer needs to be run from the `llm-d-deployer/quickstart` directory.
 
 ### Flags
 
-| Flag                       | Description                                                                                             | Example                                                                   |
-|----------------------------|---------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| Flag                       | Description                                                                                             | Example                                                   |
+|----------------------------|---------------------------------------------------------------------------------------------------------|-----------------------------------------------------------|
 | `--hf-token TOKEN`         | HuggingFace API token (or set `HF_TOKEN` env var)                                                       | `./llmd-installer-minikube.sh --hf-token "abc123"`                        |
 | `--auth-file PATH`         | Path to your registry auth file ig not in one of the two listed files in the auth section of the readme | `./llmd-installer-minikube.sh --auth-file ~/.config/containers/auth.json` |
-| `--provision-minikube`     | Provision a local Minikube cluster without GPU support                                                  | `./llmd-installer-minikube.sh --provision-minikube`                       |
-| `--provision-minikube-gpu` | Provision a local Minikube cluster with GPU support                                                     | `./llmd-installer-minikube.sh --provision-minikube`                       |
-| `--storage-size SIZE`      | Size of storage volume (default: 15Gi)                                                                  | `./llmd-installer-minikube.sh --storage-size 15Gi`                        |
-| `--delete-minikube`        | Delete local Minikube cluster                                                                           | `./llmd-installer-minikube.sh --delete-minikube`                          |
+| `--storage-size SIZE`      | Size of storage volume (default: 7Gi)                                                                   | `./llmd-installer-minikube.sh --storage-size 15Gi`                        |
+| `--storage-class CLASS`    | Storage class to use (default: standard)                                                                | `./llmd-installer-minikube.sh --storage-class standard`                  |
 | `--namespace NAME`         | Kubernetes namespace to use (default: `llm-d`)                                                          | `./llmd-installer-minikube.sh --namespace foo`                            |
 | `--values NAME`            | Absolute path to a Helm values.yaml file (default: llm-d-deployer/charts/llm-d/values.yaml)             | `./llmd-installer-minikube.sh --values /path/to/values.yaml`              |
 | `--uninstall`              | Uninstall llm-d and cleanup resources                                                                   | `./llmd-installer-minikube.sh --uninstall`                                |
+| `--disable-metrics-collection` | Disable metrics collection (Prometheus will not be installed)                                    | `./llmd-installer-minikube.sh --disable-metrics-collection`               |
 | `-h`, `--help`             | Show help and exit                                                                                      | `./llmd-installer-minikube.sh --help`                                     |
 
 ## Examples
@@ -227,11 +226,48 @@ kubectl run --rm -i curl-temp --image=curlimages/curl --restart=Never -- \
   }'
 ```
 
-After the p/d pods are running, you can view the models being run on the GPUs on the host to verify activity.
+### Metrics Collection
 
-```yaml
-nvidia-smi --query-gpu=index,name,utilization.gpu,utilization.memory,memory.used,memory.total --format=csv
+llm-d includes built-in support for metrics collection using Prometheus and Grafana. This feature is enabled by default but can be disabled using the `--disable-metrics-collection` flag during installation.
+
+#### Accessing the Metrics UIs
+
+Once installed, you can access the metrics UIs through port-forwarding:
+
+1. Prometheus UI (port 9090):
+
+```bash
+kubectl port-forward -n llm-d-monitoring --address 0.0.0.0 svc/prometheus-kube-prometheus-prometheus 9090:9090
 ```
+
+1. Grafana UI (port 3000):
+
+```bash
+kubectl port-forward -n llm-d-monitoring --address 0.0.0.0 svc/prometheus-grafana 3000:80
+```
+
+Access the UIs at:
+
+- Prometheus: <http://localhost:9090>
+- Grafana: <http://localhost:3000> (default credentials: admin/admin)
+
+#### Available Metrics
+
+The metrics collection includes:
+
+- Model inference performance metrics
+- Request latency and throughput
+- Resource utilization (CPU, memory, GPU)
+- Cache hit/miss rates
+- Error rates and types
+
+#### Local Development Note
+
+When running in Minikube:
+
+1. The metrics UIs are accessible via localhost by default
+2. If you need to access from another machine, use the Minikube IP address instead of localhost
+3. The default credentials (admin/admin) should be changed in production environments
 
 ### Troubleshooting
 

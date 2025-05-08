@@ -1,9 +1,8 @@
 {{- if and .Values.modelservice.enabled .Values.modelservice.rbac.create }}
+kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
 metadata:
-  name: {{ include "modelservice.fullname" . }}
-  namespace: {{ .Release.Namespace }}
+  name: {{ include "modelservice.fullname" . }}-endpoint-picker
   labels:
     {{- include "common.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: modelservice
@@ -17,13 +16,42 @@ metadata:
     {{- if .Values.modelservice.annotations }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.annotations "context" $) | nindent 4 }}
     {{- end }}
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: {{ include "modelservice.fullname" . }}
-subjects:
-- kind: ServiceAccount
-  apiGroup: ""
-  name: {{ include "modelservice.serviceAccountName" . }}
-  namespace: {{ .Release.Namespace }}
+rules:
+- apiGroups:
+  - inference.networking.x-k8s.io
+  resources:
+  - inferencepools
+  - inferencemodels
+  verbs:
+  - get
+  - watch
+  - list
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - watch
+  - list
+- apiGroups:
+  - discovery.k8s.io
+  resources:
+  - endpointslices
+  verbs:
+  - get
+  - watch
+  - list
+- apiGroups:
+  - authentication.k8s.io
+  resources:
+  - tokenreviews
+  verbs:
+  - create
+- apiGroups:
+  - authorization.k8s.io
+  resources:
+  - subjectaccessreviews
+  verbs:
+  - create
 {{- end }}

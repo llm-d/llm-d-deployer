@@ -1,8 +1,9 @@
 {{- if and .Values.modelservice.enabled .Values.modelservice.rbac.create }}
+# Ref: https://github.com/neuralmagic/llm-d-model-service/blob/dev/config/rbac/role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ include "modelservice.fullname" . }}-manager-role
+  name: {{ include "modelservice.fullname" . }}-manager
   labels:
     {{- include "common.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: modelservice
@@ -21,80 +22,34 @@ rules:
   - ""
   resources:
   - configmaps
+  - serviceaccounts
   verbs:
+  - create
+  - delete
   - get
   - list
+  - patch
+  - update
   - watch
-  - create
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - watch
+  - list
 - apiGroups:
   - ""
   resources:
   - services
-  - serviceaccounts
   verbs:
-  - get
-  - list
-  - watch
   - create
-  - update
-- apiGroups:
-  - rbac.authorization.k8s.io
-  resources:
-  - roles
-  - rolebindings
-  verbs:
-  - get
+  - delete
   - list
-  - watch
-  - create
+  - patch
   - update
-  # MSV2 HACK BEGIN ---------------
-- apiGroups:
-  - "v1"
-  resources:
-  - "secrets"
-  verbs:
-  - "get"
-  - "list"
-  - "watch"
-- apiGroups:
-  - "inference.networking.x-k8s.io"
-  resources:
-  - "inferencepools"
-  - "inferencemodels"
-  verbs:
-  - "get"
-  - "watch"
-  - "list"
-- apiGroups:
-  - ""
-  resources:
-  - "pods"
-  verbs:
-  - "get"
-  - "watch"
-  - "list"
-- apiGroups:
-  - "discovery.k8s.io"
-  resources:
-  - "endpointslices"
-  verbs:
-  - "get"
-  - "watch"
-  - "list"
-- apiGroups:
-  - "authentication.k8s.io"
-  resources:
-  - "tokenreviews"
-  verbs:
-  - "create"
-- apiGroups:
-  - "authorization.k8s.io"
-  resources:
-  - "subjectaccessreviews"
-  verbs:
-  - "create"
-  # MSV2 HACK END ---------------
+  - watch
 - apiGroups:
   - apps
   resources:
@@ -115,10 +70,18 @@ rules:
   - patch
   - update
 - apiGroups:
+  - discovery.k8s.io
+  resources:
+  - endpointslices
+  verbs:
+  - get
+  - watch
+  - list
+- apiGroups:
   - inference.networking.x-k8s.io
   resources:
-  - inferencemodel
-  - inferencepool
+  - inferencemodels
+  - inferencepools
   verbs:
   - create
   - delete
@@ -153,4 +116,16 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - rolebindings
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
 {{- end }}
