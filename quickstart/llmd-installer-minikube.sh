@@ -24,6 +24,8 @@ AUTH_FILE=""
 HOSTPATH_DIR=${HOSTPATH_DIR:="/mnt/data/llama-model-storage"}
 VALUES_FILE="values.yaml"
 DEBUG=""
+DISABLE_METRICS=false
+MONITORING_NAMESPACE="llm-d-monitoring"
 MODEL_PV_NAME="llama-hostpath-pv"
 MODEL_PVC_NAME="llama-3.2-3b-instruct-pvc"
 REDIS_PV_NAME="redis-hostpath-pv"
@@ -45,6 +47,7 @@ Options:
   --values-file PATH         Path to Helm values.yaml file (default: values.yaml)
   --uninstall                Uninstall the llm-d components from the current cluster
   --debug                    Add debug mode to the helm install
+  --disable-metrics-collection Disable metrics collection (Prometheus will not be installed)
   -h, --help                 Show this help and exit
 EOF
 }
@@ -101,6 +104,7 @@ parse_args() {
       --values-file)            VALUES_FILE="$2"; shift 2 ;;
       --uninstall)              ACTION="uninstall"; shift ;;
       --debug)                  DEBUG="--debug"; shift;;
+      --disable-metrics-collection) DISABLE_METRICS=true; shift;;
       -h|--help)                print_help; exit 0 ;;
       *)                        die "Unknown option: $1" ;;
     esac
@@ -165,6 +169,60 @@ provision_minikube_gpu() {
     --container-runtime docker \
     --gpus all
   log_success "🚀 Minikube GPU cluster started."
+}
+
+install_prometheus_grafana() {
+  log_info "🌱 Provisioning Prometheus operator…"
+
+  if ! kubectl get namespace "${MONITORING_NAMESPACE}" &>/dev/null; then
+    log_info "📦 Creating monitoring namespace..."
+    kubectl create namespace "${MONITORING_NAMESPACE}"
+  else
+    log_info "📦 Monitoring namespace already exists"
+  fi
+
+  if ! helm repo list 2>/dev/null | grep -q "prometheus-community"; then
+    log_info "📚 Adding prometheus-community helm repo..."
+    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+    helm repo update
+  fi
+
+  if helm list -n "${MONITORING_NAMESPACE}" | grep -q "prometheus"; then
+    log_info "⚠️ Prometheus stack already installed in ${MONITORING_NAMESPACE} namespace"
+    return 0
+  fi
+
+  log_info "🚀 Installing Prometheus stack..."
+  # Install minimal Prometheus stack with only essential configurations:
+  # - Basic ClusterIP services for Prometheus and Grafana
+  # - ServiceMonitor discovery enabled across namespaces
+  # - Default admin password for Grafana
+  # Note: Ingress and other advanced configurations are left to the user to customize
+  cat <<EOF > /tmp/prometheus-values.yaml
+grafana:
+  adminPassword: admin
+  service:
+    type: ClusterIP
+prometheus:
+  service:
+    type: ClusterIP
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelector: {}
+    serviceMonitorNamespaceSelector: {}
+EOF
+
+  helm install prometheus prometheus-community/kube-prometheus-stack \
+    --namespace "${MONITORING_NAMESPACE}" \
+    -f /tmp/prometheus-values.yaml
+
+  rm -f /tmp/prometheus-values.yaml
+
+  log_info "⏳ Waiting for Prometheus stack pods to be ready..."
+  kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=prometheus -n "${MONITORING_NAMESPACE}" --timeout=300s || true
+  kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=grafana -n "${MONITORING_NAMESPACE}" --timeout=300s || true
+
+  log_success "🚀 Prometheus and Grafana installed."
 }
 
 delete_minikube() {
@@ -234,7 +292,7 @@ install() {
   log_success "✅ ModelService CRD applied"
 
   log_info "📝 Patching load-model job manifest with HF secret name='${HF_NAME}', key='${HF_KEY}'"
-  # try brew’s yq first; if that fails, fall back to linux installed pkg syntax -_-
+  # try brew's yq first; if that fails, fall back to linux installed pkg syntax -_-
   if ! yq -i ".spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.name = \"${HF_NAME}\"" "${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml"; then
     yq -i -y ".spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.name = \"${HF_NAME}\"" "${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml"
   fi
@@ -395,6 +453,8 @@ uninstall() {
   helm uninstall llm-d --namespace "${NAMESPACE}" || true
   log_info "🗑️ Deleting namespace ${NAMESPACE}..."
   kubectl delete namespace "${NAMESPACE}" || true
+  log_info "🗑️ Deleting monitoring namespace..."
+  kubectl delete namespace "${MONITORING_NAMESPACE}" --ignore-not-found || true
   log_info "🗑️ Deleting PVCs..."
   kubectl delete pv llama-hostpath-pv --ignore-not-found
   kubectl delete pvc redis-pvc -n "${NAMESPACE}" --ignore-not-found
@@ -426,10 +486,20 @@ main() {
   if [[ "$ACTION" == "install" ]]; then
     if [[ "$PROVISION_MINIKUBE_GPU" == "true" ]]; then
       provision_minikube_gpu
+      if [[ "${DISABLE_METRICS}" == "false" ]]; then
+        install_prometheus_grafana
+      else
+        log_info "ℹ️ Metrics collection disabled by user request"
+      fi
     elif [[ "$PROVISION_MINIKUBE" == "true" ]]; then
       provision_minikube
+      if [[ "${DISABLE_METRICS}" == "false" ]]; then
+        install_prometheus_grafana
+      else
+        log_info "ℹ️ Metrics collection disabled by user request"
+      fi
     fi
-  install
+    install
   elif [[ "$ACTION" == "uninstall" ]]; then
     uninstall
   else
