@@ -9,6 +9,7 @@ metadata:
     {{- if .Values.commonLabels }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
+    {{- include "metrics.label" . | nindent 4 }}
   annotations:
     {{- if .Values.commonAnnotations }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
@@ -32,9 +33,11 @@ spec:
       type: {{ .Values.gateway.serviceType | default "NodePort" | quote }}
       extraLabels:
         gateway: custom
+        {{- include "metrics.label" . | nindent 8 }}
     podTemplate:
       extraLabels:
         gateway: custom
+        {{- include "metrics.label" . | nindent 8 }}
     sdsContainer:
       securityContext:
         allowPrivilegeEscalation: false

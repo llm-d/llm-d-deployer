@@ -104,6 +104,29 @@ gateway:
   metrics:
     enabled: true
 
+  # -- Prometheus ServiceMonitor configuration
+  # <br /> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md
+  # <br /> Ref: https://gateway-api-inference-extension.sigs.k8s.io/guides/metrics
+  serviceMonitor:
+    # -- Additional annotations provided to the ServiceMonitor
+    annotations: {}
+    # -- Additional labels provided to the ServiceMonitor
+    labels: {}
+    # -- ServiceMonitor endpoint port
+    port: "metrics"
+    # -- ServiceMonitor endpoint path
+    path: "/metrics"
+    # -- ServiceMonitor endpoint interval at which metrics should be scraped
+    interval: "10s"
+    # -- ServiceMonitor namespace selector
+    namespaceSelector:
+      any: false
+      matchNames: []
+    # -- ServiceMonitor selector matchLabels
+    # </br> matchLabels must match labels on gateway Services
+    selector:
+      matchLabels: {}
+
   # --  String to fully override gateway.fullname
   fullnameOverride: ""
 
@@ -119,7 +142,6 @@ gateway:
 
   # Special parameters applied to kGateway via GatewayParameters resource
   kGatewayParameters:
-
     proxyUID: false
 
   # Set of listeners exposed via the Gateway, also propagated to the Ingress if enabled

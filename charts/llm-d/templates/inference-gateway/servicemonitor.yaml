@@ -1,0 +1,42 @@
+{{- if and .Values.gateway.enabled .Values.gateway.metrics.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "gateway.fullname" . }}
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/gateway: {{ include "gateway.fullname" . }}
+    app.kubernetes.io/component: inference-gateway
+    {{- if .Values.gateway.serviceMonitor.labels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.gateway.serviceMonitor.labels "context" . ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.gateway.serviceMonitor.annotations }}
+  annotations:
+    {{- include "common.tplvalues.render" ( dict "value" .Values.gateway.serviceMonitor.annotations "context" . ) | nindent 4 }}
+  {{- end }}
+spec:
+  endpoints:
+    - port: {{ .Values.gateway.serviceMonitor.port }}
+      path: {{ .Values.gateway.serviceMonitor.path }}
+      interval: {{ .Values.gateway.serviceMonitor.interval }}
+      bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+  {{- if .Values.gateway.serviceMonitor.selector.matchLabels }}
+  selector:
+    matchLabels:
+      {{- include "common.tplvalues.render" ( dict "value" .Values.gateway.serviceMonitor.selector.matchLabels "context" $ ) | nindent 4 }}
+      {{- include "metrics.label" . | nindent 4 }}
+  {{- else }}
+  selector:
+    matchLabels:
+      {{- include "metrics.label" . | nindent 6 }}
+  {{- end }}
+  {{- if .Values.gateway.serviceMonitor.namespaceSelector.matchNames }}
+  namespaceSelector:
+    matchNames:
+      {{- toYaml .Values.gateway.serviceMonitor.namespaceSelector.matchNames | nindent 6 }}
+  {{- else }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  {{- end }}
+{{- end }}

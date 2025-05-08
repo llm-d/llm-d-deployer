@@ -1,0 +1,82 @@
+{{- if and .Values.gateway.enabled .Values.gateway.metrics.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "gateway.fullname" . }}-metrics
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/gateway: {{ include "gateway.fullname" . }}
+    app.kubernetes.io/component: inference-gateway
+    app.kubernetes.io/name: metrics
+    {{- include "metrics.label" . | nindent 4 }}
+  {{- if .Values.gateway.metrics.annotations }}
+  annotations:
+    {{- include "common.tplvalues.render" ( dict "value" .Values.gateway.metrics.annotations "context" .) | nindent 4 }}
+  {{- end }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: metrics
+      port: 9090
+      targetPort: 9090
+      protocol: TCP
+  selector:
+    app.kubernetes.io/gateway: {{ include "gateway.fullname" . }}
+    app.kubernetes.io/component: inference-gateway
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "gateway.fullname" . }}-metrics-reader
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/gateway: {{ include "gateway.fullname" . }}
+    app.kubernetes.io/component: inference-gateway
+rules:
+- nonResourceURLs:
+  - /metrics
+  verbs:
+  - get
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "gateway.fullname" . }}-metrics-reader
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/gateway: {{ include "gateway.fullname" . }}
+    app.kubernetes.io/component: inference-gateway
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "gateway.fullname" . }}-metrics-reader-binding
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/gateway: {{ include "gateway.fullname" . }}
+    app.kubernetes.io/component: inference-gateway
+subjects:
+- kind: ServiceAccount
+  name: {{ include "gateway.fullname" . }}-metrics-reader
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ include "gateway.fullname" . }}-metrics-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "gateway.fullname" . }}-metrics-reader-token
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/gateway: {{ include "gateway.fullname" . }}
+    app.kubernetes.io/component: inference-gateway
+  annotations:
+    kubernetes.io/service-account.name: {{ include "gateway.fullname" . }}-metrics-reader
+type: kubernetes.io/service-account-token
+{{- end }}
