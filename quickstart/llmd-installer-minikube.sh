@@ -24,8 +24,8 @@ AUTH_FILE=""
 HOSTPATH_DIR=${HOSTPATH_DIR:="/mnt/data/llama-model-storage"}
 VALUES_FILE="values.yaml"
 DEBUG=""
-MODEL_PV_NAME="llama-hostpath-pv"
-MODEL_PVC_NAME="llama-3.2-3b-instruct-pvc"
+MODEL_PV_NAME="model-hostpath-pv"
+MODEL_PVC_NAME="model-storage-pvc"
 REDIS_PV_NAME="redis-hostpath-pv"
 REDIS_PVC_NAME="redis-data-redis-master"
 
@@ -207,20 +207,17 @@ install() {
   #     either relative or absolute path and require it to exist.
   #   - Otherwise default to $CHART_DIR/values.yaml.
   if [[ "$VALUES_FILE" != "values.yaml" ]]; then
-    if [[ -f "$VALUES_FILE" ]]; then
+    [[ -f "$VALUES_FILE" ]] || die "Custom values file not found: $VALUES_FILE"
       VALUES_PATH=$(realpath "$VALUES_FILE")
       log_info "✅ Using custom values file: ${VALUES_PATH}"
-    else
-      die "Custom values file not found: $VALUES_FILE"
-    fi
   else
     VALUES_PATH="${CHART_DIR}/values.yaml"
   fi
 
   if [[ "$(yq -r .auth.hfToken.enabled "${VALUES_PATH}")" == "true" ]]; then
     log_info "🔐 Creating HF token secret (from ${VALUES_PATH})..."
-    HF_NAME=$(yq -r .auth.hfToken.name "${VALUES_PATH}")
-    HF_KEY=$(yq -r .auth.hfToken.key  "${VALUES_PATH}")
+    HF_NAME=$(yq -r .auth.hfToken.name  "${VALUES_PATH}")
+    HF_KEY=$(yq -r .auth.hfToken.key   "${VALUES_PATH}")
     kubectl create secret generic "${HF_NAME}" \
       --from-literal="${HF_KEY}=${HF_TOKEN}" \
       --dry-run=client -o yaml | kubectl apply -f -
@@ -233,27 +230,57 @@ install() {
   kubectl apply -f crds/modelservice-crd.yaml
   log_success "✅ ModelService CRD applied"
 
-  log_info "📝 Patching load-model job manifest with HF secret name='${HF_NAME}', key='${HF_KEY}'"
-  # try brew’s yq first; if that fails, fall back to linux installed pkg syntax -_-
-  if ! yq -i ".spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.name = \"${HF_NAME}\"" "${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml"; then
-    yq -i -y ".spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.name = \"${HF_NAME}\"" "${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml"
-  fi
-  if ! yq -i ".spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.key  = \"${HF_KEY}\""  "${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml"; then
-    yq -i -y ".spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.key  = \"${HF_KEY}\""  "${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml"
-  fi
-  log_success "✅ Job manifest patched"
+  # model‐to‐pvc download job
+  log_info "💾 Preparing load-model job manifest…"
+  # derive paths & IDs
+  MODEL_ARTIFACT_URI=$(yq -r .sampleApplication.model.modelArtifactURI "${VALUES_PATH}")
+  PVC_AND_MODEL_PATH="${MODEL_ARTIFACT_URI#*://}"
+  MODEL_PATH="${PVC_AND_MODEL_PATH#*/}"
+  HF_MODEL_ID=$(yq -r .sampleApplication.model.hfModelID "${VALUES_PATH}")
+  HF_NAME=$(yq -r .auth.hfToken.name "${VALUES_PATH}")
+  HF_KEY=$(yq -r .auth.hfToken.key  "${VALUES_PATH}")
 
+  log_info "🔍 Debug vars:"
+  log_info "    MODEL_PATH       = ${MODEL_PATH}"
+  log_info "    HF_MODEL_ID      = ${HF_MODEL_ID}"
+  log_info "    HF_NAME (secret) = ${HF_NAME}"
+  log_info "    MODEL_PVC_NAME   = ${MODEL_PVC_NAME}"
+
+  # copy template to working manifest
+  JOB_TPL="${REPO_ROOT}/helpers/k8s/load-model-on-pvc-template.yaml"
+  JOB_MANIFEST="${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml"
+  cp "${JOB_TPL}" "${JOB_MANIFEST}"
+
+  # Patch load-model job manifest
+  log_info "📝 Patching load-model job manifest"
+  if ! yq -i "
+    (.spec.template.spec.containers[0].env[] | select(.name == \"MODEL_PATH\")).value = \"${MODEL_PATH}\" |
+    (.spec.template.spec.containers[0].env[] | select(.name == \"HF_MODEL_ID\")).value = \"${HF_MODEL_ID}\" |
+    (.spec.template.spec.containers[0].env[] | select(.name == \"HF_TOKEN\")).valueFrom.secretKeyRef.name = \"${HF_NAME}\" |
+    (.spec.template.spec.containers[0].env[] | select(.name == \"HF_TOKEN\")).valueFrom.secretKeyRef.key = \"${HF_KEY}\" |
+    (.spec.template.spec.volumes[] | select(.name == \"model-cache\")).persistentVolumeClaim.claimName = \"${MODEL_PVC_NAME}\"
+  " "${JOB_MANIFEST}"; then
+    yq -i -y "
+      (.spec.template.spec.containers[0].env[] | select(.name == \"MODEL_PATH\")).value = \"${MODEL_PATH}\" |
+      (.spec.template.spec.containers[0].env[] | select(.name == \"HF_MODEL_ID\")).value = \"${HF_MODEL_ID}\" |
+      (.spec.template.spec.containers[0].env[] | select(.name == \"HF_TOKEN\")).valueFrom.secretKeyRef.name = \"${HF_NAME}\" |
+      (.spec.template.spec.containers[0].env[] | select(.name == \"HF_TOKEN\")).valueFrom.secretKeyRef.key = \"${HF_KEY}\" |
+      (.spec.template.spec.volumes[] | select(.name == \"model-cache\")).persistentVolumeClaim.claimName = \"${MODEL_PVC_NAME}\"
+    " "${JOB_MANIFEST}"
+  fi
+    log_success "✅ load-model job manifest prepared"
+
+  # create hostPath PV/PVC for model
     setup_minikube_storage
 
-  log_info "🚀 Launching model download job..."
-  kubectl apply -f "${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml" -n "${NAMESPACE}"
-
-  log_info "⏳ Waiting up to 3m for model download job to complete; this may take a while depending on connection speed and model size..."
+  # launch the download job
+  log_info "🚀 Launching model download job…"
+  kubectl apply -f "${JOB_MANIFEST}" -n "${NAMESPACE}"
+  log_info "⏳ Waiting up to 3m for model download to complete…"
   kubectl wait --for=condition=complete --timeout=180s job/download-model -n "${NAMESPACE}" || {
-    log_error "🙀 Model download job failed or timed out";
-    kubectl logs job/download-model -n "${NAMESPACE}";
-    kubectl logs -l job-name=download-model -n "${NAMESPACE}";
-    exit 1;
+    log_error "🙀 Model download job failed or timed out"
+    kubectl logs job/download-model -n "${NAMESPACE}"
+    exit 1
   }
   log_success "✅ Model downloaded"
 
@@ -396,9 +423,9 @@ uninstall() {
   log_info "🗑️ Deleting namespace ${NAMESPACE}..."
   kubectl delete namespace "${NAMESPACE}" || true
   log_info "🗑️ Deleting PVCs..."
-  kubectl delete pv llama-hostpath-pv --ignore-not-found
-  kubectl delete pvc redis-pvc -n "${NAMESPACE}" --ignore-not-found
-  kubectl delete pv redis-hostpath-pv --ignore-not-found
+  kubectl delete pv "${MODEL_PV_NAME}" --ignore-not-found
+  kubectl delete pvc "${REDIS_PVC_NAME}" -n "${NAMESPACE}" --ignore-not-found
+  kubectl delete pv "${REDIS_PV_NAME}" --ignore-not-found
   log_success "💀 Uninstallation complete"
 }
 
