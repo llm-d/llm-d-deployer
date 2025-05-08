@@ -199,6 +199,22 @@ modelservice:
     metrics:
       enabled: true
 
+  # -- Tolerations configuration to deploy prefill pods to tainted nodes
+  prefill:
+    tolerations:
+      # -- default NVIDIA GPU toleration
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+
+  # -- Tolerations configuration to deploy decode pods to tainted nodes
+  decode:
+    tolerations:
+      # -- default NVIDIA GPU toleration
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+
   # -- vLLM image used in ModelService CR presets
   vllm:
     image:
