@@ -1,8 +1,9 @@
 {{- if and .Values.modelservice.enabled .Values.modelservice.rbac.create }}
+# Ref: https://github.com/neuralmagic/llm-d-model-service/blob/dev/config/rbac/role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ include "modelservice.fullname" . }}-manager-role
+  name: {{ include "modelservice.fullname" . }}-manager
   labels:
     {{- include "common.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: modelservice
@@ -21,40 +22,14 @@ rules:
   - ""
   resources:
   - configmaps
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-- apiGroups:
-  - ""
-  resources:
-  - services
   - serviceaccounts
   verbs:
-  - get
-  - list
-  - watch
   - create
-  - update
-- apiGroups:
-  - rbac.authorization.k8s.io
-  resources:
-  - roles
-  - rolebindings
-  verbs:
+  - delete
   - get
   - list
-  - watch
-  - create
+  - patch
   - update
-- apiGroups:
-  - v1
-  resources:
-  - secrets
-  verbs:
-  - get
-  - list
   - watch
 - apiGroups:
   - ""
@@ -65,25 +40,16 @@ rules:
   - watch
   - list
 - apiGroups:
-  - discovery.k8s.io
+  - ""
   resources:
-  - endpointslices
+  - services
   verbs:
-  - get
-  - watch
+  - create
+  - delete
   - list
-- apiGroups:
-  - authentication.k8s.io
-  resources:
-  - tokenreviews
-  verbs:
-  - create
-- apiGroups:
-  - authorization.k8s.io
-  resources:
-  - subjectaccessreviews
-  verbs:
-  - create
+  - patch
+  - update
+  - watch
 - apiGroups:
   - apps
   resources:
@@ -103,6 +69,14 @@ rules:
   verbs:
   - patch
   - update
+- apiGroups:
+  - discovery.k8s.io
+  resources:
+  - endpointslices
+  verbs:
+  - get
+  - watch
+  - list
 - apiGroups:
   - inference.networking.x-k8s.io
   resources:
@@ -142,4 +116,16 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - rolebindings
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
 {{- end }}

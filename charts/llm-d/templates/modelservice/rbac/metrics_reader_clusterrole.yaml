@@ -1,8 +1,9 @@
 {{- if and .Values.modelservice.enabled .Values.modelservice.rbac.create }}
+# Ref: https://github.com/neuralmagic/llm-d-model-service/blob/dev/config/rbac/metrics_reader_role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ include "modelservice.fullname" . }}-editor-role
+  name: {{ include "modelservice.fullname" . }}-metrics-reader
   labels:
     {{- include "common.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: modelservice
@@ -17,22 +18,8 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.annotations "context" $) | nindent 4 }}
     {{- end }}
 rules:
-- apiGroups:
-  - llm-d.ai
-  resources:
-  - modelservices
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - llm-d.ai
-  resources:
-  - modelservices/status
+- nonResourceURLs:
+  - /metrics
   verbs:
   - get
 {{- end }}

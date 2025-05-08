@@ -44,7 +44,7 @@ spec:
         - --health-probe-bind-address=:8081
         # MSV2 HACK BEGIN
         - --epp-cluster-role
-        - endpoint-picker-clusterrole
+        - {{ include "modelservice.fullname" . }}-endpoint-picker
         - --epp-pull-secrets
         - {{ include "common.images.renderImagePullSecretsString" (dict "images" (list .Values.modelservice.epp.image) "context" $) }}
         - --pd-pull-secrets

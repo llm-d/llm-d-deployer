@@ -1,9 +1,9 @@
 {{- if and .Values.modelservice.enabled .Values.modelservice.rbac.create }}
+# Ref: https://github.com/neuralmagic/llm-d-model-service/blob/dev/config/rbac/role_binding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
+kind: ClusterRoleBinding
 metadata:
-  name: {{ include "modelservice.fullname" . }}
-  namespace: {{ .Release.Namespace }}
+  name: {{ include "modelservice.fullname" . }}-manager
   labels:
     {{- include "common.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: modelservice
@@ -19,11 +19,10 @@ metadata:
     {{- end }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: {{ include "modelservice.fullname" . }}
+  kind: ClusterRole
+  name: {{ include "modelservice.fullname" . }}-manager
 subjects:
 - kind: ServiceAccount
-  apiGroup: ""
   name: {{ include "modelservice.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}
 {{- end }}

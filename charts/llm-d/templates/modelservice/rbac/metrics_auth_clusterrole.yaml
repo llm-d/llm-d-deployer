@@ -1,8 +1,9 @@
 {{- if and .Values.modelservice.enabled .Values.modelservice.rbac.create }}
+# Ref: https://github.com/neuralmagic/llm-d-model-service/blob/dev/config/rbac/metrics_auth_role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ include "modelservice.fullname" . }}-admin-role
+  name: {{ include "modelservice.fullname" . }}-metrics-auth
   labels:
     {{- include "common.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: modelservice
@@ -18,15 +19,15 @@ metadata:
     {{- end }}
 rules:
 - apiGroups:
-  - llm-d.ai
+  - authentication.k8s.io
   resources:
-  - modelservices
+  - tokenreviews
   verbs:
-  - '*'
+  - create
 - apiGroups:
-  - llm-d.ai
+  - authorization.k8s.io
   resources:
-  - modelservices/status
+  - subjectaccessreviews
   verbs:
-  - get
+  - create
 {{- end }}
