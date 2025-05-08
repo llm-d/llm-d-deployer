@@ -9,6 +9,6 @@ redis:
     persistence:
       enabled: false
 
-modelserver:
+modelservice:
   metrics:
     enabled: false
