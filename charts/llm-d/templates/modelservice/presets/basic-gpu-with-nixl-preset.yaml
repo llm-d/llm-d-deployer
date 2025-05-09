@@ -16,6 +16,28 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.annotations "context" $) | nindent 4 }}
     {{- end }}
 data:
+  configMaps: |
+    - apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: {{ include "modelservice.fullname" . -}}-config-decoder
+      data:
+        lmcache-decoder-config.yaml: |
+          # local_cpu: False
+          # max_local_cpu_size: 0
+          # max_local_disk_size: 0
+          # remote_serde: NULL
+    - apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: {{ include "modelservice.fullname" . -}}-config-prefiller
+      data:
+        lmcache-prefiller-config.yaml: |
+          # local_cpu: False
+          # max_local_cpu_size: 0
+          # max_local_disk_size: 0
+          # remote_serde: NULL
+
   decodeDeployment: |
     apiVersion: apps/v1
     kind: Deployment
@@ -81,11 +103,13 @@ data:
                       apiVersion: v1
                       fieldPath: status.podIP
                 - name: LMCACHE_DISTRIBUTED_URL
-                  value: {{ `"${POD_IP}:80"` }}
+                  value: ${POD_IP}:8200
                 - name: CUDA_VISIBLE_DEVICES
                   value: "0"
                 - name: UCX_TLS
                   value: "cuda_ipc,cuda_copy,tcp"
+                # - name: LMCACHE_CONFIG_FILE
+                #   value: /vllm-workspace/lmcache-decoder-config.yaml
                 {{- if .Values.redis.enabled }}
                 - name: LMCACHE_LOOKUP_URL
                   value: {{ include "redis.master.service.fullurl" .}}
@@ -97,6 +121,8 @@ data:
               volumeMounts:
                 - name: home
                   mountPath: /home
+                # - name: config-decoder
+                #   mountPath: /vllm-workspace
                 {{ `{{- if .HFModelName }}` }}
                 - name: model-cache
                   mountPath: /models
@@ -111,6 +137,9 @@ data:
           volumes:
             - name: home
               emptyDir: {}
+            # - name: config-decoder
+            #   configMap:
+            #     name: {{ include "modelservice.fullname" . -}}-config-decoder
             {{ `{{- if .HFModelName }}` }}
             - name: model-cache
               emptyDir: {}
@@ -126,21 +155,6 @@ data:
           tolerations:
             {{- toYaml .Values.modelservice.prefill.tolerations | nindent 12 }}
           {{- end }}
-          initContainers:
-            - name: "routing-proxy"
-              image: {{ include "modelservice.routingProxyImage" . }}
-              securityContext:
-                allowPrivilegeEscalation: false
-                runAsNonRoot: true
-              args:
-                - "--port=8000"
-                - "--vllm-port=8001"
-                - "--connector=nixl"
-              ports:
-                - containerPort: 8000
-                  protocol: TCP
-              restartPolicy: Always
-              imagePullPolicy: Always
           containers:
             - name: vllm
               image: {{ include "modelservice.vllmImage" . }}
@@ -153,7 +167,7 @@ data:
                 - {{ `{{ default (print "/models/" .ModelPath) .HFModelName }}` }}
               args:
                 - "--port"
-                - "8001"
+                - "8000"
                 - "--enforce-eager"
                 - "--kv-transfer-config"
                 - '{"kv_connector":"NixlConnector","kv_role":"kv_both"}'
@@ -174,11 +188,14 @@ data:
                       apiVersion: v1
                       fieldPath: status.podIP
                 - name: LMCACHE_DISTRIBUTED_URL
-                  value: {{ `"${POD_IP}:80"` }}
+                  value: ${POD_IP}:8200
                 - name: CUDA_VISIBLE_DEVICES
                   value: "0"
                 - name: UCX_TLS
                   value: "cuda_ipc,cuda_copy,tcp"
+                ### Keep ability to enable LMCache configs but don't use them right now
+                # - name: LMCACHE_CONFIG_FILE
+                #   value: /vllm-workspace/lmcache-prefiller-config.yaml
                 {{- if .Values.redis.enabled }}
                 - name: LMCACHE_LOOKUP_URL
                   value: {{ include "redis.master.service.fullurl" .}}
@@ -190,6 +207,9 @@ data:
               volumeMounts:
                 - name: home
                   mountPath: /home
+                # - name: config-prefiller
+                #   configMap:
+                #     name: {{ include "modelservice.fullname" . -}}-config-prefiller
                 {{ `{{- if .HFModelName }}` }}
                 - name: model-cache
                   mountPath: /models
@@ -204,6 +224,8 @@ data:
           volumes:
             - name: home
               emptyDir: {}
+            # - name: config-prefiller
+            #   mountPath: /vllm-workspace
             {{ `{{ if .HFModelName }}` }}
             - name: model-cache
               emptyDir: {}
