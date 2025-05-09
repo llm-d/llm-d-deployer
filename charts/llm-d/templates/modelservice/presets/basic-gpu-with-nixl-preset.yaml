@@ -49,6 +49,10 @@ data:
               image: {{ include "modelservice.vllmImage" . }}
               imagePullPolicy: {{ .Values.modelservice.vllm.image.imagePullPolicy }}
               securityContext:
+                capabilities:
+                  drop:
+                    - MKNOD
+                runAsNonRoot: true
                 allowPrivilegeEscalation: false
               command:
                 - vllm
@@ -205,41 +209,41 @@ data:
               emptyDir: {}
             {{ `{{ end }}` }}
 
-  # decodeService: |
-  #   apiVersion: v1
-  #   kind: Service
-  #   metadata:
-  #     labels:
-  #       {{- if .Values.modelservice.vllm.metrics.enabled }}
-  #       {{ include "metrics.label" . }}
-  #       {{- end }}
-  #   spec:
-  #     clusterIP: None
-  #     ports:
-  #     - name: nixl
-  #       port: 5557
-  #       protocol: TCP
-  #     - name: vllm
-  #       port: 8000
-  #       protocol: TCP
+  decodeService: |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        {{- if .Values.modelservice.vllm.metrics.enabled }}
+        {{ include "metrics.label" . }}
+        {{- end }}
+    spec:
+      clusterIP: None
+      ports:
+      - name: nixl
+        port: 5557
+        protocol: TCP
+      - name: vllm
+        port: 8000
+        protocol: TCP
 
-  # prefillService: |
-  #   apiVersion: v1
-  #   kind: Service
-  #   metadata:
-  #     labels:
-  #       {{- if .Values.modelservice.vllm.metrics.enabled }}
-  #       {{ include "metrics.label" . }}
-  #       {{- end }}
-  #   spec:
-  #     clusterIP: None
-  #     ports:
-  #     - name: nixl
-  #       port: 5557
-  #       protocol: TCP
-  #     - name: vllm
-  #       port: 8000
-  #       protocol: TCP
+  prefillService: |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        {{- if .Values.modelservice.vllm.metrics.enabled }}
+        {{ include "metrics.label" . }}
+        {{- end }}
+    spec:
+      clusterIP: None
+      ports:
+      - name: nixl
+        port: 5557
+        protocol: TCP
+      - name: vllm
+        port: 8000
+        protocol: TCP
 
   eppService: |
     apiVersion: v1
