@@ -5,7 +5,7 @@ set -euo pipefail
 
 # Detect package manager
 if command -v apt &> /dev/null; then
-  PKG_INSTALL="sudo apt update && sudo apt install -y"
+  PKG_INSTALL="sudo apt-get install -y"
 elif command -v dnf &> /dev/null; then
   PKG_INSTALL="sudo dnf install -y"
 elif command -v yum &> /dev/null; then
@@ -36,7 +36,9 @@ fi
 # Install helm
 if ! command -v helm &> /dev/null; then
   echo "Installing Helm..."
-  curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+  wget https://get.helm.sh/helm-v3.17.3-linux-amd64.tar.gz
+  tar -zxvf helm-v3.17.3-linux-amd64.tar.gz
+  sudo mv linux-amd64/helm /usr/local/bin/helm
 fi
 
 # Install kustomize
