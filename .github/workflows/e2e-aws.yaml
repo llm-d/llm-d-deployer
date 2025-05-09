@@ -38,7 +38,7 @@ jobs:
       AMI_ID: ami-04f167a56786e4b09
       KEY_NAME: ${{ secrets.SSH_KEY_NAME }}
       REGION: ${{ secrets.AWS_REGION }}
-      GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      GH_TOKEN: ${{secrets.GH_TOKEN}}
       HF_TOKEN: ${{secrets.HF_TOKEN}}
       TERMINATION_TIMEOUT: ${{ github.event.inputs.wait_for_termination }}
       PODS_READINESS_TIMEOUT: ${{ github.event.inputs.wait_for_pods }}
