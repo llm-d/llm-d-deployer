@@ -456,7 +456,7 @@ install() {
     ${DEBUG} \
     --namespace "${NAMESPACE}" \
     --values "${VALUES_PATH}" \
-    --set global.imagePullSecrets.0="llm-d-pull-secret" \
+    --set global.imagePullSecrets[0]=llm-d-pull-secret \
     --set gateway.kGatewayParameters.proxyUID="${PROXY_UID}"
   log_success "✅ llm-d deployed"
 
