@@ -30,8 +30,11 @@ data:
             - name: routing-proxy
               image: {{ include "modelservice.routingProxyImage" . }}
               securityContext:
-                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - MKNOD
                 runAsNonRoot: true
+                allowPrivilegeEscalation: false
               args:
                 - "--port=8000"
                 - "--vllm-port=8001"
@@ -39,6 +42,8 @@ data:
               ports:
                 - containerPort: 8000
                   protocol: TCP
+              restartPolicy: Always
+              imagePullPolicy: Always
           containers:
             - name: vllm
               image: {{ include "modelservice.vllmImage" . }}
@@ -130,6 +135,8 @@ data:
               ports:
                 - containerPort: 8000
                   protocol: TCP
+              restartPolicy: Always
+              imagePullPolicy: Always
           containers:
             - name: vllm
               image: {{ include "modelservice.vllmImage" . }}
@@ -198,41 +205,41 @@ data:
               emptyDir: {}
             {{ `{{ end }}` }}
 
-  decodeService: |
-    apiVersion: v1
-    kind: Service
-    metadata:
-      labels:
-        {{- if .Values.modelservice.vllm.metrics.enabled }}
-        {{ include "metrics.label" . }}
-        {{- end }}
-    spec:
-      clusterIP: None
-      ports:
-      - name: nixl
-        port: 5557
-        protocol: TCP
-      - name: vllm
-        port: 8001
-        protocol: TCP
+  # decodeService: |
+  #   apiVersion: v1
+  #   kind: Service
+  #   metadata:
+  #     labels:
+  #       {{- if .Values.modelservice.vllm.metrics.enabled }}
+  #       {{ include "metrics.label" . }}
+  #       {{- end }}
+  #   spec:
+  #     clusterIP: None
+  #     ports:
+  #     - name: nixl
+  #       port: 5557
+  #       protocol: TCP
+  #     - name: vllm
+  #       port: 8000
+  #       protocol: TCP
 
-  prefillService: |
-    apiVersion: v1
-    kind: Service
-    metadata:
-      labels:
-        {{- if .Values.modelservice.vllm.metrics.enabled }}
-        {{ include "metrics.label" . }}
-        {{- end }}
-    spec:
-      clusterIP: None
-      ports:
-      - name: nixl
-        port: 5557
-        protocol: TCP
-      - name: vllm
-        port: 8001
-        protocol: TCP
+  # prefillService: |
+  #   apiVersion: v1
+  #   kind: Service
+  #   metadata:
+  #     labels:
+  #       {{- if .Values.modelservice.vllm.metrics.enabled }}
+  #       {{ include "metrics.label" . }}
+  #       {{- end }}
+  #   spec:
+  #     clusterIP: None
+  #     ports:
+  #     - name: nixl
+  #       port: 5557
+  #       protocol: TCP
+  #     - name: vllm
+  #       port: 8000
+  #       protocol: TCP
 
   eppService: |
     apiVersion: v1
