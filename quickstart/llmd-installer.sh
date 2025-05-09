@@ -207,6 +207,12 @@ create_pvc_and_download_model_if_needed() {
 
       verify_env
 
+      log_info "Identify if storage class exists..."
+      if ! kubectl get storageclass "${STORAGE_CLASS}" &>/dev/null; then
+        log_error "Storage class \`${STORAGE_CLASS}\` not found. Please create it before attempting to pull the model."
+        exit 1
+      fi
+
       eval "echo \"$(cat ${REPO_ROOT}/helpers/k8s/model-storage-rwx-pvc-template.yaml)\"" \
         | kubectl apply -n "${NAMESPACE}" -f -
       log_success "✅ PVC \`${PVC_NAME}\` created with storageClassName ${STORAGE_CLASS} and size ${STORAGE_SIZE}"
