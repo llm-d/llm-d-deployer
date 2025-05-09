@@ -13,7 +13,7 @@ Our focus is to provide a Helm chart for deploying llm-d on Kubernetes.
 
 ## Getting Started
 
-To try out the chart and llm-d look at our [quickstart guide](docs/quickstart.md).
+To try out the chart and llm-d look at our [quickstart guide](quickstart/README.md).
 
 ## Contributing
 
