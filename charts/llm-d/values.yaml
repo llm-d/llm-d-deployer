@@ -13,12 +13,11 @@ global:
 
   # -- Global Docker registry secret names as an array
   # </br> E.g. `imagePullSecrets: [myRegistryKeySecretName]`
-  imagePullSecrets: ["llm-d-pull-secret"]
+  imagePullSecrets: []
 
   security:
     allowInsecureImages: true
 # -- Common parameters
-
 # -- Override Kubernetes version
 kubeVersion: ""
 
@@ -47,6 +46,7 @@ test:
   enabled: false
 
 # -- Sample application deploying a p-d pair of specific model
+# @default -- See below
 sampleApplication:
 
   # -- Enable rendering of sample application resources
@@ -94,6 +94,7 @@ sampleApplication:
   inferencePoolPort: 8000
 
 # -- Gateway configuration
+# @default -- See below
 gateway:
 
   # -- Deploy resources related to Gateway
@@ -128,6 +129,7 @@ gateway:
   serviceType: NodePort
 
 # -- Ingress configuration
+# @default -- See below
 ingress:
 
   # -- Deploy Ingress
@@ -173,6 +175,7 @@ ingress:
   extraTls: []
 
 # -- Model service controller configuration
+# @default -- See below
 modelservice:
 
   # -- Toggle to deploy modelservice controller related resources
@@ -198,52 +201,78 @@ modelservice:
     tag: "0.0.8"
     imagePullPolicy: "Always"
 
-  # -- Endpoint picker image used in ModelService CR presets
+  # -- Endpoint picker container options
+  # @default -- See below
   epp:
+    # -- Endpoint picker image used in ModelService CR presets
     image:
       registry: quay.io
       repository: llm-d/llm-d-gateway-api-inference-extension-dev
       tag: "0.0.5-amd64"
       imagePullPolicy: "IfNotPresent"
+
     metrics:
+
+      # -- Enable metrics scraping from endpoint picker service, see `modelservice.serviceMonitor` for configuration
       enabled: true
 
-  # -- Tolerations configuration to deploy prefill pods to tainted nodes
+  # -- Prefill options
+  # @default -- See below
   prefill:
+
+    # -- Tolerations configuration to deploy prefill pods to tainted nodes
+    # @default -- See below
     tolerations:
+
       # -- default NVIDIA GPU toleration
       - key: nvidia.com/gpu
         operator: Exists
         effect: NoSchedule
 
-  # -- Tolerations configuration to deploy decode pods to tainted nodes
+  # -- Decode options
+  # @default -- See below
   decode:
+
+    # -- Tolerations configuration to deploy decode pods to tainted nodes
+    # @default -- See below
     tolerations:
+
       # -- default NVIDIA GPU toleration
       - key: nvidia.com/gpu
         operator: Exists
         effect: NoSchedule
 
-  # -- vLLM image used in ModelService CR presets
+  # -- vLLM container options
+  # @default -- See below
   vllm:
+
+    # -- vLLM image used in ModelService CR presets
     image:
       registry: quay.io
       repository: llm-d/llm-d-dev
       tag: "0.0.5"
       imagePullPolicy: "IfNotPresent"
+
     metrics:
+
+      # -- Enable metrics scraping from vllm service, see `modelservice.serviceMonitor` for configuration
       enabled: true
 
-  # -- Routing proxy image used in ModelService CR presets
+  # -- Routing proxy container options
+  # @default -- See below
   routingProxy:
+    # -- Routing proxy image used in ModelService CR presets
     image:
       registry: quay.io
       repository: llm-d/llm-d-routing-sidecar
       tag: "0.0.5"
       imagePullPolicy: "Always"
 
-  # -- vLLM sim image used in ModelService CR presets
+  # -- vLL sim container options
+  # @default -- See below
   vllmSim:
+
+    # -- vLLM sim image used in ModelService CR presets
     image:
       registry: quay.io
       repository: llm-d/vllm-sim
@@ -252,6 +281,7 @@ modelservice:
 
   # -- Prometheus ServiceMonitor configuration
   # <br /> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md
+  # @default -- See below
   serviceMonitor:
 
     # -- Additional annotations provided to the ServiceMonitor
@@ -301,6 +331,7 @@ modelservice:
     type: ClusterIP
 
   # -- Service Account Configuration
+  # @default -- See below
   serviceAccount:
 
     # -- Enable the creation of a ServiceAccount for Modelservice pods
