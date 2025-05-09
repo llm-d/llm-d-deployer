@@ -29,7 +29,7 @@ MONITORING_NAMESPACE="llm-d-monitoring"
 MODEL_PV_NAME="model-hostpath-pv"
 REDIS_PV_NAME="redis-hostpath-pv"
 REDIS_PVC_NAME="redis-data-redis-master"
-DOWNLOAD_MODEL=false
+DOWNLOAD_MODEL=true
 
 ### HELP & LOGGING ###
 print_help() {
@@ -48,7 +48,7 @@ Options:
   --uninstall                    Uninstall the llm-d components from the current cluster
   --debug                        Add debug mode to the helm install
   --disable-metrics-collection   Disable metrics collection (Prometheus will not be installed)
-  -d, --download-model           Download the model to PVC if modelArtifactURI is pvc based
+  -s, --skip-download-model      Skip downloading the model to PVC if modelArtifactURI is pvc based
   -h, --help                     Show this help and exit
 EOF
 }
@@ -106,8 +106,7 @@ parse_args() {
       --uninstall)                    ACTION="uninstall"; shift ;;
       --debug)                        DEBUG="--debug"; shift;;
       --disable-metrics-collection)   DISABLE_METRICS=true; shift;;
-      -d)                             DOWNLOAD_MODEL=true; shift;;
-      --download-model)               DOWNLOAD_MODEL=true; shift;;
+      -s|--skip-download-model)       DOWNLOAD_MODEL=false; shift ;;
       -h|--help)                      print_help; exit 0 ;;
       *)                              die "Unknown option: $1" ;;
     esac
@@ -347,7 +346,7 @@ create_pvc_and_download_model_if_needed() {
 
       log_success "✅ Model downloaded"
     else
-      log_info "⏭️ Model download to PVC skipped: \`--download-model\` flag not set, assuming PVC ${PVC_NAME} exists and contains model at path: \`${MODEL_PATH}\`."
+      log_info "⏭️ Model download to PVC skipped: \`--skip-download-model\` flag set, assuming PVC ${PVC_NAME} exists and contains model at path: \`${MODEL_PATH}\`."
     fi
     ;;
   hf)

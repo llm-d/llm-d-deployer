@@ -66,7 +66,7 @@ sampleApplication:
     servedModelNames: []
 
     auth:
-      # -- HF token auth config via k8s secret. Required if using hf:// URI or using pvc:// URI with `--download-model` in quickstart
+      # -- HF token auth config via k8s secret.
       hfToken:
         # -- If the secret should be created or one already exists
         create: true

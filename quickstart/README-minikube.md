@@ -130,18 +130,18 @@ The installer needs to be run from the `llm-d-deployer/quickstart` directory.
 
 ### Flags
 
-| Flag                       | Description                                                                                             | Example                                                   |
+| Flag                           | Description                                                                                             | Example                                                   |
 |--------------------------------|---------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
-| `--hf-token TOKEN`         | HuggingFace API token (or set `HF_TOKEN` env var)                                                       | `./llmd-installer-minikube.sh --hf-token "abc123"`                        |
-| `--auth-file PATH`         | Path to your registry auth file ig not in one of the two listed files in the auth section of the readme | `./llmd-installer-minikube.sh --auth-file ~/.config/containers/auth.json` |
-| `--storage-size SIZE`      | Size of storage volume (default: 7Gi)                                                                   | `./llmd-installer-minikube.sh --storage-size 15Gi`                        |
-| `--download-model`             | Download the model to the modelArtifactURI URI PVC in your values.yaml file                             | `./llmd-installer-minikube.sh --download-model`                           |
-| `--storage-class CLASS`    | Storage class to use (default: standard)                                                                | `./llmd-installer-minikube.sh --storage-class standard`                  |
-| `--namespace NAME`         | Kubernetes namespace to use (default: `llm-d`)                                                          | `./llmd-installer-minikube.sh --namespace foo`                            |
-| `--values NAME`            | Absolute path to a Helm values.yaml file (default: llm-d-deployer/charts/llm-d/values.yaml)             | `./llmd-installer-minikube.sh --values /path/to/values.yaml`              |
-| `--uninstall`              | Uninstall llm-d and cleanup resources                                                                   | `./llmd-installer-minikube.sh --uninstall`                                |
-| `--disable-metrics-collection` | Disable metrics collection (Prometheus will not be installed)                                    | `./llmd-installer-minikube.sh --disable-metrics-collection`               |
-| `-h`, `--help`             | Show help and exit                                                                                      | `./llmd-installer-minikube.sh --help`                                     |
+| `--hf-token TOKEN`             | HuggingFace API token (or set `HF_TOKEN` env var)                                                       | `./llmd-installer-minikube.sh --hf-token "abc123"`                        |
+| `--auth-file PATH`             | Path to your registry auth file ig not in one of the two listed files in the auth section of the readme | `./llmd-installer-minikube.sh --auth-file ~/.config/containers/auth.json` |
+| `--storage-size SIZE`          | Size of storage volume (default: 7Gi)                                                                   | `./llmd-installer-minikube.sh --storage-size 15Gi`                        |
+| `--skip-download-model`        | Skip downloading the model to PVC if modelArtifactURI is pvc based                                      | `./llmd-installer.sh --skip-download-model`                      |
+| `--storage-class CLASS`        | Storage class to use (default: standard)                                                                | `./llmd-installer-minikube.sh --storage-class standard`                  |
+| `--namespace NAME`             | Kubernetes namespace to use (default: `llm-d`)                                                          | `./llmd-installer-minikube.sh --namespace foo`                            |
+| `--values NAME`                | Absolute path to a Helm values.yaml file (default: llm-d-deployer/charts/llm-d/values.yaml)             | `./llmd-installer-minikube.sh --values /path/to/values.yaml`              |
+| `--uninstall`                  | Uninstall llm-d and cleanup resources                                                                   | `./llmd-installer-minikube.sh --uninstall`                                |
+| `--disable-metrics-collection` | Disable metrics collection (Prometheus will not be installed)                                       | `./llmd-installer-minikube.sh --disable-metrics-collection`               |
+| `-h`, `--help`                 | Show help and exit                                                                                      | `./llmd-installer-minikube.sh --help`                                     |
 
 ## Examples
 
@@ -153,7 +153,7 @@ A hugging-face token is required either exported in your environment or passed v
 
 ```bash
 export HF_TOKEN="your-token"
-./llmd-installer-minikube.sh --provision-minikube-gpu --download-model
+./llmd-installer-minikube.sh --provision-minikube-gpu
 ```
 
 ### Install on an existing llm-d minikube cluster
@@ -164,7 +164,7 @@ to avoid any conflicts with existing deployments.
 
 ```bash
 export HF_TOKEN="your-token"
-./llmd-installer-minikube.sh --download-model
+./llmd-installer-minikube.sh
 ```
 
 ### Provision Minikube cluster without GPU support and install llm-d
@@ -174,7 +174,7 @@ would be for testing component functionality up until p/d pod deployments and wo
 
 ```bash
 export HF_TOKEN="your-token"
-./llmd-installer-minikube.sh --provision-minikube --download-model
+./llmd-installer-minikube.sh --provision-minikube
 ```
 
 ### Manually minikube operations
@@ -252,7 +252,7 @@ Here is an example snippet of the default model values being replaced with
     servedModelNames: []
 
     auth:
-      # -- HF token auth config via k8s secret. Required if using hf:// URI or using pvc:// URI with `--download-model` in quickstart
+      # -- HF token auth config via k8s secret.
       hfToken:
         # -- If the secret should be created or one already exists
         create: true

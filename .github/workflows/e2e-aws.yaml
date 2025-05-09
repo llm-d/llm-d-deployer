@@ -234,7 +234,7 @@ jobs:
             set -e
             cd llm-d-deployer/quickstart
 
-            ./llmd-installer-minikube.sh --provision-minikube-gpu --hf-token $HF_TOKEN --download-model| tee ~/llmd-installer.log
+            ./llmd-installer-minikube.sh --provision-minikube-gpu --hf-token $HF_TOKEN | tee ~/llmd-installer.log
           EOF
 
       - name: Wait for pods to be in ready state.
