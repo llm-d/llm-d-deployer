@@ -217,7 +217,8 @@ EOF
 
   helm install prometheus prometheus-community/kube-prometheus-stack \
     --namespace "${MONITORING_NAMESPACE}" \
-    -f /tmp/prometheus-values.yaml
+    -f /tmp/prometheus-values.yaml \
+    --output json > /dev/null
 
   rm -f /tmp/prometheus-values.yaml
 
