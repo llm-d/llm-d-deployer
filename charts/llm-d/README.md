@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart for OpenShift
 
-![Version: 0.6.0](https://img.shields.io/badge/Version-0.6.0-informational?style=flat-square)
+![Version: 0.6.1](https://img.shields.io/badge/Version-0.6.1-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for llm-d
@@ -143,7 +143,7 @@ Kubernetes: `>= 1.25.0-0`
 | commonLabels | Labels to add to all deployed objects | object | `{}` |
 | extraDeploy | Array of extra objects to deploy with the release | list | `[]` |
 | fullnameOverride | String to fully override common.names.fullname | string | `""` |
-| gateway | Gateway configuration | object | `{"annotations":{},"enabled":true,"fullnameOverride":"","gatewayClassName":"kgateway","kGatewayParameters":{"proxyUID":false},"listeners":[{"name":"default","path":"/","port":80,"protocol":"HTTP"}],"nameOverride":"","serviceType":"NodePort"}` |
+| gateway | Gateway configuration | object | See below |
 | gateway.annotations | Additional annotations provided to the Gateway resource | object | `{}` |
 | gateway.enabled | Deploy resources related to Gateway | bool | `true` |
 | gateway.fullnameOverride | String to fully override gateway.fullname | string | `""` |
@@ -151,9 +151,9 @@ Kubernetes: `>= 1.25.0-0`
 | gateway.nameOverride | String to partially override gateway.fullname | string | `""` |
 | gateway.serviceType | Gateway's service type. Ingress is only available if the service type is set to NodePort. Accepted values: ["LoadBalancer", "NodePort"] | string | `"NodePort"` |
 | global | Global parameters Global Docker image parameters Please, note that this will override the image parameters, including dependencies, configured to use the global value Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass | object | See below |
-| global.imagePullSecrets | Global Docker registry secret names as an array </br> E.g. `imagePullSecrets: [myRegistryKeySecretName]` | list | `["llm-d-pull-secret"]` |
+| global.imagePullSecrets | Global Docker registry secret names as an array </br> E.g. `imagePullSecrets: [myRegistryKeySecretName]` | list | `[]` |
 | global.imageRegistry | Global Docker image registry | string | `""` |
-| ingress | Ingress configuration | object | `{"annotations":{},"enabled":true,"extraHosts":[],"extraTls":[],"host":"","ingressClassName":"","path":"/","tls":{"enabled":false,"secretName":""}}` |
+| ingress | Ingress configuration | object | See below |
 | ingress.annotations | Additional annotations for the Ingress resource | object | `{}` |
 | ingress.enabled | Deploy Ingress | bool | `true` |
 | ingress.extraHosts | List of additional hostnames to be covered with this ingress record (e.g. a CNAME) <!-- E.g. extraHosts:   - name: llm-d.env.example.com     path: / (Optional)     pathType: Prefix (Optional)     port: 7007 (Optional) --> | list | `[]` |
@@ -165,33 +165,38 @@ Kubernetes: `>= 1.25.0-0`
 | ingress.tls.enabled | Enable TLS configuration for the host defined at `ingress.host` parameter | bool | `false` |
 | ingress.tls.secretName | The name to which the TLS Secret will be called | string | `""` |
 | kubeVersion | Override Kubernetes version | string | `""` |
-| modelservice | Model service controller configuration | object | `{"annotations":{},"decode":{"tolerations":[{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}]},"enabled":true,"epp":{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-gateway-api-inference-extension-dev","tag":"0.0.5-amd64"},"metrics":{"enabled":true}},"fullnameOverride":"","image":{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-model-service","tag":"0.0.8"},"metrics":{"enabled":true},"nameOverride":"","podAnnotations":{},"podLabels":{},"prefill":{"tolerations":[{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}]},"rbac":{"create":true},"replicas":1,"routingProxy":{"image":{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-routing-sidecar","tag":"0.0.5"}},"service":{"enabled":true,"port":8443,"type":"ClusterIP"},"serviceAccount":{"annotations":{},"create":true,"fullnameOverride":"","labels":{},"nameOverride":""},"serviceMonitor":{"annotations":{},"interval":"15s","labels":{},"namespaceSelector":{"any":false,"matchNames":[]},"path":"/metrics","port":"vllm","selector":{"matchLabels":{}}},"vllm":{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-dev","tag":"0.0.5"},"metrics":{"enabled":true}},"vllmSim":{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/vllm-sim","tag":"0.0.4"}}}` |
+| modelservice | Model service controller configuration | object | See below |
 | modelservice.annotations | Annotations to add to all modelservice resources | object | `{}` |
-| modelservice.decode | Tolerations configuration to deploy decode pods to tainted nodes | object | `{"tolerations":[{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}]}` |
+| modelservice.decode | Decode options | object | See below |
+| modelservice.decode.tolerations | Tolerations configuration to deploy decode pods to tainted nodes | list | See below |
 | modelservice.decode.tolerations[0] | default NVIDIA GPU toleration | object | `{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}` |
 | modelservice.enabled | Toggle to deploy modelservice controller related resources | bool | `true` |
-| modelservice.epp | Endpoint picker image used in ModelService CR presets | object | `{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-gateway-api-inference-extension-dev","tag":"0.0.5-amd64"},"metrics":{"enabled":true}}` |
+| modelservice.epp | Endpoint picker container options | object | See below |
+| modelservice.epp.image | Endpoint picker image used in ModelService CR presets | object | `{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-gateway-api-inference-extension-dev","tag":"0.0.5-amd64"}` |
+| modelservice.epp.metrics.enabled | Enable metrics scraping from endpoint picker service, see `modelservice.serviceMonitor` for configuration | bool | `true` |
 | modelservice.fullnameOverride | String to fully override modelservice.fullname | string | `""` |
 | modelservice.image | Modelservice controller image, please change only if appropriate adjustments to the CRD are being made | object | `{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-model-service","tag":"0.0.8"}` |
 | modelservice.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true}` |
 | modelservice.nameOverride | String to partially override modelservice.fullname | string | `""` |
 | modelservice.podAnnotations | Pod annotations for modelservice | object | `{}` |
 | modelservice.podLabels | Pod labels for modelservice | object | `{}` |
-| modelservice.prefill | Tolerations configuration to deploy prefill pods to tainted nodes | object | `{"tolerations":[{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}]}` |
+| modelservice.prefill | Prefill options | object | See below |
+| modelservice.prefill.tolerations | Tolerations configuration to deploy prefill pods to tainted nodes | list | See below |
 | modelservice.prefill.tolerations[0] | default NVIDIA GPU toleration | object | `{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}` |
 | modelservice.rbac.create | Enable the creation of RBAC resources | bool | `true` |
 | modelservice.replicas | Number of controller replicas | int | `1` |
-| modelservice.routingProxy | Routing proxy image used in ModelService CR presets | object | `{"image":{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-routing-sidecar","tag":"0.0.5"}}` |
+| modelservice.routingProxy | Routing proxy container options | object | See below |
+| modelservice.routingProxy.image | Routing proxy image used in ModelService CR presets | object | `{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-routing-sidecar","tag":"0.0.5"}` |
 | modelservice.service.enabled | Toggle to deploy a Service resource for Model service controller | bool | `true` |
 | modelservice.service.port | Port number exposed from Model Service controller | int | `8443` |
 | modelservice.service.type | Service type | string | `"ClusterIP"` |
-| modelservice.serviceAccount | Service Account Configuration | object | `{"annotations":{},"create":true,"fullnameOverride":"","labels":{},"nameOverride":""}` |
+| modelservice.serviceAccount | Service Account Configuration | object | See below |
 | modelservice.serviceAccount.annotations | Additional custom annotations for the ServiceAccount. | object | `{}` |
 | modelservice.serviceAccount.create | Enable the creation of a ServiceAccount for Modelservice pods | bool | `true` |
 | modelservice.serviceAccount.fullnameOverride | String to fully override modelservice.serviceAccountName, defaults to modelservice.fullname | string | `""` |
 | modelservice.serviceAccount.labels | Additional custom labels to the service ServiceAccount. | object | `{}` |
 | modelservice.serviceAccount.nameOverride | String to partially override modelservice.serviceAccountName, defaults to modelservice.fullname | string | `""` |
-| modelservice.serviceMonitor | Prometheus ServiceMonitor configuration <br /> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md | object | `{"annotations":{},"interval":"15s","labels":{},"namespaceSelector":{"any":false,"matchNames":[]},"path":"/metrics","port":"vllm","selector":{"matchLabels":{}}}` |
+| modelservice.serviceMonitor | Prometheus ServiceMonitor configuration <br /> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md | object | See below |
 | modelservice.serviceMonitor.annotations | Additional annotations provided to the ServiceMonitor | object | `{}` |
 | modelservice.serviceMonitor.interval | ServiceMonitor endpoint interval at which metrics should be scraped | string | `"15s"` |
 | modelservice.serviceMonitor.labels | Additional labels provided to the ServiceMonitor | object | `{}` |
@@ -199,11 +204,14 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.serviceMonitor.path | ServiceMonitor endpoint path | string | `"/metrics"` |
 | modelservice.serviceMonitor.port | ServiceMonitor endpoint port | string | `"vllm"` |
 | modelservice.serviceMonitor.selector | ServiceMonitor selector matchLabels </br> matchLabels must match labels on modelservice Services | object | `{"matchLabels":{}}` |
-| modelservice.vllm | vLLM image used in ModelService CR presets | object | `{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-dev","tag":"0.0.5"},"metrics":{"enabled":true}}` |
-| modelservice.vllmSim | vLLM sim image used in ModelService CR presets | object | `{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/vllm-sim","tag":"0.0.4"}}` |
+| modelservice.vllm | vLLM container options | object | See below |
+| modelservice.vllm.image | vLLM image used in ModelService CR presets | object | `{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-dev","tag":"0.0.5"}` |
+| modelservice.vllm.metrics.enabled | Enable metrics scraping from vllm service, see `modelservice.serviceMonitor` for configuration | bool | `true` |
+| modelservice.vllmSim | vLL sim container options | object | See below |
+| modelservice.vllmSim.image | vLLM sim image used in ModelService CR presets | object | `{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/vllm-sim","tag":"0.0.4"}` |
 | nameOverride | String to partially override common.names.fullname | string | `""` |
 | redis | Bitnami/Redis chart configuration | object | Use sane defaults for minimal Redis deployment |
-| sampleApplication | Sample application deploying a p-d pair of specific model | object | `{"downloadModelJob":{"hfModelID":"meta-llama/Llama-3.2-3B-Instruct"},"enabled":true,"inferencePoolPort":8000,"model":{"auth":{"hfToken":{"create":true,"key":"HF_TOKEN","name":"llm-d-hf-token"}},"modelArtifactURI":"pvc://llama-3.2-3b-instruct-pvc/models/meta-llama/Llama-3.2-3B-Instruct","modelName":"Llama-3.2-3B-Instruct","servedModelNames":[]},"resources":{"limits":{"nvidia.com/gpu":1},"requests":{"nvidia.com/gpu":1}}}` |
+| sampleApplication | Sample application deploying a p-d pair of specific model | object | See below |
 | sampleApplication.downloadModelJob.hfModelID | If `.Values.sampleApplication.model.modelArtifactURI` starts with `pvc://` what huggingface repo to load onto the pvc | string | `"meta-llama/Llama-3.2-3B-Instruct"` |
 | sampleApplication.enabled | Enable rendering of sample application resources | bool | `true` |
 | sampleApplication.inferencePoolPort | InferencePool port configuration | int | `8000` |

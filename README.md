@@ -3,30 +3,22 @@
 
 See [charts/llm-d/README.md](charts/llm-d/README.md).
 
+## What is llm-d?
+
+See [llm-d website](https://llm-d.ai/) for more information.
+
+## What is this repository?
+
+Our focus is to provide a Helm chart for deploying llm-d on Kubernetes.
+
+## Getting Started
+
+To try out the chart and llm-d look at our [quickstart guide](docs/quickstart.md).
+
 ## Contributing
 
-Before submitting a pull request, please ensure that you have following dependencies installed and set up:
+See [CONTRIBUTING.md](CONTRIBUTING.md) for instructions on how to contribute to this repository.
 
-- [Helm](https://helm.sh/)
-- [Helm docs](https://github.com/norwoodj/helm-docs)
-- [pre-commit](https://pre-commit.com/)
+## License
 
-Then run:
-
-```bash
-pre-commit install
-pre-commit run -a
-```
-
-Please address any linting issues that are flagged during validation. Once all linting problems have been resolved,
-update the version number in the [`charts/llm-d/Chart.yaml`](charts/llm-d/Chart.yaml) file using
-[semantic versioning](https://semver.org/). Follow the `X.Y.Z` format so the nature of the changes is reflected in the
-chart.
-
-- `X` (major) is incremented for breaking changes,
-- `Y` (minor) is incremented when new features are added without breaking existing functionality,
-- `Z` (patch) is incremented for bug fixes, minor improvements, or non-breaking changes.
-
-## Deploying llm-d
-
-See the [quickstart installer readme](quickstart/README.md) for instructions
+This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
