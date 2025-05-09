@@ -452,13 +452,25 @@ install() {
   helm dependency build .
   log_success "✅ Dependencies built"
 
+  if [[ "${DISABLE_METRICS}" == "true" ]]; then
+    log_info "ℹ️ Metrics collection disabled"
+    METRICS_ARGS=(
+      --set modelservice.metrics.enabled=false
+      --set modelservice.epp.metrics.enabled=false
+      --set modelservice.vllm.metrics.enabled=false
+    )
+  else
+    METRICS_ARGS=()
+  fi
+
   log_info "🚚 Deploying llm-d chart with ${VALUES_PATH}..."
   helm upgrade -i llm-d . \
     ${DEBUG} \
     --namespace "${NAMESPACE}" \
     --values "${VALUES_PATH}" \
     --set global.imagePullSecrets[0]=llm-d-pull-secret \
-    --set gateway.kGatewayParameters.proxyUID="${PROXY_UID}"
+    --set gateway.kGatewayParameters.proxyUID="${PROXY_UID}" \
+    "${METRICS_ARGS[@]}"
   log_success "✅ llm-d deployed"
 
   log_info "🔄 Patching all ServiceAccounts with pull-secret..."
@@ -601,8 +613,8 @@ uninstall() {
   log_info "🗑️ Deleting monitoring namespace..."
   kubectl delete namespace "${MONITORING_NAMESPACE}" --ignore-not-found || true
 
-
   log_info "🗑️ Deleting PVCs..."
+
   #  If the PV is not deleted here, it breaks model-download job on next install
   kubectl delete pv "${MODEL_PV_NAME}" --ignore-not-found
   # TODO: sort out why PROTOCOL is null. Temporary workaround is always deleting it. PV_NAME is also currently unbound here.
