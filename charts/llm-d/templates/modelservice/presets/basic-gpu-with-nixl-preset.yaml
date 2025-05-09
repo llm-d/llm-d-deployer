@@ -332,10 +332,6 @@ data:
                 - --grpcHealthPort
                 - "9003"
               env:
-              {{- if .Values.redis.enabled }}
-              - name: KVCACHE_INDEXER_REDIS_ADDR
-                value: {{ include "redis.master.service.fullurl" . -}}
-              {{- end -}}
               {{/* HACK, waiting on: https://github.com/neuralmagic/llm-d-model-service/issues/123 */}}
               {{ `{{- if .HFModelName }}` }}
               - name: HF_TOKEN
@@ -344,6 +340,12 @@ data:
                     name: {{ .Values.sampleApplication.model.auth.hfToken.name }}
                     key: {{ .Values.sampleApplication.model.auth.hfToken.key }}
               {{ `{{- end }}` }}
+              {{- if .Values.modelservice.epp.defaultEnvVars }}
+              {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.epp.defaultEnvVars "context" $) | nindent 14 }}
+              {{- end }}
+              {{- if .Values.modelservice.epp.extraEnvVars }}
+              {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.epp.extraEnvVars "context" $) | nindent 14 }}
+              {{- end }}
               image: {{ include "modelservice.eppImage" . }}
               imagePullPolicy: {{ .Values.modelservice.epp.image.imagePullPolicy }}
               livenessProbe:

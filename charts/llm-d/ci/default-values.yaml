@@ -12,3 +12,7 @@ redis:
 modelservice:
   metrics:
     enabled: false
+  epp:
+    extraEnvVars:
+      - name: PD_ENABLED
+        value: 'false'
