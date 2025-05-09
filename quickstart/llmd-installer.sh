@@ -233,9 +233,9 @@ install() {
   log_success "✅ Job manifest patched"
 
   log_info "Checking for a storage class..."
-  STORAGE_CLASS=$(kubectl get sc -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
-  if [[ -z "$STORAGE_CLASS" ]]; then
-    log_error "No storage class found; please create one"
+  STORAGE_CLASSES=$(kubectl get sc ${STORAGE_CLASS} 2>/dev/null || true)
+  if [[ -z "$STORAGE_CLASSES" ]]; then
+    log_error "The defined storage class was not found; please create one"
     exit 1
   fi
   log_success "✅ Storage class found: ${STORAGE_CLASS}"
