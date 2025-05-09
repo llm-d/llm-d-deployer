@@ -301,8 +301,9 @@ modelservice:
     image:
       registry: quay.io
       repository: "llm-d/llm-d-dev"
-      tag: "vllm-nixl-0.0.6-amd64"
-      imagePullPolicy: "IfNotPresent"
+      tag: "vllm-nixl-0.0.6"
+      imagePullPolicy: "Always"
+      # imagePullPolicy: "IfNotPresent"
 
     metrics:
 
