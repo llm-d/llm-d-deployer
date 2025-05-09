@@ -38,7 +38,7 @@ jobs:
       AMI_ID: ami-04f167a56786e4b09
       KEY_NAME: ${{ secrets.SSH_KEY_NAME }}
       REGION: ${{ secrets.AWS_REGION }}
-      GH_TOKEN: ${{secrets.GH_TOKEN}}
+      GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
       HF_TOKEN: ${{secrets.HF_TOKEN}}
       TERMINATION_TIMEOUT: ${{ github.event.inputs.wait_for_termination }}
       PODS_READINESS_TIMEOUT: ${{ github.event.inputs.wait_for_pods }}
@@ -127,7 +127,7 @@ jobs:
             sudo apt-get update -y
             sudo apt-get install -y git
 
-            git clone https://$GH_TOKEN@github.com/vishnoianil/llm-d-deployer.git
+            git clone https://$GH_TOKEN@github.com/neuralmagic/llm-d-deployer.git
             cd llm-d-deployer/quickstart
 
             ./install-deps.sh | tee ~/install-deps.log
