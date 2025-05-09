@@ -175,10 +175,28 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.epp.defaultEnvVars | Default environment variables for endpoint picker, use `extraEnvVars` to override default behavior by defining the same variable again. Ref: https://github.com/neuralmagic/gateway-api-inference-extension/tree/dev?tab=readme-ov-file#temporary-fork-configuration | list | `[{"name":"ENABLE_KVCACHE_AWARE_SCORER","value":"{{ .Values.redis.enabled }}"},{"name":"KVCACHE_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"KVCACHE_INDEXER_REDIS_ADDR","value":"{{ if .Values.redis.enabled }}{{ include \"redis.master.service.fullurl\" . }}{{ end }}"},{"name":"ENABLE_PREFIX_AWARE_SCORER","value":"true"},{"name":"PREFIX_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"ENABLE_LOAD_AWARE_SCORER","value":"true"},{"name":"LOAD_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"ENABLE_SESSION_AWARE_SCORER","value":"true"},{"name":"SESSION_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"PD_ENABLED","value":"true"},{"name":"PD_PROMPT_LEN_THRESHOLD","value":"10"},{"name":"PREFILL_ENABLE_KVCACHE_AWARE_SCORER","value":"true"},{"name":"PREFILL_KVCACHE_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"PREFILL_ENABLE_LOAD_AWARE_SCORER","value":"true"},{"name":"PREFILL_LOAD_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"PREFILL_ENABLE_PREFIX_AWARE_SCORER","value":"true"},{"name":"PREFILL_PREFIX_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"DECODE_ENABLE_KVCACHE_AWARE_SCORER","value":"true"},{"name":"DECODE_KVCACHE_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"DECODE_ENABLE_LOAD_AWARE_SCORER","value":"true"},{"name":"DECODE_LOAD_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"DECODE_ENABLE_PREFIX_AWARE_SCORER","value":"true"},{"name":"DECODE_PREFIX_AWARE_SCORER_WEIGHT","value":"1.0"}]` |
 | modelservice.epp.extraEnvVars | Additional environment variables for endpoint picker | list | `[]` |
 | modelservice.epp.image | Endpoint picker image used in ModelService CR presets | object | `{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-gateway-api-inference-extension-dev","tag":"0.0.5"}` |
-| modelservice.epp.metrics.enabled | Enable metrics scraping from endpoint picker service, see `modelservice.serviceMonitor` for configuration | bool | `true` |
+| modelservice.epp.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true,"serviceMonitor":{"annotations":{},"interval":"10s","labels":{},"namespaceSelector":{"any":false,"matchNames":[]},"path":"/metrics","port":"metrics","selector":{"matchLabels":{}}}}` |
+| modelservice.epp.metrics.enabled | Enable metrics scraping from endpoint picker service | bool | `true` |
+| modelservice.epp.metrics.serviceMonitor | Prometheus ServiceMonitor configuration <br /> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md | object | See below |
+| modelservice.epp.metrics.serviceMonitor.annotations | Additional annotations provided to the ServiceMonitor | object | `{}` |
+| modelservice.epp.metrics.serviceMonitor.interval | ServiceMonitor endpoint interval at which metrics should be scraped | string | `"10s"` |
+| modelservice.epp.metrics.serviceMonitor.labels | Additional labels provided to the ServiceMonitor | object | `{}` |
+| modelservice.epp.metrics.serviceMonitor.namespaceSelector | ServiceMonitor namespace selector | object | `{"any":false,"matchNames":[]}` |
+| modelservice.epp.metrics.serviceMonitor.path | ServiceMonitor endpoint path | string | `"/metrics"` |
+| modelservice.epp.metrics.serviceMonitor.port | ServiceMonitor endpoint port | string | `"metrics"` |
+| modelservice.epp.metrics.serviceMonitor.selector | ServiceMonitor selector matchLabels </br> matchLabels must match labels on modelservice Services | object | `{"matchLabels":{}}` |
 | modelservice.fullnameOverride | String to fully override modelservice.fullname | string | `""` |
 | modelservice.image | Modelservice controller image, please change only if appropriate adjustments to the CRD are being made | object | `{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-model-service","tag":"0.0.8"}` |
-| modelservice.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true}` |
+| modelservice.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true,"serviceMonitor":{"annotations":{},"interval":"15s","labels":{},"namespaceSelector":{"any":false,"matchNames":[]},"path":"/metrics","port":"vllm","selector":{"matchLabels":{}}}}` |
+| modelservice.metrics.enabled | Enable metrics scraping from prefill and decode services, see `model | bool | `true` |
+| modelservice.metrics.serviceMonitor | Prometheus ServiceMonitor configuration <br /> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md | object | See below |
+| modelservice.metrics.serviceMonitor.annotations | Additional annotations provided to the ServiceMonitor | object | `{}` |
+| modelservice.metrics.serviceMonitor.interval | ServiceMonitor endpoint interval at which metrics should be scraped | string | `"15s"` |
+| modelservice.metrics.serviceMonitor.labels | Additional labels provided to the ServiceMonitor | object | `{}` |
+| modelservice.metrics.serviceMonitor.namespaceSelector | ServiceMonitor namespace selector | object | `{"any":false,"matchNames":[]}` |
+| modelservice.metrics.serviceMonitor.path | ServiceMonitor endpoint path | string | `"/metrics"` |
+| modelservice.metrics.serviceMonitor.port | ServiceMonitor endpoint port | string | `"vllm"` |
+| modelservice.metrics.serviceMonitor.selector | ServiceMonitor selector matchLabels </br> matchLabels must match labels on modelservice Services | object | `{"matchLabels":{}}` |
 | modelservice.nameOverride | String to partially override modelservice.fullname | string | `""` |
 | modelservice.podAnnotations | Pod annotations for modelservice | object | `{}` |
 | modelservice.podLabels | Pod labels for modelservice | object | `{}` |
@@ -198,17 +216,10 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.serviceAccount.fullnameOverride | String to fully override modelservice.serviceAccountName, defaults to modelservice.fullname | string | `""` |
 | modelservice.serviceAccount.labels | Additional custom labels to the service ServiceAccount. | object | `{}` |
 | modelservice.serviceAccount.nameOverride | String to partially override modelservice.serviceAccountName, defaults to modelservice.fullname | string | `""` |
-| modelservice.serviceMonitor | Prometheus ServiceMonitor configuration <br /> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md | object | See below |
-| modelservice.serviceMonitor.annotations | Additional annotations provided to the ServiceMonitor | object | `{}` |
-| modelservice.serviceMonitor.interval | ServiceMonitor endpoint interval at which metrics should be scraped | string | `"15s"` |
-| modelservice.serviceMonitor.labels | Additional labels provided to the ServiceMonitor | object | `{}` |
-| modelservice.serviceMonitor.namespaceSelector | ServiceMonitor namespace selector | object | `{"any":false,"matchNames":[]}` |
-| modelservice.serviceMonitor.path | ServiceMonitor endpoint path | string | `"/metrics"` |
-| modelservice.serviceMonitor.port | ServiceMonitor endpoint port | string | `"vllm"` |
-| modelservice.serviceMonitor.selector | ServiceMonitor selector matchLabels </br> matchLabels must match labels on modelservice Services | object | `{"matchLabels":{}}` |
 | modelservice.vllm | vLLM container options | object | See below |
 | modelservice.vllm.image | vLLM image used in ModelService CR presets | object | `{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-dev","tag":"vllm-nixl-0.0.6"}` |
-| modelservice.vllm.metrics.enabled | Enable metrics scraping from vllm service, see `modelservice.serviceMonitor` for configuration | bool | `true` |
+| modelservice.vllm.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true}` |
+| modelservice.vllm.metrics.enabled | Enable metrics scraping from prefill & decode services | bool | `true` |
 | modelservice.vllmSim | vLL sim container options | object | See below |
 | modelservice.vllmSim.image | vLLM sim image used in ModelService CR presets | object | `{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/vllm-sim","tag":"0.0.4"}` |
 | nameOverride | String to partially override common.names.fullname | string | `""` |
@@ -222,7 +233,7 @@ Kubernetes: `>= 1.25.0-0`
 | sampleApplication.model.auth.hfToken.key | Value of the token. Do not set this but use `envsubst` in conjunction with the helm chart | string | `"HF_TOKEN"` |
 | sampleApplication.model.auth.hfToken.name | Name of the secret to create to store your huggingface token | string | `"llm-d-hf-token"` |
 | sampleApplication.model.modelArtifactURI | Fully qualified pvc URI: pvc://<pvc-name>/<model-path> | string | `"pvc://llama-3.2-3b-instruct-pvc/models/meta-llama/Llama-3.2-3B-Instruct"` |
-| sampleApplication.model.modelName | Name of the model | string | `"Llama-3.2-3B-Instruct"` |
+| sampleApplication.model.modelName | Name of the model | string | `"meta-llama/Llama-3.2-3B-Instruct"` |
 | sampleApplication.model.servedModelNames | Aliases to the Model named vllm will serve with | list | `[]` |
 | sampleApplication.resources | Resource requests/limits <br /> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-requests-and-limits-of-pod-and-container | object | `{"limits":{"nvidia.com/gpu":1},"requests":{"nvidia.com/gpu":1}}` |
 | test | Helm tests | object | `{"enabled":false}` |

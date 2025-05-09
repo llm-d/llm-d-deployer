@@ -60,7 +60,7 @@ sampleApplication:
     # modelArtifactURI: hf://meta-llama/Llama-3.2-3B-Instruct
 
     # -- Name of the model
-    modelName: "Llama-3.2-3B-Instruct"
+    modelName: "meta-llama/Llama-3.2-3B-Instruct"
 
     # -- Aliases to the Model named vllm will serve with
     servedModelNames: []
@@ -183,7 +183,40 @@ modelservice:
 
   # -- Enable metrics gathering via podMonitor / ServiceMonitor
   metrics:
+
+    # -- Enable metrics scraping from prefill and decode services, see `model
     enabled: true
+
+    # -- Prometheus ServiceMonitor configuration
+    # <br /> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md
+    # @default -- See below
+    serviceMonitor:
+
+      # -- Additional annotations provided to the ServiceMonitor
+      annotations: {}
+
+      # -- Additional labels provided to the ServiceMonitor
+      labels: {}
+
+      # -- ServiceMonitor endpoint port
+      port: "vllm"
+
+      # -- ServiceMonitor endpoint path
+      path: "/metrics"
+
+      # -- ServiceMonitor endpoint interval at which metrics should be scraped
+      interval: "15s"
+
+      # -- ServiceMonitor namespace selector
+      namespaceSelector:
+        any: false
+        matchNames: []
+
+      # -- ServiceMonitor selector matchLabels
+      # </br> matchLabels must match labels on modelservice Services
+      selector:
+        matchLabels: {}
+
 
   # --  String to fully override modelservice.fullname
   fullnameOverride: ""
@@ -213,10 +246,42 @@ modelservice:
       # tag: 0.0.1
       imagePullPolicy: "Always"
 
+    # -- Enable metrics gathering via podMonitor / ServiceMonitor
     metrics:
 
-      # -- Enable metrics scraping from endpoint picker service, see `modelservice.serviceMonitor` for configuration
+      # -- Enable metrics scraping from endpoint picker service
       enabled: true
+
+      # -- Prometheus ServiceMonitor configuration
+      # <br /> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md
+      # @default -- See below
+      serviceMonitor:
+
+        # -- Additional annotations provided to the ServiceMonitor
+        annotations: {}
+
+        # -- Additional labels provided to the ServiceMonitor
+        labels: {}
+
+        # -- ServiceMonitor endpoint port
+        port: "metrics"
+
+        # -- ServiceMonitor endpoint path
+        path: "/metrics"
+
+        # -- ServiceMonitor endpoint interval at which metrics should be scraped
+        interval: "10s"
+
+        # -- ServiceMonitor namespace selector
+        namespaceSelector:
+          any: false
+          matchNames: []
+
+        # -- ServiceMonitor selector matchLabels
+        # </br> matchLabels must match labels on modelservice Services
+        selector:
+          matchLabels: {}
+
     # -- Default environment variables for endpoint picker, use `extraEnvVars` to override default behavior by defining the same variable again.
     # Ref: https://github.com/neuralmagic/gateway-api-inference-extension/tree/dev?tab=readme-ov-file#temporary-fork-configuration
     defaultEnvVars:
@@ -307,9 +372,10 @@ modelservice:
       imagePullPolicy: "Always"
       # imagePullPolicy: "IfNotPresent"
 
+    # -- Enable metrics gathering via podMonitor / ServiceMonitor
     metrics:
 
-      # -- Enable metrics scraping from vllm service, see `modelservice.serviceMonitor` for configuration
+      # -- Enable metrics scraping from prefill & decode services
       enabled: true
 
   # -- Routing proxy container options
@@ -332,36 +398,6 @@ modelservice:
       repository: llm-d/vllm-sim
       tag: "0.0.4"
       imagePullPolicy: "IfNotPresent"
-
-  # -- Prometheus ServiceMonitor configuration
-  # <br /> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md
-  # @default -- See below
-  serviceMonitor:
-
-    # -- Additional annotations provided to the ServiceMonitor
-    annotations: {}
-
-    # -- Additional labels provided to the ServiceMonitor
-    labels: {}
-
-    # -- ServiceMonitor endpoint port
-    port: "vllm"
-
-    # -- ServiceMonitor endpoint path
-    path: "/metrics"
-
-    # -- ServiceMonitor endpoint interval at which metrics should be scraped
-    interval: "15s"
-
-    # -- ServiceMonitor namespace selector
-    namespaceSelector:
-      any: false
-      matchNames: []
-
-    # -- ServiceMonitor selector matchLabels
-    # </br> matchLabels must match labels on modelservice Services
-    selector:
-      matchLabels: {}
 
   # -- Annotations to add to all modelservice resources
   annotations: {}
