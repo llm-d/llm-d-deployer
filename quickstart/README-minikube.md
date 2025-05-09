@@ -131,10 +131,11 @@ The installer needs to be run from the `llm-d-deployer/quickstart` directory.
 ### Flags
 
 | Flag                       | Description                                                                                             | Example                                                   |
-|----------------------------|---------------------------------------------------------------------------------------------------------|-----------------------------------------------------------|
+|--------------------------------|---------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
 | `--hf-token TOKEN`         | HuggingFace API token (or set `HF_TOKEN` env var)                                                       | `./llmd-installer-minikube.sh --hf-token "abc123"`                        |
 | `--auth-file PATH`         | Path to your registry auth file ig not in one of the two listed files in the auth section of the readme | `./llmd-installer-minikube.sh --auth-file ~/.config/containers/auth.json` |
 | `--storage-size SIZE`      | Size of storage volume (default: 7Gi)                                                                   | `./llmd-installer-minikube.sh --storage-size 15Gi`                        |
+| `--download-model`             | Download the model to the modelArtifactURI URI PVC in your values.yaml file                             | `./llmd-installer-minikube.sh --download-model`                           |
 | `--storage-class CLASS`    | Storage class to use (default: standard)                                                                | `./llmd-installer-minikube.sh --storage-class standard`                  |
 | `--namespace NAME`         | Kubernetes namespace to use (default: `llm-d`)                                                          | `./llmd-installer-minikube.sh --namespace foo`                            |
 | `--values NAME`            | Absolute path to a Helm values.yaml file (default: llm-d-deployer/charts/llm-d/values.yaml)             | `./llmd-installer-minikube.sh --values /path/to/values.yaml`              |
@@ -152,7 +153,7 @@ A hugging-face token is required either exported in your environment or passed v
 
 ```bash
 export HF_TOKEN="your-token"
-./llmd-installer-minikube.sh --provision-minikube-gpu
+./llmd-installer-minikube.sh --provision-minikube-gpu --download-model
 ```
 
 ### Install on an existing llm-d minikube cluster
@@ -163,7 +164,7 @@ to avoid any conflicts with existing deployments.
 
 ```bash
 export HF_TOKEN="your-token"
-./llmd-installer-minikube.sh
+./llmd-installer-minikube.sh --download-model
 ```
 
 ### Provision Minikube cluster without GPU support and install llm-d
@@ -173,7 +174,7 @@ would be for testing component functionality up until p/d pod deployments and wo
 
 ```bash
 export HF_TOKEN="your-token"
-./llmd-installer-minikube.sh --provision-minikube
+./llmd-installer-minikube.sh --provision-minikube --download-model
 ```
 
 ### Manually minikube operations
@@ -224,6 +225,45 @@ kubectl run --rm -i curl-temp --image=curlimages/curl --restart=Never -- \
     "messages": [{"content": "Who are you?", "role": "user"}],
     "stream": false
   }'
+```
+
+### Bring Your Own Model
+
+There is a default sample application that by loads [`meta-llama/Llama-3.2-3B-Instruct`](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct)
+based on the sample application [values.yaml](../charts/llm-d/values.yaml) file. If you want to swap that model out with
+another [vllm compatible model](https://docs.vllm.ai/en/latest/models/supported_models.html). Simply modify the
+values file with the model you wish to run.
+
+Here is an example snippet of the default model values being replaced with
+[`meta-llama/Llama-3.2-1B-Instruct`](https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct).
+
+```yaml
+  model:
+    # -- Fully qualified pvc URI: pvc://<pvc-name>/<model-path>
+    modelArtifactURI: pvc://llama-3.2-1b-instruct-pvc/models/meta-llama/Llama-3.2-1B-Instruct
+
+    # # -- Fully qualified hf URI: pvc://<pvc-name>/<model-path>
+    # modelArtifactURI: hf://meta-llama/Llama-3.2-3B-Instruct
+
+    # -- Name of the model
+    modelName: "Llama-3.2-1B-Instruct"
+
+    # -- Aliases to the Model named vllm will serve with
+    servedModelNames: []
+
+    auth:
+      # -- HF token auth config via k8s secret. Required if using hf:// URI or using pvc:// URI with `--download-model` in quickstart
+      hfToken:
+        # -- If the secret should be created or one already exists
+        create: true
+        # -- Name of the secret to create to store your huggingface token
+        name: llm-d-hf-token
+        # -- Value of the token. Do not set this but use `envsubst` in conjunction with the helm chart
+        key: HF_TOKEN
+
+  downloadModelJob:
+      # -- If `.Values.sampleApplication.model.modelArtifactURI` starts with `pvc://` what huggingface repo to load onto the pvc
+    hfModelID: "meta-llama/Llama-3.2-1B-Instruct"
 ```
 
 ### Metrics Collection
