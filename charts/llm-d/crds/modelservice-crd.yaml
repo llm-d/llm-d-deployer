@@ -1,3 +1,4 @@
+---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -19,6 +20,18 @@ spec:
     - jsonPath: .spec.decoupleScaling
       name: Decouple Scaling
       type: boolean
+    - jsonPath: .status.prefillReady
+      name: Prefill READY
+      type: string
+    - jsonPath: .status.prefillAvailable
+      name: Prefill AVAIL
+      type: integer
+    - jsonPath: .status.decodeReady
+      name: Decode READY
+      type: string
+    - jsonPath: .status.decodeAvailable
+      name: Decode AVAIL
+      type: integer
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
@@ -2079,16 +2092,48 @@ spec:
                   - type
                   type: object
                 type: array
+              configMapNames:
+                description: |-
+                  ConfigMapNames identifies the configmap used for prefill and decode
+                  if ConfigMapNames is yet to be created,
+                  this reference will be an empty list
+                items:
+                  type: string
+                type: array
+              decodeAvailable:
+                format: int32
+                type: integer
               decodeDeploymentRef:
                 description: |-
                   DecodeDeploymentRef identifies the decode deployment
                   if decode deployment is yet to be created,
                   this reference will be nil
                 type: string
+              decodeReady:
+                description: READY and AVAILABLE for decode
+                type: string
+              decodeServiceAccountRef:
+                description: |-
+                  DecodeServiceAccountRef identifies the service account for decode
+                  if DecodeServiceAccountRef is yet to be created,
+                  this reference will be nil
+                type: string
+              eppAvailable:
+                format: int32
+                type: integer
               eppDeploymentRef:
                 description: |-
                   EppDeploymentRef identifies the epp deployment
                   if epp deployment is yet to be created,
+                  this reference will be nil
+                type: string
+              eppReady:
+                description: READY and AVAILABLE for Epp
+                type: string
+              eppRoleBinding:
+                description: |-
+                  EppRoleBinding identifies the rolebinding for Epp
+                  if EppRoleBinding is yet to be created,
                   this reference will be nil
                 type: string
               inferenceModelRef:
@@ -2103,12 +2148,28 @@ spec:
                   if inference pool is yet to be created,
                   this reference will be nil
                 type: string
+              prefillAvailable:
+                format: int32
+                type: integer
               prefillDeploymentRef:
                 description: |-
                   PrefillDeploymentRef identifies the prefill deployment
                   if prefill stanza is omitted, or if prefill deployment is yet to be created,
                   this reference will be nil
                 type: string
+              prefillReady:
+                description: READY and AVAILABLE for prefill
+                type: string
+              prefillServiceAccountRef:
+                description: |-
+                  PDServiceAccountRef identifies the service account for PD
+                  if PDServiceAccountRef is yet to be created,
+                  this reference will be nil
+                type: string
+            required:
+            - decodeAvailable
+            - eppAvailable
+            - prefillAvailable
             type: object
         type: object
     served: true

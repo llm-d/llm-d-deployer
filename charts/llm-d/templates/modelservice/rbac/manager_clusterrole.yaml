@@ -37,8 +37,8 @@ rules:
   - pods
   verbs:
   - get
-  - watch
   - list
+  - watch
 - apiGroups:
   - ""
   resources:
@@ -75,8 +75,8 @@ rules:
   - endpointslices
   verbs:
   - get
-  - watch
   - list
+  - watch
 - apiGroups:
   - inference.networking.x-k8s.io
   resources:

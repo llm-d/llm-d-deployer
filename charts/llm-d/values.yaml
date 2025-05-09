@@ -195,7 +195,7 @@ modelservice:
   image:
     registry: quay.io
     repository: llm-d/llm-d-model-service
-    tag: "0.0.6"
+    tag: "0.0.8"
     imagePullPolicy: "Always"
 
   # -- Endpoint picker image used in ModelService CR presets
