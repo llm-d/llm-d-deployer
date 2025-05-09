@@ -26,8 +26,7 @@ VALUES_FILE="values.yaml"
 DEBUG=""
 DISABLE_METRICS=false
 MONITORING_NAMESPACE="llm-d-monitoring"
-MODEL_PV_NAME="llama-hostpath-pv"
-MODEL_PVC_NAME="llama-3.2-3b-instruct-pvc"
+MODEL_PV_NAME="model-hostpath-pv"
 REDIS_PV_NAME="redis-hostpath-pv"
 REDIS_PVC_NAME="redis-data-redis-master"
 DOWNLOAD_MODEL=false
@@ -296,10 +295,6 @@ create_pvc_and_download_model_if_needed() {
 
       verify_env
 
-      eval "echo \"$(cat ${REPO_ROOT}/helpers/k8s/model-storage-rwx-pvc-template.yaml)\"" \
-        | kubectl apply -n "${NAMESPACE}" -f -
-      log_success "✅ PVC \`${PVC_NAME}\` created with storageClassName ${STORAGE_CLASS} and size ${STORAGE_SIZE}"
-
       log_info "🚀 Launching model download job..."
 
       if [[ "${YQ_TYPE}" == "go" ]]; then
@@ -377,21 +372,6 @@ install() {
   kubectl config set-context --current --namespace="${NAMESPACE}"
   log_success "✅ Namespace ready"
 
-  log_info "🔐 Creating pull secret ${PULL_SECRET_NAME}..."
-  kubectl create secret generic "${PULL_SECRET_NAME}" \
-    -n "${NAMESPACE}" \
-    --from-file=.dockerconfigjson="${AUTH_FILE}" \
-    --type=kubernetes.io/dockerconfigjson \
-    --dry-run=client -o yaml | kubectl apply -f -
-  log_success "✅ Pull secret created"
-
-  log_info "🔧 Patching default ServiceAccount..."
-  kubectl patch serviceaccount default \
-    -n "${NAMESPACE}" \
-    --type merge \
-    --patch '{"imagePullSecrets":[{"name":"'"${PULL_SECRET_NAME}"'"}]}'
-  log_success "✅ ServiceAccount patched"
-
   cd "${CHART_DIR}"
   # Resolve which values.yaml to use:
   #   - If the user passed --values-file (i.e. $VALUES_FILE != "values.yaml"), treat it as
@@ -407,6 +387,33 @@ install() {
   else
     VALUES_PATH="${CHART_DIR}/values.yaml"
   fi
+
+  log_info "🔍 DEBUG: raw MODEL_ARTIFACT_URI = $(yq -r .sampleApplication.model.modelArtifactURI "${VALUES_PATH}")"
+  MODEL_ARTIFACT_URI=$(yq -r .sampleApplication.model.modelArtifactURI "${VALUES_PATH}")
+  PROTOCOL="${MODEL_ARTIFACT_URI%%://*}"
+  PVC_AND_MODEL_PATH="${MODEL_ARTIFACT_URI#*://}"
+  PVC_NAME="${PVC_AND_MODEL_PATH%%/*}"
+  MODEL_PATH="${PVC_AND_MODEL_PATH#*/}"
+  log_info "🔍 DEBUG: PVC_NAME will be ${PVC_NAME}"
+
+  # Create hostPath PV & PVC for model storage (hostPath is minikube specific)
+  setup_minikube_storage
+  log_success "✅ Minikube hostPath PV/PVC for model created"
+
+  log_info "🔐 Creating pull secret ${PULL_SECRET_NAME}..."
+  kubectl create secret generic "${PULL_SECRET_NAME}" \
+    -n "${NAMESPACE}" \
+    --from-file=.dockerconfigjson="${AUTH_FILE}" \
+    --type=kubernetes.io/dockerconfigjson \
+    --dry-run=client -o yaml | kubectl apply -f -
+  log_success "✅ Pull secret created"
+
+  log_info "🔧 Patching default ServiceAccount..."
+  kubectl patch serviceaccount default \
+    -n "${NAMESPACE}" \
+    --type merge \
+    --patch '{"imagePullSecrets":[{"name":"'"${PULL_SECRET_NAME}"'"}]}'
+  log_success "✅ ServiceAccount patched"
 
   if [[ "$(yq -r .sampleApplication.model.auth.hfToken.create "${VALUES_PATH}")" == "true" ]]; then
     log_info "🔐 Creating HF token secret (from ${VALUES_PATH})..."
@@ -426,6 +433,17 @@ install() {
 
   export STORAGE_CLASS="manual"
 
+  # DEBUG PVC CREATION TODO: setup debug logging
+  log_info "🔍 DEBUG: Using values file: ${VALUES_PATH}"
+  log_info "🔍 DEBUG: raw MODEL_ARTIFACT_URI = $(yq -r .sampleApplication.model.modelArtifactURI "${VALUES_PATH}")"
+  log_info "🔍 DEBUG: raw DOWNLOAD_MODEL flag = ${DOWNLOAD_MODEL}"
+  log_info "🔍 DEBUG: PROTOCOL=${PROTOCOL}"
+  log_info "🔍 DEBUG: PVC_NAME=${PVC_NAME}"
+  log_info "🔍 DEBUG: MODEL_PATH=${MODEL_PATH}"
+  log_info "🔍 DEBUG: STORAGE_CLASS=${STORAGE_CLASS}"
+  log_info "🔍 DEBUG: STORAGE_SIZE=${STORAGE_SIZE}"
+
+  #  create_pvc_and_download_model_if_needed
   create_pvc_and_download_model_if_needed
 
   helm repo add bitnami  https://charts.bitnami.com/bitnami
@@ -491,8 +509,8 @@ EOF
 
 setup_minikube_storage() {
   log_info "📦 Setting up Minikube hostPath RWX Shared Storage..."
-  log_info "🔄 Creating PV and PVC for llama model..."
-kubectl apply -f - <<EOF
+  log_info "🔄 Creating PV and PVC for llama model (PVC name: ${PVC_NAME})…"
+  kubectl apply -f - <<EOF
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -511,7 +529,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: ${MODEL_PVC_NAME}
+  name: ${PVC_NAME}                # ← now dynamic
   namespace: ${NAMESPACE}
 spec:
   storageClassName: manual
@@ -522,7 +540,7 @@ spec:
       storage: ${STORAGE_SIZE}
   volumeName: ${MODEL_PV_NAME}
 EOF
-  log_success "✅ llama model PV and PVC created."
+  log_success "✅ llama model PV and PVC (${PVC_NAME}) created."
 }
 
 clone_gaie_repo() {
@@ -584,7 +602,9 @@ uninstall() {
 
 
   log_info "🗑️ Deleting PVCs..."
-
+  #  If the PV is not deleted here, it breaks model-download job on next install
+  kubectl delete pv "${MODEL_PV_NAME}" --ignore-not-found
+  # TODO: sort out why PROTOCOL is null. Temporary workaround is always deleting it. PV_NAME is also currently unbound here.
   if [[ "${PROTOCOL}" == "pvc" ]]; then
     # enforce PV cleanup - PVC should go with namespace
     if [[ -n ${PV_NAME} ]]; then
