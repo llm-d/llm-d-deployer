@@ -79,14 +79,18 @@ data:
               imagePullPolicy: {{ .Values.modelservice.vllm.image.imagePullPolicy }}
               securityContext:
                 allowPrivilegeEscalation: false
+              command:
+                - vllm
+                - serve
+                - {{ `{{ default (print "/models/" .ModelPath) .HFModelName }}` }}
               args:
                 - "--port"
                 - "8000"
                 - "--kv-transfer-config"
                 - '{"kv_connector":"LMCacheConnectorV1","kv_role":"kv_consumer","kv_connector_extra_config": {"discard_partial_chunks": false, "lmcache_rpc_port": "consumer1"}}'
               env:
-                - name: XDG_CACHE_HOME
-                  value: /tmp
+                - name: HOME
+                  value: /home
                 - name: POD_IP
                   valueFrom:
                     fieldRef:
@@ -94,13 +98,6 @@ data:
                       fieldPath: status.podIP
                 - name: LMCACHE_DISTRIBUTED_URL
                   value: ${POD_IP}:80
-                {{- if .Values.auth.hfToken.enabled }}
-                - name: HF_TOKEN
-                  valueFrom:
-                    secretKeyRef:
-                      name: {{ .Values.auth.hfToken.name }}
-                      key: {{ .Values.auth.hfToken.key }}
-                {{- end }}
                 - name: CUDA_VISIBLE_DEVICES
                   value: "0"
                 - name: UCX_TLS
@@ -117,25 +114,38 @@ data:
                 - name: LMCACHE_LOOKUP_URL
                   value: {{ include "redis.master.service.fullurl" .}}
                 {{- end }}
+                {{ `{{- if .HFModelName }}` }}
+                - name: HF_HUB_CACHE
+                  value: /models
+                {{ `{{- end }}` }}
+              volumeMounts:
+                - name: home
+                  mountPath: /home
+                - name: config-decoder
+                  mountPath: /vllm-workspace
+                {{ `{{- if .HFModelName }}` }}
+                - name: model-cache
+                  mountPath: /models
+                {{ `{{- else }}` }}
+                - name: model-storage
+                  mountPath: /models
+                  readOnly: true
+                {{ `{{- end }}` }}
               ports:
                 - containerPort: 8001
                   protocol: TCP
                 - containerPort: 55555
                   protocol: TCP
-              volumeMounts:
-                - name: config-decoder
-                  mountPath: /vllm-workspace
-                - name: model-cache
-                  mountPath: /vllm-workspace/models
-                - name: model-storage
-                  mountPath: /cache
           volumes:
+            - name: home
+              emptyDir: {}
             - name: config-decoder
               configMap:
                 name: {{ include "modelservice.fullname" . -}}-config-decoder
+            {{ `{{- if .HFModelName }}` }}
             - name: model-cache
-              emptyDir:
-                sizeLimit: 1Gi
+              emptyDir: {}
+            {{ `{{- end }}` }}
 
   prefillDeployment: |
     apiVersion: apps/v1
@@ -164,14 +174,18 @@ data:
               imagePullPolicy: {{ .Values.modelservice.vllm.image.imagePullPolicy }}
               securityContext:
                 allowPrivilegeEscalation: false
+              command:
+                - vllm
+                - serve
+                - {{ `{{ default (print "/models/" .ModelPath) .HFModelName }}` }}
               args:
                 - "--port"
                 - "8000"
                 - "--kv-transfer-config"
                 - '{"kv_connector":"LMCacheConnectorV1","kv_role":"kv_producer","kv_connector_extra_config": {"discard_partial_chunks": false, "lmcache_rpc_port": "producer1"}}'
               env:
-                - name: XDG_CACHE_HOME
-                  value: /tmp
+                - name: HOME
+                  value: /home
                 - name: POD_IP
                   valueFrom:
                     fieldRef:
@@ -179,13 +193,6 @@ data:
                       fieldPath: status.podIP
                 - name: LMCACHE_DISTRIBUTED_URL
                   value: "${POD_IP}:80"
-                {{- if .Values.auth.hfToken.enabled }}
-                - name: HF_TOKEN
-                  valueFrom:
-                    secretKeyRef:
-                      name: {{ .Values.auth.hfToken.name }}
-                      key: {{ .Values.auth.hfToken.key }}
-                {{- end }}
                 - name: CUDA_VISIBLE_DEVICES
                   value: "0"
                 - name: UCX_TLS
@@ -202,25 +209,38 @@ data:
                 - name: LMCACHE_LOOKUP_URL
                   value: {{ include "redis.master.service.fullurl" .}}
                 {{- end }}
+                {{ `{{- if .HFModelName }}` }}
+                - name: HF_HUB_CACHE
+                  value: /models
+                {{ `{{- end }}` }}
               volumeMounts:
+                - name: home
+                  mountPath: /home
                 - name: config-prefiller
                   mountPath: /vllm-workspace
+                {{ `{{- if .HFModelName }}` }}
                 - name: model-cache
-                  mountPath: /vllm-workspace/models
+                  mountPath: /models
+                {{ `{{- else }}` }}
                 - name: model-storage
-                  mountPath: /cache
+                  mountPath: /models
+                  readOnly: true
+                {{ `{{- end }}` }}
               ports:
                 - containerPort: 8001
                   protocol: TCP
                 - containerPort: 55555
                   protocol: TCP
           volumes:
+            - name: home
+              emptyDir: {}
             - name: config-prefiller
               configMap:
                 name: {{ include "modelservice.fullname" . -}}-config-prefiller
+            {{ `{{ if .HFModelName }}` }}
             - name: model-cache
-              emptyDir:
-                sizeLimit: 1Gi
+              emptyDir: {}
+            {{ `{{ end }}` }}
 
   decodeService: |
     apiVersion: v1
@@ -269,7 +289,7 @@ data:
         {{- end}}
     spec:
       ports:
-        - port: 9002    # Needs to match the port of the eppDeployment
+        - port: 9002
           protocol: TCP
           name: grpc
         - port: 9003
@@ -278,7 +298,7 @@ data:
         - port: 9090
           protocol: TCP
           name: metrics
-      type: NodePort # accepts "LoadBalancer" or "NodePort"
+      type: NodePort
       selector:
         app.kubernetes.io/gateway: {{ include "gateway.fullname" . }}
 
@@ -297,7 +317,6 @@ data:
           labels:
             app.kubernetes.io/gateway: {{ include "gateway.fullname" . }}
         spec:
-          serviceAccountName: endpoint-picker-sa # manually created in workaround w/ proper RBAC
           containers:
             - args:
                 - --poolName
@@ -314,16 +333,17 @@ data:
                 - "9003"
               env:
               {{- if .Values.redis.enabled }}
-                - name: KVCACHE_INDEXER_REDIS_ADDR
-                  value: {{ include "redis.master.service.fullurl" . -}}:8100
-              {{- end }}
-              {{- if .Values.auth.hfToken.enabled }}
-                - name: HF_TOKEN
-                  valueFrom:
-                    secretKeyRef:
-                      name: {{ .Values.auth.hfToken.name }}
-                      key: {{ .Values.auth.hfToken.key }}
-              {{- end }}
+              - name: KVCACHE_INDEXER_REDIS_ADDR
+                value: {{ include "redis.master.service.fullurl" . -}}
+              {{- end -}}
+              {{/* HACK, waiting on: https://github.com/neuralmagic/llm-d-model-service/issues/123 */}}
+              {{ `{{- if .HFModelName }}` }}
+              - name: HF_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.sampleApplication.model.auth.hfToken.name }}
+                    key: {{ .Values.sampleApplication.model.auth.hfToken.key }}
+              {{ `{{- end }}` }}
               image: {{ include "modelservice.eppImage" . }}
               imagePullPolicy: {{ .Values.modelservice.epp.image.imagePullPolicy}}
               # livenessProbe:

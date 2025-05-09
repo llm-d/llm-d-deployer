@@ -30,6 +30,7 @@ MODEL_PV_NAME="llama-hostpath-pv"
 MODEL_PVC_NAME="llama-3.2-3b-instruct-pvc"
 REDIS_PV_NAME="redis-hostpath-pv"
 REDIS_PVC_NAME="redis-data-redis-master"
+DOWNLOAD_MODEL=false
 
 ### HELP & LOGGING ###
 print_help() {
@@ -37,18 +38,19 @@ print_help() {
 Usage: $(basename "$0") [OPTIONS]
 
 Options:
-  --hf-token TOKEN           Hugging Face token (or set HF_TOKEN env var)
-  --auth-file PATH           Path to containers auth.json
-  --provision-minikube       Provision a local Minikube cluster without GPU support (p/d pods will stay pending)
-  --provision-minikube-gpu   Provision a local Minikube cluster with GPU support
-  --delete-minikube          Delete the minikube cluster and exit
-  --storage-size SIZE        Size of storage volume (default: 15Gi)
-  --namespace NAME           K8s namespace (default: llm-d)
-  --values-file PATH         Path to Helm values.yaml file (default: values.yaml)
-  --uninstall                Uninstall the llm-d components from the current cluster
-  --debug                    Add debug mode to the helm install
-  --disable-metrics-collection Disable metrics collection (Prometheus will not be installed)
-  -h, --help                 Show this help and exit
+  --hf-token TOKEN               Hugging Face token (or set HF_TOKEN env var)
+  --auth-file PATH               Path to containers auth.json
+  --provision-minikube           Provision a local Minikube cluster without GPU support (p/d pods will stay pending)
+  --provision-minikube-gpu       Provision a local Minikube cluster with GPU support
+  --delete-minikube              Delete the minikube cluster and exit
+  --storage-size SIZE            Size of storage volume (default: 15Gi)
+  --namespace NAME               K8s namespace (default: llm-d)
+  --values-file PATH             Path to Helm values.yaml file (default: values.yaml)
+  --uninstall                    Uninstall the llm-d components from the current cluster
+  --debug                        Add debug mode to the helm install
+  --disable-metrics-collection   Disable metrics collection (Prometheus will not be installed)
+  -d, --download-model           Download the model to PVC if modelArtifactURI is pvc based
+  -h, --help                     Show this help and exit
 EOF
 }
 
@@ -94,19 +96,21 @@ fetch_kgateway_proxy_uid() {
 parse_args() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --hf-token)               HF_TOKEN_CLI="$2"; shift 2 ;;
-      --auth-file)              AUTH_FILE_CLI="$2"; shift 2 ;;
-      --provision-minikube)     PROVISION_MINIKUBE=true; shift ;;
-      --provision-minikube-gpu) PROVISION_MINIKUBE_GPU=true; shift ;;
-      --delete-minikube)        DELETE_MINIKUBE=true; shift ;;
-      --storage-size)           STORAGE_SIZE="$2"; shift 2 ;;
-      --namespace)              NAMESPACE="$2"; shift 2 ;;
-      --values-file)            VALUES_FILE="$2"; shift 2 ;;
-      --uninstall)              ACTION="uninstall"; shift ;;
-      --debug)                  DEBUG="--debug"; shift;;
-      --disable-metrics-collection) DISABLE_METRICS=true; shift;;
-      -h|--help)                print_help; exit 0 ;;
-      *)                        die "Unknown option: $1" ;;
+      --hf-token)                     HF_TOKEN_CLI="$2"; shift 2 ;;
+      --auth-file)                    AUTH_FILE_CLI="$2"; shift 2 ;;
+      --provision-minikube)           PROVISION_MINIKUBE=true; shift ;;
+      --provision-minikube-gpu)       PROVISION_MINIKUBE_GPU=true; shift ;;
+      --delete-minikube)              DELETE_MINIKUBE=true; shift ;;
+      --storage-size)                 STORAGE_SIZE="$2"; shift 2 ;;
+      --namespace)                    NAMESPACE="$2"; shift 2 ;;
+      --values-file)                  VALUES_FILE="$2"; shift 2 ;;
+      --uninstall)                    ACTION="uninstall"; shift ;;
+      --debug)                        DEBUG="--debug"; shift;;
+      --disable-metrics-collection)   DISABLE_METRICS=true; shift;;
+      -d)                             DOWNLOAD_MODEL=true; shift;;
+      --download-model)               DOWNLOAD_MODEL=true; shift;;
+      -h|--help)                      print_help; exit 0 ;;
+      *)                              die "Unknown option: $1" ;;
     esac
   done
 }
@@ -231,6 +235,135 @@ delete_minikube() {
   log_success "🙀 Minikube deleted."
 }
 
+create_pvc_and_download_model_if_needed() {
+  YQ_TYPE=$(yq --version 2>/dev/null | grep -q 'version' && echo 'go' || echo 'py')
+
+  MODEL_ARTIFACT_URI=$(yq '.sampleApplication.model.modelArtifactURI' "${VALUES_PATH}" )
+  if [[ "${YQ_TYPE}" == "py" ]]; then
+    MODEL_ARTIFACT_URI=$(echo "${MODEL_ARTIFACT_URI}" | cut -d "\"" -f 2)
+  fi
+
+  PROTOCOL="${MODEL_ARTIFACT_URI%%://*}"
+
+  verify_env() {
+    if [[ -z "${MODEL_ARTIFACT_URI}" ]]; then
+        log_error "No Model Artifact URI set. Please set the \`.sampleApplication.model.modelArtifactURI\` in the values file."
+        exit 1
+    fi
+    if [[ -z "${HF_MODEL_ID}" ]]; then
+        log_error "Error, \`modelArtifactURI\` indicates model from PVC, but no
+        Please set the \`.sampleApplication.downloadModelJob.hfModelID\` in the values file."
+        exit 1
+    fi
+    if [[ -z "${HF_TOKEN_SECRET_NAME}" ]]; then
+        log_error "Error, no HF token secret name. Please set the \`.sampleApplication.model.auth.hfToken.name\` in the values file."
+        exit 1
+    fi
+    if [[ -z "${HF_TOKEN_SECRET_KEY}" ]]; then
+        log_error "Error, no HF token secret key. Please set the \`.sampleApplication.model.auth.hfToken.key\` in the values file."
+        exit 1
+    fi
+    if [[ -z "${PVC_NAME}" ]]; then
+        log_error "Invalid \$MODEL_ARTIFACT_URI, could not parse PVC name out of \`.sampleApplication.model.modelArtifactURI\`."
+        exit 1
+    fi
+    if [[ -z "${MODEL_PATH}" ]]; then
+        log_error "Invalid \$MODEL_ARTIFACT_URI, could not parse Model Path out of \`.sampleApplication.model.modelArtifactURI\`."
+        exit 1
+    fi
+  }
+
+  case "$PROTOCOL" in
+  pvc)
+    # Used in both conditionals, for logging in else
+    PVC_AND_MODEL_PATH="${MODEL_ARTIFACT_URI#*://}"
+    PVC_NAME="${PVC_AND_MODEL_PATH%%/*}"
+    MODEL_PATH="${PVC_AND_MODEL_PATH#*/}"
+    if [[ "${DOWNLOAD_MODEL}" == "true" ]]; then
+      log_info "💾 Provisioning model storage…"
+
+      HF_MODEL_ID=$(yq '.sampleApplication.downloadModelJob.hfModelID' "${VALUES_PATH}" )
+      HF_TOKEN_SECRET_NAME=$(yq '.sampleApplication.model.auth.hfToken.name' "${VALUES_PATH}" )
+      HF_TOKEN_SECRET_KEY=$(yq '.sampleApplication.model.auth.hfToken.key' "${VALUES_PATH}" )
+
+      if [[ "${YQ_TYPE}" == "py" ]]; then
+        HF_MODEL_ID=$(echo "${HF_MODEL_ID}" | cut -d "\"" -f 2)
+        HF_TOKEN_SECRET_NAME=$(echo "${HF_TOKEN_SECRET_NAME}" | cut -d "\"" -f 2)
+        HF_TOKEN_SECRET_KEY=$(echo "${HF_TOKEN_SECRET_KEY}" | cut -d "\"" -f 2)
+      fi
+
+      DOWNLOAD_MODEL_JOB_TEMPLATE_FILE_PATH=$(realpath "${REPO_ROOT}/helpers/k8s/load-model-on-pvc-template.yaml")
+
+      verify_env
+
+      eval "echo \"$(cat ${REPO_ROOT}/helpers/k8s/model-storage-rwx-pvc-template.yaml)\"" \
+        | kubectl apply -n "${NAMESPACE}" -f -
+      log_success "✅ PVC \`${PVC_NAME}\` created with storageClassName ${STORAGE_CLASS} and size ${STORAGE_SIZE}"
+
+      log_info "🚀 Launching model download job..."
+
+      if [[ "${YQ_TYPE}" == "go" ]]; then
+        yq eval "
+        (.spec.template.spec.containers[0].env[] | select(.name == \"MODEL_PATH\")).value = \"${MODEL_PATH}\" |
+        (.spec.template.spec.containers[0].env[] | select(.name == \"HF_MODEL_ID\")).value = \"${HF_MODEL_ID}\" |
+        (.spec.template.spec.containers[0].env[] | select(.name == \"HF_TOKEN\")).valueFrom.secretKeyRef.name = \"${HF_TOKEN_SECRET_NAME}\" |
+        (.spec.template.spec.containers[0].env[] | select(.name == \"HF_TOKEN\")).valueFrom.secretKeyRef.key = \"${HF_TOKEN_SECRET_KEY}\" |
+        (.spec.template.spec.volumes[] | select(.name == \"model-cache\")).persistentVolumeClaim.claimName = \"${PVC_NAME}\"
+        " "${DOWNLOAD_MODEL_JOB_TEMPLATE_FILE_PATH}" | kubectl apply -f -
+      elif [[ "${YQ_TYPE}" == "py" ]]; then
+        kubectl apply -f ${DOWNLOAD_MODEL_JOB_TEMPLATE_FILE_PATH} --dry-run=client -o yaml |
+          yq -r | \
+          jq \
+            --arg modelPath "${MODEL_PATH}" \
+            --arg hfModelId "${HF_MODEL_ID}" \
+            --arg hfTokenSecretName "${HF_TOKEN_SECRET_NAME}" \
+            --arg hfTokenSecretKey "${HF_TOKEN_SECRET_KEY}" \
+            --arg pvcName "${PVC_NAME}" \
+            '
+            (.spec.template.spec.containers[] | select(.name == "downloader").env[] | select(.name == "MODEL_PATH")).value = $modelPath |
+            (.spec.template.spec.containers[] | select(.name == "downloader").env[] | select(.name == "HF_MODEL_ID")).value = $hfModelId |
+            (.spec.template.spec.containers[] | select(.name == "downloader").env[] | select(.name == "HF_TOKEN")).valueFrom.secretKeyRef.name = $hfTokenSecretName |
+            (.spec.template.spec.containers[] | select(.name == "downloader").env[] | select(.name == "HF_TOKEN")).valueFrom.secretKeyRef.key = $hfTokenSecretKey |
+            (.spec.template.spec.volumes[] | select(.name == "model-cache")).persistentVolumeClaim.claimName = $pvcName
+            ' | \
+          yq -y | \
+          kubectl apply -n ${NAMESPACE} -f -
+      else
+        log_error "unrecognized yq distro -- error"
+        exit 1
+      fi
+
+      log_info "⏳ Waiting 30 seconds pod to start running model download job ..."
+      kubectl wait --for=condition=Ready pod/$(kubectl get pod --selector=job-name=download-model -o json | jq -r '.items[0].metadata.name') --timeout=60s || {
+        log_error "🙀 No pod picked up model download job";
+        log_info "Please check your storageclass configuration for the \`download-model\` - if the PVC fails to spin the job will never get a pod"
+        kubectl logs job/download-model -n "${NAMESPACE}";
+      }
+
+      log_info "⏳ Waiting up to 3m for model download job to complete; this may take a while depending on connection speed and model size..."
+      kubectl wait --for=condition=complete --timeout=180s job/download-model -n "${NAMESPACE}" || {
+        log_error "🙀 Model download job failed or timed out";
+        JOB_POD=$(kubectl get pod --selector=job-name=download-model -o json | jq -r '.items[0].metadata.name')
+        kubectl logs pod/${JOB_POD} -n "${NAMESPACE}";
+        exit 1;
+      }
+
+      log_success "✅ Model downloaded"
+    else
+      log_info "⏭️ Model download to PVC skipped: \`--download-model\` flag not set, assuming PVC ${PVC_NAME} exists and contains model at path: \`${MODEL_PATH}\`."
+    fi
+    ;;
+  hf)
+    log_info "⏭️ Model download to PVC skipped: BYO model via HF repo_id selected."
+    echo "protocol hf chosen - models will be downloaded JIT in inferencing pods."
+    ;;
+  *)
+    log_error "🤮 Unsupported protocol: $PROTOCOL. Check back soon for more supported types of model source 😉."
+    exit 1
+    ;;
+  esac
+}
+
 install() {
   log_info "🏗️ Installing GAIE Kubernetes infrastructure…"
   clone_gaie_repo
@@ -275,10 +408,10 @@ install() {
     VALUES_PATH="${CHART_DIR}/values.yaml"
   fi
 
-  if [[ "$(yq -r .auth.hfToken.enabled "${VALUES_PATH}")" == "true" ]]; then
+  if [[ "$(yq -r .sampleApplication.model.auth.hfToken.create "${VALUES_PATH}")" == "true" ]]; then
     log_info "🔐 Creating HF token secret (from ${VALUES_PATH})..."
-    HF_NAME=$(yq -r .auth.hfToken.name "${VALUES_PATH}")
-    HF_KEY=$(yq -r .auth.hfToken.key  "${VALUES_PATH}")
+    HF_NAME=$(yq -r .sampleApplication.model.auth.hfToken.name "${VALUES_PATH}")
+    HF_KEY=$(yq -r .sampleApplication.model.auth.hfToken.key  "${VALUES_PATH}")
     kubectl create secret generic "${HF_NAME}" \
       --from-literal="${HF_KEY}=${HF_TOKEN}" \
       --dry-run=client -o yaml | kubectl apply -f -
@@ -291,29 +424,9 @@ install() {
   kubectl apply -f crds/modelservice-crd.yaml
   log_success "✅ ModelService CRD applied"
 
-  log_info "📝 Patching load-model job manifest with HF secret name='${HF_NAME}', key='${HF_KEY}'"
-  # try brew's yq first; if that fails, fall back to linux installed pkg syntax -_-
-  if ! yq -i ".spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.name = \"${HF_NAME}\"" "${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml"; then
-    yq -i -y ".spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.name = \"${HF_NAME}\"" "${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml"
-  fi
-  if ! yq -i ".spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.key  = \"${HF_KEY}\""  "${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml"; then
-    yq -i -y ".spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.key  = \"${HF_KEY}\""  "${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml"
-  fi
-  log_success "✅ Job manifest patched"
+  export STORAGE_CLASS="manual"
 
-    setup_minikube_storage
-
-  log_info "🚀 Launching model download job..."
-  kubectl apply -f "${REPO_ROOT}/helpers/k8s/load-model-on-pvc.yaml" -n "${NAMESPACE}"
-
-  log_info "⏳ Waiting up to 3m for model download job to complete; this may take a while depending on connection speed and model size..."
-  kubectl wait --for=condition=complete --timeout=180s job/download-model -n "${NAMESPACE}" || {
-    log_error "🙀 Model download job failed or timed out";
-    kubectl logs job/download-model -n "${NAMESPACE}";
-    kubectl logs -l job-name=download-model -n "${NAMESPACE}";
-    exit 1;
-  }
-  log_success "✅ Model downloaded"
+  create_pvc_and_download_model_if_needed
 
   helm repo add bitnami  https://charts.bitnami.com/bitnami
   log_info "🛠️ Building Helm chart dependencies..."
@@ -335,10 +448,6 @@ install() {
     xargs -I{} kubectl patch serviceaccount {} --namespace="${NAMESPACE}" --type merge --patch "${patch}"
   kubectl patch serviceaccount default --namespace="${NAMESPACE}" --type merge --patch "${patch}"
   log_success "✅ ServiceAccounts patched"
-
-  MODELSERVICE_POD=$(kubectl get pods -n "${NAMESPACE}" | grep "modelservice" | awk 'NR==1{print $1}')
-  log_info "🔁 Restarting pod ${MODELSERVICE_POD} to pick up new image..."
-  kubectl delete pod "${MODELSERVICE_POD}" -n "${NAMESPACE}" || true
 
   log_info "🔄 Creating shared hostpath for Minicube PV and PVC for Redis..."
   kubectl delete pvc redis-pvc -n "${NAMESPACE}" --ignore-not-found
@@ -417,7 +526,7 @@ EOF
 
 clone_gaie_repo() {
   if [[ ! -d gateway-api-inference-extension ]]; then
-    git clone https://github.com/neuralmagic/gateway-api-inference-extension.git
+    git clone --branch main https://github.com/neuralmagic/gateway-api-inference-extension.git
   fi
 }
 
@@ -454,8 +563,19 @@ uninstall() {
     log_info "🗑️ Deleting ServiceMonitor CRD..."
     kubectl delete crd servicemonitors.monitoring.coreos.com --ignore-not-found || true
   fi
+
+  MODEL_ARTIFACT_URI=$(kubectl get modelservice --ignore-not-found -n ${NAMESPACE} -o yaml | yq '.items[].spec.modelArtifacts.uri')
+  PROTOCOL="${MODEL_ARTIFACT_URI%%://*}"
+  if [[ "${PROTOCOL}" == "pvc" ]]; then
+    INFERENCING_DEPLOYMENT=$(kubectl get deployments --ignore-not-found  -n ${NAMESPACE} -l llm-d.ai/inferenceServing=true | tail -n 1 | awk '{print $1}')
+    PVC_NAME=$( kubectl get deployments --ignore-not-found  $INFERENCING_DEPLOYMENT -n ${NAMESPACE} -o yaml | yq '.spec.template.spec.volumes[] | select(has("persistentVolumeClaim"))' | yq .claimName)
+    PV_NAME=$(kubectl get pvc ${PVC_NAME} --ignore-not-found  -n ${NAMESPACE} -o yaml | yq .spec.volumeName)
+    kubectl delete job download-model --ignore-not-found || true
+  fi
+
   log_info "🗑️ Uninstalling llm-d chart..."
-  helm uninstall llm-d --namespace "${NAMESPACE}" || true
+  helm uninstall llm-d --ignore-not-found --namespace "${NAMESPACE}" || true
+
   log_info "🗑️ Deleting namespace ${NAMESPACE}..."
   kubectl delete namespace "${NAMESPACE}" || true
   log_info "🗑️ Deleting monitoring namespace..."
@@ -463,7 +583,17 @@ uninstall() {
 
 
   log_info "🗑️ Deleting PVCs..."
-  kubectl delete pv llama-hostpath-pv --ignore-not-found
+
+  if [[ "${PROTOCOL}" == "pvc" ]]; then
+    # enforce PV cleanup - PVC should go with namespace
+    if [[ -n ${PV_NAME} ]]; then
+      log_info "🗑️ Deleting Model PV..."
+      kubectl delete pv ${PV_NAME} --ignore-not-found
+    fi
+  else
+    log_info "⏭️ skipping deletion of PV and PVCS..."
+  fi
+
   kubectl delete pvc redis-pvc -n "${NAMESPACE}" --ignore-not-found
   kubectl delete pv redis-hostpath-pv --ignore-not-found
   log_success "💀 Uninstallation complete"

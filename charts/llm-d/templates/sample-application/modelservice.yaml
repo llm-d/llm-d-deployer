@@ -17,31 +17,39 @@ spec:
   baseConfigMapRef:
     name: {{ include "modelservice.fullname" . }}-basic-gpu-with-nixl-preset
   routing:
-    modelName: {{ .Values.sampleApplication.modelName }}
+    modelName: {{ .Values.sampleApplication.model.modelName }}
   modelArtifacts:
-    uri: {{ .Values.sampleApplication.modelArtifactUri }}
+    uri: {{ .Values.sampleApplication.model.modelArtifactURI }}
   decode:
     replicas: 1
     containers:
     - name: "vllm"
-      command:
-        - vllm
-        - serve
       args:
-      - "{{ .Values.sampleApplication.modelPath }}"
       - "--served-model-name"
-      - {{ .Values.sampleApplication.modelName }}
+      - {{ include "sampleApplication.servedModelNames" .}}
       resources: {{ .Values.sampleApplication.resources | toYaml | nindent 8 }}
+      env:
+      {{- if eq (include "sampleApplication.modelArtifactType" . ) "hf" }}
+      - name: HF_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: {{ .Values.sampleApplication.model.auth.hfToken.name }}
+            key: {{ .Values.sampleApplication.model.auth.hfToken.key }}
+      {{- end }}
   prefill:
     replicas: 1
     containers:
     - name: "vllm"
-      command:
-        - vllm
-        - serve
       args:
-      - "{{ .Values.sampleApplication.modelPath }}"
       - "--served-model-name"
-      - {{ .Values.sampleApplication.modelName }}
+      - {{ include "sampleApplication.servedModelNames" .}}
       resources: {{ .Values.sampleApplication.resources | toYaml | nindent 8 }}
+      env:
+      {{- if eq (include "sampleApplication.modelArtifactType" . ) "hf" }}
+      - name: HF_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: {{ .Values.sampleApplication.model.auth.hfToken.name }}
+            key: {{ .Values.sampleApplication.model.auth.hfToken.key }}
+      {{- end }}
 {{- end }}

@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart for OpenShift
 
-![Version: 0.5.6](https://img.shields.io/badge/Version-0.5.6-informational?style=flat-square)
+![Version: 0.5.7](https://img.shields.io/badge/Version-0.5.7-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for llm-d
@@ -138,9 +138,6 @@ Kubernetes: `>= 1.25.0-0`
 
 | Key | Description | Type | Default |
 |-----|-------------|------|---------|
-| auth.hfToken.enabled | If the contents of this secret should be read into env | bool | `true` |
-| auth.hfToken.key | Value of the token. Do not set this but use `envsubst` in conjunction with the helm chart | string | `"HF_TOKEN"` |
-| auth.hfToken.name | Name of the secret to create to store your huggingface token | string | `"llm-d-hf-token"` |
 | clusterDomain | Default Kubernetes cluster domain | string | `"cluster.local"` |
 | commonAnnotations | Annotations to add to all deployed objects | object | `{}` |
 | commonLabels | Labels to add to all deployed objects | object | `{}` |
@@ -206,12 +203,17 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.vllmSim | vLLM sim image used in ModelService CR presets | object | `{"image":{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/vllm-sim","tag":"0.0.4"}}` |
 | nameOverride | String to partially override common.names.fullname | string | `""` |
 | redis | Bitnami/Redis chart configuration | object | Use sane defaults for minimal Redis deployment |
-| sampleApplication | Sample application deploying a p-d pair of specific model | object | `{"enabled":true,"inferencePoolPort":8000,"modelArtifactUri":"pvc://llama-3.2-3b-instruct-pvc/models/meta-llama/Llama-32-3B-Instruct","modelName":"Llama-3.2-3B-Instruct","modelPath":"/cache/models/meta-llama/Llama-3.2-3B-Instruct","resources":{"limits":{"nvidia.com/gpu":1},"requests":{"nvidia.com/gpu":1}}}` |
+| sampleApplication | Sample application deploying a p-d pair of specific model | object | `{"downloadModelJob":{"hfModelID":"meta-llama/Llama-3.2-3B-Instruct"},"enabled":true,"inferencePoolPort":8000,"model":{"auth":{"hfToken":{"create":true,"key":"HF_TOKEN","name":"llm-d-hf-token"}},"modelArtifactURI":"pvc://llama-3.2-3b-instruct-pvc/models/meta-llama/Llama-3.2-3B-Instruct","modelName":"Llama-3.2-3B-Instruct","servedModelNames":[]},"resources":{"limits":{"nvidia.com/gpu":1},"requests":{"nvidia.com/gpu":1}}}` |
+| sampleApplication.downloadModelJob.hfModelID | If `.Values.sampleApplication.model.modelArtifactURI` starts with `pvc://` what huggingface repo to load onto the pvc | string | `"meta-llama/Llama-3.2-3B-Instruct"` |
 | sampleApplication.enabled | Enable rendering of sample application resources | bool | `true` |
 | sampleApplication.inferencePoolPort | InferencePool port configuration | int | `8000` |
-| sampleApplication.modelArtifactUri | Location where the model can be loaded from. Currently supports pvc:// backed by preexisting PVC | string | `"pvc://llama-3.2-3b-instruct-pvc/models/meta-llama/Llama-32-3B-Instruct"` |
-| sampleApplication.modelName | Specify the model name as it is available to the api | string | `"Llama-3.2-3B-Instruct"` |
-| sampleApplication.modelPath | Specify the filepath for the model | string | `"/cache/models/meta-llama/Llama-3.2-3B-Instruct"` |
+| sampleApplication.model.auth.hfToken | HF token auth config via k8s secret. Required if using hf:// URI or using pvc:// URI with `--download-model` in quickstart | object | `{"create":true,"key":"HF_TOKEN","name":"llm-d-hf-token"}` |
+| sampleApplication.model.auth.hfToken.create | If the secret should be created or one already exists | bool | `true` |
+| sampleApplication.model.auth.hfToken.key | Value of the token. Do not set this but use `envsubst` in conjunction with the helm chart | string | `"HF_TOKEN"` |
+| sampleApplication.model.auth.hfToken.name | Name of the secret to create to store your huggingface token | string | `"llm-d-hf-token"` |
+| sampleApplication.model.modelArtifactURI | Fully qualified pvc URI: pvc://<pvc-name>/<model-path> | string | `"pvc://llama-3.2-3b-instruct-pvc/models/meta-llama/Llama-3.2-3B-Instruct"` |
+| sampleApplication.model.modelName | Name of the model | string | `"Llama-3.2-3B-Instruct"` |
+| sampleApplication.model.servedModelNames | Aliases to the Model named vllm will serve with | list | `[]` |
 | sampleApplication.resources | Resource requests/limits <br /> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-requests-and-limits-of-pod-and-container | object | `{"limits":{"nvidia.com/gpu":1},"requests":{"nvidia.com/gpu":1}}` |
 | test | Helm tests | object | `{"enabled":false}` |
 | test.enabled | Enable rendering of helm test resources | bool | `false` |
