@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart for OpenShift
 
-![Version: 0.6.1](https://img.shields.io/badge/Version-0.6.1-informational?style=flat-square)
+![Version: 0.6.2](https://img.shields.io/badge/Version-0.6.2-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for llm-d
@@ -172,7 +172,7 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.decode.tolerations[0] | default NVIDIA GPU toleration | object | `{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}` |
 | modelservice.enabled | Toggle to deploy modelservice controller related resources | bool | `true` |
 | modelservice.epp | Endpoint picker container options | object | See below |
-| modelservice.epp.image | Endpoint picker image used in ModelService CR presets | object | `{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-gateway-api-inference-extension-dev","tag":"0.0.5-amd64"}` |
+| modelservice.epp.image | Endpoint picker image used in ModelService CR presets | object | `{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-inference-scheduler","tag":"0.0.1"}` |
 | modelservice.epp.metrics.enabled | Enable metrics scraping from endpoint picker service, see `modelservice.serviceMonitor` for configuration | bool | `true` |
 | modelservice.fullnameOverride | String to fully override modelservice.fullname | string | `""` |
 | modelservice.image | Modelservice controller image, please change only if appropriate adjustments to the CRD are being made | object | `{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-model-service","tag":"0.0.8"}` |
