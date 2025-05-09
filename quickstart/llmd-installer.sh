@@ -235,7 +235,7 @@ create_pvc_and_download_model_if_needed() {
         (.spec.template.spec.containers[] | select(.name == "downloader").env[] | select(.name == "HF_TOKEN")).valueFrom.secretKeyRef.name = $hfTokenSecretName |
         (.spec.template.spec.containers[] | select(.name == "downloader").env[] | select(.name == "HF_TOKEN")).valueFrom.secretKeyRef.key = $hfTokenSecretKey |
         (.spec.template.spec.volumes[] | select(.name == "model-cache")).persistentVolumeClaim.claimName = $pvcName
-        ' | yq -y | kubectl apply -n ${NAMESPACE} -f - 
+        ' | yq -y | kubectl apply -n ${NAMESPACE} -f -
       else
         log_error "unrecognized yq distro -- error"
         exit 1

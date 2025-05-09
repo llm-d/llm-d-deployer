@@ -283,7 +283,7 @@ create_pvc_and_download_model_if_needed() {
       log_info "💾 Provisioning model storage…"
 
       HF_MODEL_ID=$(yq '.sampleApplication.downloadModelJob.hfModelID' "${VALUES_PATH}" )
-      HF_TOKEN_SECRET_NAME=$(yq '.sampleApplication.model.auth.hfToken.name' "${VALUES_PATH}" ) 
+      HF_TOKEN_SECRET_NAME=$(yq '.sampleApplication.model.auth.hfToken.name' "${VALUES_PATH}" )
       HF_TOKEN_SECRET_KEY=$(yq '.sampleApplication.model.auth.hfToken.key' "${VALUES_PATH}" )
 
       if [[ "${YQ_TYPE}" == "py" ]]; then
@@ -327,7 +327,7 @@ create_pvc_and_download_model_if_needed() {
             (.spec.template.spec.volumes[] | select(.name == "model-cache")).persistentVolumeClaim.claimName = $pvcName
             ' | \
           yq -y | \
-          kubectl apply -n ${NAMESPACE} -f - 
+          kubectl apply -n ${NAMESPACE} -f -
       else
         log_error "unrecognized yq distro -- error"
         exit 1
@@ -583,7 +583,7 @@ uninstall() {
 
 
   log_info "🗑️ Deleting PVCs..."
-  
+
   if [[ "${PROTOCOL}" == "pvc" ]]; then
     # enforce PV cleanup - PVC should go with namespace
     if [[ -n ${PV_NAME} ]]; then
