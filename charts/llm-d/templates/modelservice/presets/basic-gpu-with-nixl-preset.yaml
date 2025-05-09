@@ -121,8 +121,8 @@ data:
               volumeMounts:
                 - name: home
                   mountPath: /home
-                # - name: config-decoder
-                #   mountPath: /vllm-workspace
+                - name: config-decoder
+                  mountPath: /vllm-workspace
                 {{ `{{- if .HFModelName }}` }}
                 - name: model-cache
                   mountPath: /models
@@ -137,9 +137,9 @@ data:
           volumes:
             - name: home
               emptyDir: {}
-            # - name: config-decoder
-            #   configMap:
-            #     name: {{ include "modelservice.fullname" . -}}-config-decoder
+            - name: config-decoder
+              configMap:
+                name: {{ include "modelservice.fullname" . -}}-config-decoder
             {{ `{{- if .HFModelName }}` }}
             - name: model-cache
               emptyDir: {}
@@ -207,9 +207,8 @@ data:
               volumeMounts:
                 - name: home
                   mountPath: /home
-                # - name: config-prefiller
-                #   configMap:
-                #     name: {{ include "modelservice.fullname" . -}}-config-prefiller
+                - name: config-prefiller
+                  mountPath: /vllm-workspace
                 {{ `{{- if .HFModelName }}` }}
                 - name: model-cache
                   mountPath: /models
@@ -224,8 +223,9 @@ data:
           volumes:
             - name: home
               emptyDir: {}
-            # - name: config-prefiller
-            #   mountPath: /vllm-workspace
+            - name: config-prefiller
+              configMap:
+                name: {{ include "modelservice.fullname" . -}}-config-prefiller
             {{ `{{ if .HFModelName }}` }}
             - name: model-cache
               emptyDir: {}
@@ -321,14 +321,6 @@ data:
                 - --grpcHealthPort
                 - "9003"
               env:
-              - name: PD_ENABLED
-                value: "true"
-              - name: PD_PROMPT_LEN_THRESHOLD
-                value: "10"
-              {{- if .Values.redis.enabled }}
-              - name: KVCACHE_INDEXER_REDIS_ADDR
-                value: {{ include "redis.master.service.fullurl" . -}}
-              {{- end -}}
               {{/* HACK, waiting on: https://github.com/neuralmagic/llm-d-model-service/issues/123 */}}
               {{ `{{- if .HFModelName }}` }}
               - name: HF_TOKEN

@@ -207,8 +207,10 @@ modelservice:
     # -- Endpoint picker image used in ModelService CR presets
     image:
       registry: quay.io
-      repository: llm-d/llm-d-inference-scheduler
-      tag: "0.0.1"
+      repository: llm-d/llm-d-gateway-api-inference-extension-dev
+      tag: 0.0.5
+      # repository: llm-d/llm-d-inference-scheduler
+      # tag: 0.0.1
       imagePullPolicy: "Always"
 
     metrics:
