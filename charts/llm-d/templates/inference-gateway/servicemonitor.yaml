@@ -16,20 +16,14 @@ metadata:
   {{- end }}
 spec:
   endpoints:
-    - port: {{ .Values.gateway.serviceMonitor.port }}
+    - port: metrics
       path: {{ .Values.gateway.serviceMonitor.path }}
       interval: {{ .Values.gateway.serviceMonitor.interval }}
       bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
-  {{- if .Values.gateway.serviceMonitor.selector.matchLabels }}
   selector:
     matchLabels:
-      {{- include "common.tplvalues.render" ( dict "value" .Values.gateway.serviceMonitor.selector.matchLabels "context" $ ) | nindent 4 }}
-      {{- include "metrics.label" . | nindent 4 }}
-  {{- else }}
-  selector:
-    matchLabels:
-      {{- include "metrics.label" . | nindent 6 }}
-  {{- end }}
+      app.kubernetes.io/component: inference-gateway
+      app.kubernetes.io/gateway: {{ include "gateway.fullname" . }}
   {{- if .Values.gateway.serviceMonitor.namespaceSelector.matchNames }}
   namespaceSelector:
     matchNames:
