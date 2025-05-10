@@ -207,20 +207,22 @@ export HF_TOKEN="your-token"
 
 ### Validation
 
-#### A simple request
+#### A Simple Request
 
-For GPU-enabled clusters, you can quickly verify the setup. Once both the prefill and
-decode pods are running and ready, simply send a curl request to the gateway to confirm that chat
-completions are working.  You can execute the `test-request.sh` script to test the chat completions, or run the following on your own.
-If everything is working as expected, you should receive a response.  You should also see activity in the epp pod.
+The inference-gateway serves as the HTTP ingress point for all inference requests in our deployment.
+It’s implemented as a Kubernetes Gateway (`gateway.networking.k8s.io/v1`) using either kgateway or istio as the
+gatewayClassName, and sits in front of your inference pods to handle path-based routing, load balancing, retries,
+and metrics. This example validates that the gateway itself is routing your completion requests correctly.
+You can execute the [`test-request.sh`](test-request.sh) script to test completions, or run the following commands
+manually.
 
 ```bash
 NAMESPACE=llm-d
-MODEL_ID=Llama-32-3B-Instruct
+MODEL_ID=Llama-3.2-3B-Instruct
 GATEWAY_ADDRESS=$(kubectl get gateway -n ${NAMESPACE} | tail -n 1 | awk '{print $3}')
 kubectl run --rm -i curl-temp --image=curlimages/curl --restart=Never -- \
   curl -X POST \
-  "http://${GATEWAY_ADDRESS}/v1/chat/completions" \
+  "http://${GATEWAY_ADDRESS}/v1/completions" \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{
