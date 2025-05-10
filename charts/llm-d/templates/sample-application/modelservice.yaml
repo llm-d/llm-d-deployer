@@ -15,7 +15,7 @@ metadata:
 spec:
   decoupleScaling: false
   baseConfigMapRef:
-    name: {{ include "modelservice.fullname" . }}-basic-gpu-with-nixl-preset
+    name: {{ include "modelservice.fullname" . }}-basic-gpu-with-nixl-and-redis-lookup-preset
   routing:
     modelName: {{ .Values.sampleApplication.model.modelName }}
   modelArtifacts:
@@ -52,14 +52,4 @@ spec:
             name: {{ .Values.sampleApplication.model.auth.hfToken.name }}
             key: {{ .Values.sampleApplication.model.auth.hfToken.key }}
       {{- end }}
-  epp:
-    defaultEnvVars:
-      - name: PD_ENABLED
-        value: "true"
-      - name: PD_PROMPT_LEN_THRESHOLD
-        value: "10"
-    {{- if .Values.redis.enabled }}
-      - name: KVCACHE_INDEXER_REDIS_ADDR
-        value: {{ include "redis.master.service.fullurl" . -}}
-    {{- end -}}
 {{- end }}
