@@ -1,0 +1,402 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "modelservice.fullname" . }}-basic-gpu-with-nixl-and-redis-lookup-preset
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: modelservice
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- if .Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.modelservice.annotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.annotations "context" $) | nindent 4 }}
+    {{- end }}
+data:
+  configMaps: |
+    - apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: {{ include "modelservice.fullname" . -}}-config-decoder
+      data:
+        lmcache-decoder-config.yaml: |
+          chunk_size: 256
+          local_cpu: True
+          # max_local_cpu_size: 40
+          max_local_cpu_size: 5
+          max_local_disk_size: 10
+          lookup_url: {{ include "redis.master.service.fullurl" . }}
+          distributed_url: {{ `{{ .DecodeServiceName }}` }}.svc.cluster.local:80
+    - apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: {{ include "modelservice.fullname" . -}}-config-prefiller
+      data:
+        lmcache-prefiller-config.yaml: |
+          chunk_size: 256
+          local_cpu: True
+          max_local_cpu_size: 5
+          max_local_disk_size: 10
+          lookup_url: {{ include "redis.master.service.fullurl" . }}
+          distributed_url: {{ `{{ .PrefillServiceName }}` }}.svc.cluster.local:80
+
+  decodeDeployment: |
+    apiVersion: apps/v1
+    kind: Deployment
+    spec:
+      template:
+        spec:
+          {{- if .Values.modelservice.decode.tolerations }}
+          tolerations:
+            {{- toYaml .Values.modelservice.decode.tolerations | nindent 12 }}
+          {{- end }}
+          initContainers:
+            - name: routing-proxy
+              image: {{ include "modelservice.routingProxyImage" . }}
+              securityContext:
+                capabilities:
+                  drop:
+                    - MKNOD
+                allowPrivilegeEscalation: false
+              args:
+                - "--port=8000"
+                - "--vllm-port=8001"
+                - "--connector=nixlv2"
+              ports:
+                - containerPort: 8000
+                  protocol: TCP
+              restartPolicy: Always
+              imagePullPolicy: Always
+          containers:
+            - name: vllm
+              image: {{ include "modelservice.vllmImage" . }}
+              imagePullPolicy: {{ .Values.modelservice.vllm.image.imagePullPolicy }}
+              securityContext:
+                capabilities:
+                  drop:
+                    - MKNOD
+                allowPrivilegeEscalation: false
+              command:
+                - vllm
+                - serve
+                - {{ `{{ default (print "/models/" .ModelPath) .HFModelName }}` }}
+              args:
+                - "--port"
+                - "8001"
+                - "--enforce-eager"
+                - "--kv-transfer-config"
+                - '{"kv_connector":"MultiConnector","kv_role":"kv_both","kv_connector_extra_config":{"connectors":[{"kv_connector":"NixlConnector","kv_role":"kv_both"},{"kv_connector":"LMCacheConnectorV1","kv_role":"kv_both"}]}}'
+              env:
+                - name: HOME
+                  value: /home
+                - name: VLLM_NIXL_SIDE_CHANNEL_PORT
+                  value: "5557"
+                - name: VLLM_NIXL_SIDE_CHANNEL_HOST
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: status.podIP
+                - name: VLLM_LOGGING_LEVEL
+                  value: DEBUG
+                - name: LMCACHE_DISTRIBUTED_URL
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: status.podIP
+                - name: CUDA_VISIBLE_DEVICES
+                  value: "0"
+                - name: UCX_TLS
+                  value: "cuda_ipc,cuda_copy,tcp"
+                - name: LMCACHE_CONFIG_FILE
+                  value: /vllm-workspace/lmcache-decoder-config.yaml
+                - name: LMCACHE_USE_EXPERIMENTAL
+                  value: "True"
+                - name: LMCACHE_ENABLE_DEBUG
+                  value: "True"
+                - name: LMCACHE_LOOKUP_URL
+                  value: {{ include "redis.master.service.fullurl" . }}
+                {{- if ne .Values.redis.auth.enabled false }}
+                - name: LMCACHE_REDIS_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.redis.auth.existingSecret | default "llm-d-redis" }}
+                      key: {{ .Values.redis.auth.existingSecretPasswordKey | default "redis-password"}}
+                {{- end }}
+                {{ `{{- if .HFModelName }}` }}
+                - name: HF_HUB_CACHE
+                  value: /models
+                {{ `{{- end }}` }}
+              volumeMounts:
+                - name: home
+                  mountPath: /home
+                - name: config-decoder
+                  mountPath: /vllm-workspace
+                {{ `{{- if .HFModelName }}` }}
+                - name: model-cache
+                  mountPath: /models
+                {{ `{{- else }}` }}
+                - name: model-storage
+                  mountPath: /models
+                  readOnly: true
+                {{ `{{- end }}` }}
+              ports:
+                - containerPort: 5557
+                  protocol: TCP
+                - containerPort: 80
+                  protocol: TCP
+          volumes:
+            - name: home
+              emptyDir: {}
+            - name: config-decoder
+              configMap:
+                name: {{ include "modelservice.fullname" . -}}-config-decoder
+            {{ `{{- if .HFModelName }}` }}
+            - name: model-cache
+              emptyDir: {}
+            {{ `{{- end }}` }}
+
+  prefillDeployment: |
+    apiVersion: apps/v1
+    kind: Deployment
+    spec:
+      template:
+        spec:
+          {{- if .Values.modelservice.prefill.tolerations }}
+          tolerations:
+            {{- toYaml .Values.modelservice.prefill.tolerations | nindent 12 }}
+          {{- end }}
+          containers:
+            - name: vllm
+              image: {{ include "modelservice.vllmImage" . }}
+              imagePullPolicy: {{ .Values.modelservice.vllm.image.imagePullPolicy }}
+              securityContext:
+                allowPrivilegeEscalation: false
+              command:
+                - vllm
+                - serve
+                - {{ `{{ default (print "/models/" .ModelPath) .HFModelName }}` }}
+              args:
+                - "--port"
+                - "8000"
+                - "--enforce-eager"
+                - "--kv-transfer-config"
+                - '{"kv_connector":"MultiConnector","kv_role":"kv_both","kv_connector_extra_config":{"connectors":[{"kv_connector":"NixlConnector","kv_role":"kv_both"},{"kv_connector":"LMCacheConnectorV1","kv_role":"kv_both"}]}}'
+              env:
+                - name: HOME
+                  value: /home
+                - name: VLLM_LOGGING_LEVEL
+                  value: DEBUG
+                - name: VLLM_NIXL_SIDE_CHANNEL_PORT
+                  value: "5557"
+                - name: VLLM_NIXL_SIDE_CHANNEL_HOST
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: status.podIP
+                - name: LMCACHE_DISTRIBUTED_URL
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: status.podIP
+                - name: CUDA_VISIBLE_DEVICES
+                  value: "0"
+                - name: UCX_TLS
+                  value: "cuda_ipc,cuda_copy,tcp"
+                - name: LMCACHE_CONFIG_FILE
+                  value: /vllm-workspace/lmcache-prefiller-config.yaml
+                - name: LMCACHE_USE_EXPERIMENTAL
+                  value: "True"
+                - name: LMCACHE_ENABLE_DEBUG
+                  value: "True"
+                - name: LMCACHE_LOOKUP_URL
+                  value: {{ include "redis.master.service.fullurl" . }}
+                {{- if ne .Values.redis.auth.enabled false }}
+                - name: LMCACHE_REDIS_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.redis.auth.existingSecret | default "llm-d-redis" }}
+                      key: {{ .Values.redis.auth.existingSecretPasswordKey | default "redis-password"}}
+                {{- end }}
+                {{ `{{- if .HFModelName }}` }}
+                - name: HF_HUB_CACHE
+                  value: /models
+                {{ `{{- end }}` }}
+              volumeMounts:
+                - name: home
+                  mountPath: /home
+                - name: config-prefiller
+                  mountPath: /vllm-workspace
+                {{ `{{- if .HFModelName }}` }}
+                - name: model-cache
+                  mountPath: /models
+                {{ `{{- else }}` }}
+                - name: model-storage
+                  mountPath: /models
+                  readOnly: true
+                {{ `{{- end }}` }}
+              ports:
+                - containerPort: 5557
+                  protocol: TCP
+                - containerPort: 80
+                  protocol: TCP
+          volumes:
+            - name: home
+              emptyDir: {}
+            - name: config-prefiller
+              configMap:
+                name: {{ include "modelservice.fullname" . -}}-config-prefiller
+            {{ `{{ if .HFModelName }}` }}
+            - name: model-cache
+              emptyDir: {}
+            {{ `{{ end }}` }}
+
+  decodeService: |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        {{- if .Values.modelservice.vllm.metrics.enabled }}
+        {{ include "metrics.label" . }}
+        {{- end }}
+    spec:
+      clusterIP: None
+      ports:
+      - name: nixl
+        port: 5557
+        protocol: TCP
+      - name: vllm
+        port: 8000
+        protocol: TCP
+      - name: lmcache-dist
+        port: 80
+        protocol: TCP
+
+  prefillService: |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        {{- if .Values.modelservice.vllm.metrics.enabled }}
+        {{ include "metrics.label" . }}
+        {{- end }}
+    spec:
+      clusterIP: None
+      ports:
+      - name: nixl
+        port: 5557
+        protocol: TCP
+      - name: vllm
+        port: 8000
+        protocol: TCP
+      - name: lmcache-dist
+        port: 80
+        protocol: TCP
+
+  eppService: |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        app.kubernetes.io/gateway: {{ include "gateway.fullname" . }}
+        {{- if .Values.modelservice.epp.metrics.enabled }}
+        {{ include "metrics.label" . }}
+        {{- end}}
+    spec:
+      ports:
+        - port: 9002
+          protocol: TCP
+          name: grpc
+        - port: 9003
+          protocol: TCP
+          name: grpc-health
+        - port: 9090
+          protocol: TCP
+          name: metrics
+      type: NodePort
+      selector:
+        app.kubernetes.io/gateway: {{ include "gateway.fullname" . }}
+
+  eppDeployment: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      labels:
+        app.kubernetes.io/gateway: {{ include "gateway.fullname" . }}
+    spec:
+      selector:
+        matchLabels:
+          app.kubernetes.io/gateway: {{ include "gateway.fullname" . }}
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/gateway: {{ include "gateway.fullname" . }}
+        spec:
+          containers:
+            - args:
+                - --poolName
+                - {{`"{{ .InferencePoolName }}"`}}
+                - --poolNamespace
+                - {{`"{{ .ModelServiceNamespace }}"`}}
+                - -v
+                - "4"
+                - --zap-encoder
+                - json
+                - --grpcPort
+                - "9002"
+                - --grpcHealthPort
+                - "9003"
+              env:
+              {{/* HACK, waiting on: https://github.com/neuralmagic/llm-d-model-service/issues/123 */}}
+              {{ `{{- if .HFModelName }}` }}
+              - name: HF_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.sampleApplication.model.auth.hfToken.name }}
+                    key: {{ .Values.sampleApplication.model.auth.hfToken.key }}
+              {{ `{{- end }}` }}
+              {{- if .Values.modelservice.epp.defaultEnvVars }}
+              {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.epp.defaultEnvVars "context" $) | nindent 14 }}
+              {{- end }}
+              {{- if .Values.modelservice.epp.extraEnvVars }}
+              {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.epp.extraEnvVars "context" $) | nindent 14 }}
+              {{- end }}
+              image: {{ include "modelservice.eppImage" . }}
+              imagePullPolicy: {{ .Values.modelservice.epp.image.imagePullPolicy }}
+              livenessProbe:
+                failureThreshold: 3
+                grpc:
+                  port: 9003
+                  service: "envoy.service.ext_proc.v3.ExternalProcessor"
+                initialDelaySeconds: 5
+                periodSeconds: 10
+                successThreshold: 1
+                timeoutSeconds: 1
+              readinessProbe:
+                failureThreshold: 3
+                grpc:
+                  port: 9003
+                  service: "envoy.service.ext_proc.v3.ExternalProcessor"
+                initialDelaySeconds: 5
+                periodSeconds: 10
+                successThreshold: 1
+                timeoutSeconds: 1
+              name: epp
+              ports:
+                - name: grpc
+                  containerPort: 9002
+                  protocol: TCP
+                - name: grpc-health
+                  containerPort: 9003
+                  protocol: TCP
+                - name: metrics
+                  containerPort: 9090
+                  protocol: TCP
+
+  inferencePool: |
+    apiVersion: inference.networking.x-k8s.io/v1alpha2
+    kind: InferencePool
+    spec:
+      targetPortNumber: 8000
+
+  inferenceModel: |
+    apiVersion: inference.networking.x-k8s.io/v1alpha2
+    kind: InferenceModel

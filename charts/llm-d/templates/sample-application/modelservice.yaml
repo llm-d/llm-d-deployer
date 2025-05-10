@@ -15,7 +15,7 @@ metadata:
 spec:
   decoupleScaling: false
   baseConfigMapRef:
-    name: {{ include "modelservice.fullname" . }}-basic-gpu-with-nixl-preset
+    name: {{ include "modelservice.fullname" . }}-basic-gpu-with-nixl-and-redis-lookup-preset
   routing:
     modelName: {{ .Values.sampleApplication.model.modelName }}
   modelArtifacts:
