@@ -142,7 +142,6 @@ All of these role specific logs will then repeat until we also have a `decode` p
 
 ### Sidecar router logs
 
-
 Our next stop is the decode proxy sidecar (terminal 2) where you should notice communication being orchestrated between P/D pods, ex:
 
 ```log
@@ -189,4 +188,4 @@ DEBUG 05-09 19:43:44 [core.py:425] EngineCore waiting for work.
 INFO:     10.131.10.180:44514 - "POST /v1/completions HTTP/1.1" 200 OK
 ```
 
-It receives the orrigional request from the routing sidecar, finishes doing the inference and then sends the KV transfer to decode.
+It receives the original request from the routing sidecar, finishes doing the inference and then sends the KV transfer to decode.
