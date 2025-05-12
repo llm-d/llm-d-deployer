@@ -170,7 +170,8 @@ provision_minikube_gpu() {
   minikube start \
     --driver docker \
     --container-runtime docker \
-    --gpus all
+    --gpus all \
+    --memory no-limit
   log_success "🚀 Minikube GPU cluster started."
 }
 
