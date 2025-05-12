@@ -33,7 +33,6 @@ data:
                 capabilities:
                   drop:
                     - MKNOD
-                runAsNonRoot: true
                 allowPrivilegeEscalation: false
               args:
                 - "--port=8000"
@@ -52,7 +51,6 @@ data:
                 capabilities:
                   drop:
                     - MKNOD
-                runAsNonRoot: true
                 allowPrivilegeEscalation: false
               command:
                 - vllm
