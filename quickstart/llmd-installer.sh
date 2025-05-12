@@ -24,7 +24,7 @@ DEBUG=""
 SKIP_INFRA=false
 DISABLE_METRICS=false
 MONITORING_NAMESPACE="llm-d-monitoring"
-DOWNLOAD_MODEL=false
+DOWNLOAD_MODEL=true
 
 ### HELP & LOGGING ###
 print_help() {
@@ -42,7 +42,7 @@ Options:
   --debug                    Add debug mode to the helm install
   --skip-infra               Skip the infrastructure components of the installation
   --disable-metrics-collection Disable metrics collection (Prometheus will not be installed)
-  -d, --download-model       Download the model to PVC if modelArtifactURI is pvc based
+  -s, --skip-download-model  Skip downloading the model to PVC if modelArtifactURI is pvc based
   -h, --help                 Show this help and exit
 EOF
 }
@@ -89,20 +89,20 @@ fetch_kgateway_proxy_uid() {
 parse_args() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --hf-token)               HF_TOKEN_CLI="$2"; shift 2 ;;
-      --auth-file)              AUTH_FILE_CLI="$2"; shift 2 ;;
-      --storage-size)           STORAGE_SIZE="$2"; shift 2 ;;
-      --storage-class)          STORAGE_CLASS="$2"; shift 2 ;;
-      --namespace)              NAMESPACE="$2"; shift 2 ;;
-      --values-file)            VALUES_FILE="$2"; shift 2 ;;
-      --uninstall)              ACTION="uninstall"; shift ;;
-      --debug)                  DEBUG="--debug"; shift;;
-      --skip-infra)             SKIP_INFRA=true; shift;;
+      --hf-token)                   HF_TOKEN_CLI="$2"; shift 2 ;;
+      --auth-file)                  AUTH_FILE_CLI="$2"; shift 2 ;;
+      --storage-size)               STORAGE_SIZE="$2"; shift 2 ;;
+      --storage-class)              STORAGE_CLASS="$2"; shift 2 ;;
+      --namespace)                  NAMESPACE="$2"; shift 2 ;;
+      --values-file)                VALUES_FILE="$2"; shift 2 ;;
+      --uninstall)                  ACTION="uninstall"; shift ;;
+      --debug)                      DEBUG="--debug"; shift;;
+      --skip-infra)                 SKIP_INFRA=true; shift;;
       --disable-metrics-collection) DISABLE_METRICS=true; shift;;
-      -d)                       DOWNLOAD_MODEL=true; shift;;
-      --download-model)         DOWNLOAD_MODEL=true; shift;;
-      -h|--help)                print_help; exit 0 ;;
-      *)                        die "Unknown option: $1" ;;
+      -d)                           DOWNLOAD_MODEL=true; shift;;
+      -s|--skip-download-model)     DOWNLOAD_MODEL=false; shift ;;
+      -h|--help)                    print_help; exit 0 ;;
+      *)                            die "Unknown option: $1" ;;
     esac
   done
 }
@@ -264,7 +264,7 @@ create_pvc_and_download_model_if_needed() {
 
       log_success "✅ Model downloaded"
     else
-      log_info "⏭️ Model download to PVC skipped: \`--download-model\` flag not set, assuming PVC ${PVC_NAME} exists and contains model at path: \`${MODEL_PATH}\`."
+      log_info "⏭️ Model download to PVC skipped: \`--skip-download-model\` flag set, assuming PVC ${PVC_NAME} exists and contains model at path: \`${MODEL_PATH}\`."
     fi
     ;;
   hf)

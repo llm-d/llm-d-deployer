@@ -170,7 +170,7 @@ The installer needs to be run from the `llm-d-deployer/quickstart` directory.
 | `--hf-token TOKEN`             | HuggingFace API token (or set `HF_TOKEN` env var)                                                       | `./llmd-installer.sh --hf-token "abc123"`                        |
 | `--auth-file PATH`             | Path to your registry auth file ig not in one of the two listed files in the auth section of the readme | `./llmd-installer.sh --auth-file ~/.config/containers/auth.json` |
 | `--storage-size SIZE`          | Size of storage volume (default: 7Gi)                                                                   | `./llmd-installer.sh --storage-size 15Gi`                        |
-| `--download-model`             | Download the model to the modelArtifactURI URI PVC in your values.yaml file                             | `./llmd-installer.sh --download-model`                           |
+| `--skip-download-model`        | Skip downloading the model to PVC if modelArtifactURI is pvc based                                      | `./llmd-installer.sh --skip-download-model`                      |
 | `--storage-class CLASS`        | Storage class to use (default: efs-sc)                                                                  | `./llmd-installer.sh --storage-class ocs-storagecluster-cephfs`  |
 | `--namespace NAME`             | Kubernetes namespace to use (default: `llm-d`)                                                          | `./llmd-installer.sh --namespace foo`                            |
 | `--values NAME`                | Absolute path to a Helm values.yaml file (default: llm-d-deployer/charts/llm-d/values.yaml)             | `./llmd-installer.sh --values /path/to/values.yaml`              |
@@ -187,7 +187,7 @@ for a different type.
 
 ```bash
 export HF_TOKEN="your-token"
-./llmd-installer.sh --download-model
+./llmd-installer.sh
 ```
 
 ### Install on OpenShift with OF installed
@@ -202,7 +202,7 @@ The installer will create a ReadWriteMany PVC and download the model to it, if y
 
 ```bash
 export HF_TOKEN="your-token"
-./llmd-installer.sh --download-model --storage-class ocs-storagecluster-cephfs --storage-size 15Gi
+./llmd-installer.sh --storage-class ocs-storagecluster-cephfs --storage-size 15Gi
 ```
 
 ### Validation
@@ -255,7 +255,7 @@ Here is an example snippet of the default model values being replaced with
     servedModelNames: []
 
     auth:
-      # -- HF token auth config via k8s secret. Required if using hf:// URI or using pvc:// URI with `--download-model` in quickstart
+      # -- HF token auth config via k8s secret. Required if using hf:// URI or not using pvc:// URI with `--skip-download-model` in quickstart
       hfToken:
         # -- If the secret should be created or one already exists
         create: true

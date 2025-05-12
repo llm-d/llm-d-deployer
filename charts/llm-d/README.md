@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart for OpenShift
 
-![Version: 0.7.1](https://img.shields.io/badge/Version-0.7.1-informational?style=flat-square)
+![Version: 0.7.2](https://img.shields.io/badge/Version-0.7.2-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for llm-d
@@ -217,7 +217,7 @@ Kubernetes: `>= 1.25.0-0`
 | sampleApplication.downloadModelJob.hfModelID | If `.Values.sampleApplication.model.modelArtifactURI` starts with `pvc://` what huggingface repo to load onto the pvc | string | `"meta-llama/Llama-3.2-3B-Instruct"` |
 | sampleApplication.enabled | Enable rendering of sample application resources | bool | `true` |
 | sampleApplication.inferencePoolPort | InferencePool port configuration | int | `8000` |
-| sampleApplication.model.auth.hfToken | HF token auth config via k8s secret. Required if using hf:// URI or using pvc:// URI with `--download-model` in quickstart | object | `{"create":true,"key":"HF_TOKEN","name":"llm-d-hf-token"}` |
+| sampleApplication.model.auth.hfToken | HF token auth config via k8s secret. | object | `{"create":true,"key":"HF_TOKEN","name":"llm-d-hf-token"}` |
 | sampleApplication.model.auth.hfToken.create | If the secret should be created or one already exists | bool | `true` |
 | sampleApplication.model.auth.hfToken.key | Value of the token. Do not set this but use `envsubst` in conjunction with the helm chart | string | `"HF_TOKEN"` |
 | sampleApplication.model.auth.hfToken.name | Name of the secret to create to store your huggingface token | string | `"llm-d-hf-token"` |
