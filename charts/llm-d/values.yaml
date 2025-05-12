@@ -63,7 +63,8 @@ sampleApplication:
 
   model:
     # -- Fully qualified pvc URI: pvc://<pvc-name>/<model-path>
-    modelArtifactURI: pvc://llama-3.2-3b-instruct-pvc/models/meta-llama/Llama-3.2-3B-Instruct
+    # modelArtifactURI: pvc://llama-3.2-3b-instruct-pvc/models/meta-llama/Llama-3.2-3B-Instruct
+    modelArtifactURI: pvc://model-pvc/models/meta-llama/Llama-3.2-3B-Instruct
 
     # # -- Fully qualified hf URI: pvc://<pvc-name>/<model-path>
     # modelArtifactURI: hf://meta-llama/Llama-3.2-3B-Instruct
@@ -376,10 +377,9 @@ modelservice:
     # -- vLLM image used in ModelService CR presets
     image:
       registry: quay.io
-      repository: "llm-d/llm-d-dev"
-      tag: "vllm-nixl-0.0.6"
-      imagePullPolicy: "Always"
-      # imagePullPolicy: "IfNotPresent"
+      repository: "llm-d/llm-d"
+      tag: 0.0.7
+      imagePullPolicy: "IfNotPresent"
 
     # -- Enable metrics gathering via podMonitor / ServiceMonitor
     metrics:
@@ -394,7 +394,7 @@ modelservice:
     image:
       registry: quay.io
       repository: llm-d/llm-d-routing-sidecar
-      tag: "0.0.5"
+      tag: "0.0.6"
       imagePullPolicy: "Always"
 
   # -- vLL sim container options
@@ -456,6 +456,10 @@ modelservice:
 # @default -- Use sane defaults for minimal Redis deployment
 redis:
   enabled: true
+  auth:
+    enabled: false
+    existingSecretPasswordKey: ""
+    existingSecret: ""
   architecture: standalone
   image:
     registry: quay.io
@@ -475,5 +479,8 @@ redis:
       size: "5Gi"
     pdb:
       create: false
+    service:
+      ports:
+        redis: 8100
   networkPolicy:
     enabled: false

@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart for OpenShift
 
-![Version: 0.7.8](https://img.shields.io/badge/Version-0.7.8-informational?style=flat-square)
+![Version: 0.8.0](https://img.shields.io/badge/Version-0.8.0-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for llm-d
@@ -206,7 +206,7 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.rbac.create | Enable the creation of RBAC resources | bool | `true` |
 | modelservice.replicas | Number of controller replicas | int | `1` |
 | modelservice.routingProxy | Routing proxy container options | object | See below |
-| modelservice.routingProxy.image | Routing proxy image used in ModelService CR presets | object | `{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-routing-sidecar","tag":"0.0.5"}` |
+| modelservice.routingProxy.image | Routing proxy image used in ModelService CR presets | object | `{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-routing-sidecar","tag":"0.0.6"}` |
 | modelservice.service.enabled | Toggle to deploy a Service resource for Model service controller | bool | `true` |
 | modelservice.service.port | Port number exposed from Model Service controller | int | `8443` |
 | modelservice.service.type | Service type | string | `"ClusterIP"` |
@@ -217,7 +217,7 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.serviceAccount.labels | Additional custom labels to the service ServiceAccount. | object | `{}` |
 | modelservice.serviceAccount.nameOverride | String to partially override modelservice.serviceAccountName, defaults to modelservice.fullname | string | `""` |
 | modelservice.vllm | vLLM container options | object | See below |
-| modelservice.vllm.image | vLLM image used in ModelService CR presets | object | `{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-dev","tag":"vllm-nixl-0.0.6"}` |
+| modelservice.vllm.image | vLLM image used in ModelService CR presets | object | `{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d","tag":"0.0.7"}` |
 | modelservice.vllm.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true}` |
 | modelservice.vllm.metrics.enabled | Enable metrics scraping from prefill & decode services | bool | `true` |
 | modelservice.vllmSim | vLL sim container options | object | See below |
@@ -232,7 +232,7 @@ Kubernetes: `>= 1.25.0-0`
 | sampleApplication.model.auth.hfToken.create | If the secret should be created or one already exists | bool | `true` |
 | sampleApplication.model.auth.hfToken.key | Value of the token. Do not set this but use `envsubst` in conjunction with the helm chart | string | `"HF_TOKEN"` |
 | sampleApplication.model.auth.hfToken.name | Name of the secret to create to store your huggingface token | string | `"llm-d-hf-token"` |
-| sampleApplication.model.modelArtifactURI | Fully qualified pvc URI: pvc://<pvc-name>/<model-path> | string | `"pvc://llama-3.2-3b-instruct-pvc/models/meta-llama/Llama-3.2-3B-Instruct"` |
+| sampleApplication.model.modelArtifactURI | Fully qualified pvc URI: pvc://<pvc-name>/<model-path> modelArtifactURI: pvc://llama-3.2-3b-instruct-pvc/models/meta-llama/Llama-3.2-3B-Instruct | string | `"pvc://model-pvc/models/meta-llama/Llama-3.2-3B-Instruct"` |
 | sampleApplication.model.modelName | Name of the model | string | `"meta-llama/Llama-3.2-3B-Instruct"` |
 | sampleApplication.model.servedModelNames | Aliases to the Model named vllm will serve with | list | `[]` |
 | sampleApplication.resources | Resource requests/limits <br /> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-requests-and-limits-of-pod-and-container | object | `{"limits":{"nvidia.com/gpu":1},"requests":{"nvidia.com/gpu":1}}` |
