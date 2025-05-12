@@ -377,7 +377,6 @@ modelservice:
     # -- vLLM image used in ModelService CR presets
     image:
       registry: quay.io
-      # # pulling in upstream vllm changes
       repository: "llm-d/llm-d"
       tag: 0.0.7
       imagePullPolicy: "IfNotPresent"
@@ -394,7 +393,6 @@ modelservice:
     # -- Routing proxy image used in ModelService CR presets
     image:
       registry: quay.io
-      # # Pulling in router changes corresponding to upstream vllm changes
       repository: llm-d/llm-d-routing-sidecar
       tag: "0.0.6"
       imagePullPolicy: "Always"
