@@ -10,3 +10,18 @@ FDQN for Redis master service in <svc_name>.<namespace>.svc.cluster.local:<port>
 {{- define "metrics.label" -}}
 llmd.ai/gather-metrics: "true"
 {{- end }}
+
+
+{{- define "padString" -}}
+{{- $length := len (default "" .text) -}}
+{{- if lt .width $length  }}
+{{- .text -}}
+{{- else -}}
+{{- $spacer := default " " .spacer  -}}
+{{- .text }}{{- range (until (sub $length .width | int )) -}}{{- print $spacer -}}{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "tableRowPrinter" -}}
+| {{ include "padString"  ( dict "text" .name "width" .nameWidth "spacer" .spacer ) }} | {{ include "padString"  ( dict "text" .description "width" .descriptionWidth "spacer" .spacer ) }} |
+{{- end -}}

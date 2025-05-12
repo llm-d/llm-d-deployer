@@ -9,11 +9,13 @@ To learn more about the release, try:
 
 Following presets are available to your users:
 
-| Name                                                               | Description                                                |
-| ------------------------------------------------------------------ | ---------------------------------------------------------- |
-| {{ include "modelservice.fullname" . }}-basic-gpu-preset           | Basic GPU inference                                        |
-| {{ include "modelservice.fullname" . }}-basic-gpu-with-nixl-preset | GPU inference with NIXL enabled and Redis cache offloading |
-| {{ include "modelservice.fullname" . }}-basic-sim-preset           | Basic simulation                                           |
+{{ $nameWidth := 50 }}
+{{ $descriptionWidth := 60 }}
+{{ include "tableRowPrinter" ( dict "nameWidth" $nameWidth "descriptionWidth" $descriptionWidth "name" "Name" "description" "Description" ) }}
+{{ include "tableRowPrinter" ( dict "nameWidth" $nameWidth "descriptionWidth" $descriptionWidth "spacer" "-" ) }}
+{{ include "tableRowPrinter" ( dict "nameWidth" $nameWidth "descriptionWidth" $descriptionWidth "name" (print (include "modelservice.fullname" .) "-basic-gpu-preset") "description" "Basic GPU inference" ) }}
+{{ include "tableRowPrinter" ( dict "nameWidth" $nameWidth "descriptionWidth" $descriptionWidth "name" (print (include "modelservice.fullname" .) "-basic-gpu-with-nixl-preset") "description" "GPU inference with NIXL enabled and Redis cache offloading" ) }}
+{{ include "tableRowPrinter" ( dict "nameWidth" $nameWidth "descriptionWidth" $descriptionWidth "name" (print (include "modelservice.fullname" .) "-basic-sim-preset") "description" "Basic simulation" ) }}
 
 
 {{ if not .Values.sampleApplication.enabled -}}
