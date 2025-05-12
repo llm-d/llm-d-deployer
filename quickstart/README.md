@@ -218,7 +218,7 @@ manually.
 
 ```bash
 NAMESPACE=llm-d
-MODEL_ID=Llama-3.2-3B-Instruct
+MODEL_ID=meta-llama/Llama-3.2-3B-Instruct
 GATEWAY_ADDRESS=$(kubectl get gateway -n ${NAMESPACE} | tail -n 1 | awk '{print $3}')
 kubectl run --rm -i curl-temp --image=curlimages/curl --restart=Never -- \
   curl -X POST \
