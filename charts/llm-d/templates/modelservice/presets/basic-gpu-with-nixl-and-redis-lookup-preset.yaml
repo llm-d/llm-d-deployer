@@ -16,33 +16,6 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.annotations "context" $) | nindent 4 }}
     {{- end }}
 data:
-  configMaps: |
-    - apiVersion: v1
-      kind: ConfigMap
-      metadata:
-        name: {{ include "modelservice.fullname" . -}}-config-decoder
-      data:
-        lmcache-decoder-config.yaml: |
-          chunk_size: 256
-          local_cpu: True
-          # max_local_cpu_size: 40
-          max_local_cpu_size: 5
-          max_local_disk_size: 10
-          lookup_url: {{ include "redis.master.service.fullurl" . }}
-          distributed_url: {{ `{{ .DecodeServiceName }}` }}.svc.cluster.local:80
-    - apiVersion: v1
-      kind: ConfigMap
-      metadata:
-        name: {{ include "modelservice.fullname" . -}}-config-prefiller
-      data:
-        lmcache-prefiller-config.yaml: |
-          chunk_size: 256
-          local_cpu: True
-          max_local_cpu_size: 5
-          max_local_disk_size: 10
-          lookup_url: {{ include "redis.master.service.fullurl" . }}
-          distributed_url: {{ `{{ .PrefillServiceName }}` }}.svc.cluster.local:80
-
   decodeDeployment: |
     apiVersion: apps/v1
     kind: Deployment
@@ -108,12 +81,18 @@ data:
                   value: "0"
                 - name: UCX_TLS
                   value: "cuda_ipc,cuda_copy,tcp"
-                - name: LMCACHE_CONFIG_FILE
-                  value: /vllm-workspace/lmcache-decoder-config.yaml
                 - name: LMCACHE_USE_EXPERIMENTAL
                   value: "True"
                 - name: LMCACHE_ENABLE_DEBUG
                   value: "True"
+                - name: LMCACHE_LOCAL_CPU
+                  value: "True"
+                - name: LMCACHE_MAX_LOCAL_CPU_SIZE
+                  value: "5"
+                - name: LMCACHE_MAX_LOCAL_DISK_SIZE
+                  value: "10"
+                - name: LMCACHE_CHUNK_SIZE
+                  value: "256"
                 - name: LMCACHE_LOOKUP_URL
                   value: {{ include "redis.master.service.fullurl" . }}
                 {{- if ne .Values.redis.auth.enabled false }}
@@ -130,8 +109,6 @@ data:
               volumeMounts:
                 - name: home
                   mountPath: /home
-                - name: config-decoder
-                  mountPath: /vllm-workspace
                 {{ `{{- if .HFModelName }}` }}
                 - name: model-cache
                   mountPath: /models
@@ -148,9 +125,6 @@ data:
           volumes:
             - name: home
               emptyDir: {}
-            - name: config-decoder
-              configMap:
-                name: {{ include "modelservice.fullname" . -}}-config-decoder
             {{ `{{- if .HFModelName }}` }}
             - name: model-cache
               emptyDir: {}
@@ -201,12 +175,18 @@ data:
                   value: "0"
                 - name: UCX_TLS
                   value: "cuda_ipc,cuda_copy,tcp"
-                - name: LMCACHE_CONFIG_FILE
-                  value: /vllm-workspace/lmcache-prefiller-config.yaml
                 - name: LMCACHE_USE_EXPERIMENTAL
                   value: "True"
                 - name: LMCACHE_ENABLE_DEBUG
                   value: "True"
+                - name: LMCACHE_LOCAL_CPU
+                  value: "True"
+                - name: LMCACHE_MAX_LOCAL_CPU_SIZE
+                  value: "5"
+                - name: LMCACHE_MAX_LOCAL_DISK_SIZE
+                  value: "10"
+                - name: LMCACHE_CHUNK_SIZE
+                  value: "256"
                 - name: LMCACHE_LOOKUP_URL
                   value: {{ include "redis.master.service.fullurl" . }}
                 {{- if ne .Values.redis.auth.enabled false }}
@@ -223,8 +203,6 @@ data:
               volumeMounts:
                 - name: home
                   mountPath: /home
-                - name: config-prefiller
-                  mountPath: /vllm-workspace
                 {{ `{{- if .HFModelName }}` }}
                 - name: model-cache
                   mountPath: /models
@@ -241,9 +219,6 @@ data:
           volumes:
             - name: home
               emptyDir: {}
-            - name: config-prefiller
-              configMap:
-                name: {{ include "modelservice.fullname" . -}}-config-prefiller
             {{ `{{ if .HFModelName }}` }}
             - name: model-cache
               emptyDir: {}
@@ -266,9 +241,6 @@ data:
       - name: vllm
         port: 8000
         protocol: TCP
-      - name: lmcache-dist
-        port: 80
-        protocol: TCP
 
   prefillService: |
     apiVersion: v1
@@ -286,9 +258,6 @@ data:
         protocol: TCP
       - name: vllm
         port: 8000
-        protocol: TCP
-      - name: lmcache-dist
-        port: 80
         protocol: TCP
 
   eppService: |
