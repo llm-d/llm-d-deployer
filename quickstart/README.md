@@ -83,7 +83,7 @@ You can use the installer script that installs all the required dependencies.  C
 
 ### Required credentials and configuration
 
-- [llm-d-deployer GitHub repo – clone here](https://github.com/neuralmagic/llm-d-deployer.git)
+- [llm-d-deployer GitHub repo – clone here](https://github.com/llm-d/llm-d-deployer.git)
 - [Quay.io Registry – sign-up & credentials](https://quay.io/)
 - [Red Hat Registry – terms & access](https://access.redhat.com/registry/)
 - [HuggingFace HF_TOKEN](https://huggingface.co/docs/hub/en/security-tokens) with download access for the model you want to use.  By default the sample application will use [meta-llama/Llama-3.2-3B-Instruct](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct).
@@ -341,7 +341,7 @@ If you're using OpenShift with user workload monitoring enabled, you can access 
 The metrics are automatically integrated into the OpenShift monitoring stack, providing a seamless experience for viewing and analyzing your llm-d metrics.
 The llm-d-deployer does not install Grafana in OpenShift, but it's recommended that users install Grafana to view metrics and import dashboards.
 
-Follow the [OpenShift Grafana setup guide](https://github.com/neuralmagic/llm-d/blob/dev/observability/openshift/README.md#step-2-set-up-grafana-optional)
+Follow the [OpenShift Grafana setup guide](https://github.com/llm-d/llm-d/blob/dev/observability/openshift/README.md#step-2-set-up-grafana-optional)
 The guide includes manifests to install the following:
 
 - Grafana instance

@@ -52,7 +52,7 @@ You can use the installer script that installs all the required dependencies.
 
 ### Required credentials and configuration
 
-- [llm-d-deployer GitHub repo – clone here](https://github.com/neuralmagic/llm-d-deployer.git)
+- [llm-d-deployer GitHub repo – clone here](https://github.com/llm-d/llm-d-deployer.git)
 - [Quay.io Registry – sign-up & credentials](https://quay.io/)
 - [Red Hat Registry – terms & access](https://access.redhat.com/registry/)
 - [HuggingFace HF_TOKEN](https://huggingface.co/docs/hub/en/security-tokens)

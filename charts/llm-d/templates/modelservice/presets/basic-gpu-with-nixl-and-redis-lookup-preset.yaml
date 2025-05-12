@@ -314,7 +314,7 @@ data:
                 - --grpcHealthPort
                 - "9003"
               env:
-              {{/* HACK, waiting on: https://github.com/neuralmagic/llm-d-model-service/issues/123 */}}
+              {{/* HACK, waiting on: https://github.com/llm-d/llm-d-model-service/issues/123 */}}
               {{ `{{- if .HFModelName }}` }}
               - name: HF_TOKEN
                 valueFrom:

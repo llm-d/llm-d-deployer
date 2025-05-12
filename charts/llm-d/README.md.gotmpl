@@ -19,9 +19,9 @@
 
 ```console
 helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo add neuralmagic https://neuralmagic.github.io/llm-d-deployer
+helm repo add llm-d https://llm-d.github.io/llm-d-deployer
 
-helm install my-llm-d neuralmagic/llm-d
+helm install my-llm-d llm-d/llm-d
 ```
 
 ## Prerequisites
@@ -51,24 +51,24 @@ The following command can be used to add the chart repository:
 
 ```console
 helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo add neuralmagic https://neuralmagic.github.io/llm-d-deployer
+helm repo add llm-d https://llm-d.github.io/llm-d-deployer
 ```
 
 Once the chart has been added, install this chart. However before doing so, please review the default `values.yaml` and adjust as needed.
 
 
 ```console
-helm upgrade -i <release_name> neuralmagic/llm-d
+helm upgrade -i <release_name> llm-d/llm-d
 ```
 
 ### Installing from an OCI Registry
 
-Charts are also available in OCI format. The list of available releases can be found [here](https://github.com/orgs/neuralmagic/packages/container/package/llm-d-deployer%2Fllm-d).
+Charts are also available in OCI format. The list of available releases can be found [here](https://github.com/orgs/llm-d/packages/container/package/llm-d-deployer%2Fllm-d).
 
 Install one of the available versions:
 
 ```shell
-helm upgrade -i <release_name> oci://ghcr.io/neuralmagic/llm-d-deployer/llm-d --version=<version>
+helm upgrade -i <release_name> oci://ghcr.io/llm-d/llm-d-deployer/llm-d --version=<version>
 ```
 
 > **Tip**: List all releases using `helm list`

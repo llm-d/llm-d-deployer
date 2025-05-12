@@ -446,7 +446,7 @@ modelservice:
           matchLabels: {}
 
     # -- Default environment variables for endpoint picker, use `extraEnvVars` to override default behavior by defining the same variable again.
-    # Ref: https://github.com/neuralmagic/gateway-api-inference-extension/tree/dev?tab=readme-ov-file#temporary-fork-configuration
+    # Ref: https://github.com/llm-d/gateway-api-inference-extension/tree/dev?tab=readme-ov-file#temporary-fork-configuration
     defaultEnvVars:
       - name: ENABLE_KVCACHE_AWARE_SCORER
         value: "false"

@@ -243,7 +243,7 @@ Model service controller provides following template variables localized to the 
 
 You can refer to:
 
-- The [modelservice samples](https://github.com/neuralmagic/llm-d-model-service/tree/dev/samples) for additional context on the model service controller usage.
+- The [modelservice samples](https://github.com/llm-d/llm-d-model-service/tree/dev/samples) for additional context on the model service controller usage.
 - The [go template documentation](https://pkg.go.dev/text/template) for more details on the available template functions and syntax.
 
 Since in our chart the templates are rendered twice, we need to escape the go templates meant to be rendered by model service controller (not Helm) as strings via `{{` and `}}` delimiters. This is done by wrapping the template within in backticks `` ` ``.

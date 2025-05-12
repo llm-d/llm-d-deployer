@@ -19,11 +19,11 @@ CWD=$( dirname -- "$( readlink -f -- "$0"; )"; )
 
 ### Base CRDs
 echo -e "\e[32m📜 Applying base CRDs\e[0m"
-kubectl apply -k https://github.com/neuralmagic/gateway-api-inference-extension/deploy/components/crds-gateway-api?ref=dev
+kubectl apply -k https://github.com/llm-d/gateway-api-inference-extension/deploy/components/crds-gateway-api?ref=dev
 
 ### GAIE CRDs
 echo -e "\e[32m🚪 Applying GAIE CRDs\e[0m"
-kubectl apply -k https://github.com/neuralmagic/gateway-api-inference-extension/config/crd?ref=dev
+kubectl apply -k https://github.com/llm-d/gateway-api-inference-extension/config/crd?ref=dev
 
 ### Install Gateway provider
 backend=$(helm show values $CWD/../charts/llm-d --jsonpath '{.gateway.gatewayClassName}')
