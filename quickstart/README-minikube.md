@@ -218,11 +218,11 @@ retries, and metrics. All calls to `/v1/models` and `/v1/completions` flow throu
 # Option A: Direct NodePort (no minikube tunnel required)
 # -------------------------------------------------------------------------
 # 1) Grab the Minikube VM IP and the NodePort that the gateway is listening on
-MODEL_ID=Llama-3.2-3B-Instruct
 MINIKUBE_IP=$(minikube ip)
 NODEPORT=$(kubectl get svc llm-d-inference-gateway -n llm-d -o jsonpath='{.spec.ports[0].nodePort}')
 
 # 2) Curl the same completion endpoint on that high-numbered port:
+MODEL_ID=meta-llama/Llama-3.2-3B-Instruct
 curl -X POST http://$MINIKUBE_IP:$NODEPORT/v1/completions \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
@@ -247,7 +247,7 @@ kubectl get svc -n llm-d | grep llm-d-inference-gateway
 # ➜ llm-d-inference-gateway LoadBalancer 10.109.40.169 10.109.40.169 80:30185/TCP
 
 # 4) Hit the gateway’s plain completion endpoint with a role-based prompt:
-MODEL_ID=Llama-3.2-3B-Instruct
+MODEL_ID=meta-llama/Llama-3.2-3B-Instruct
 curl -X POST http://10.109.40.169/v1/completions \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
