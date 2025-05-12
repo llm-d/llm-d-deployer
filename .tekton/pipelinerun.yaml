@@ -118,7 +118,7 @@ spec:
         secretName: "{{ git_auth_secret }}"
     - name: git-auth
       secret:
-        secretName: "git-auth-secret-neuralmagic"
+        secretName: "git-auth-secret-llm-d"
     - name: registry-secret
       secret:
         secretName: icr-secret

@@ -1,13 +1,16 @@
 Thank you for installing {{ .Chart.Name }}.
 
-Your release is named {{ .Release.Name }}.
+Your release is named `{{ .Release.Name }}`.
 
 To learn more about the release, try:
 
-  $ helm status {{ .Release.Name }}
-  $ helm get all {{ .Release.Name }}
+```bash
+$ helm status {{ .Release.Name }}
+$ helm get all {{ .Release.Name }}
+```
 
 Following presets are available to your users:
+
 
 {{ $nameWidth := 65 }}
 {{ $descriptionWidth := 95 }}
@@ -18,10 +21,11 @@ Following presets are available to your users:
 {{ include "tableRowPrinter" ( dict "nameWidth" $nameWidth "descriptionWidth" $descriptionWidth "name" (print (include "modelservice.fullname" .) "-basic-sim-preset") "description" "Basic simulation" ) }}
 
 
-{{ if not .Values.sampleApplication.enabled -}}
-To provision a ModelService, create a new ModelService resources as follows:
 
-```
+{{ if not .Values.sampleApplication.enabled -}}
+To provision a `ModelService`, create a new CR:
+
+```yaml
 apiVersion: llm-d.ai/v1alpha1
 kind: ModelService
 metadata:
