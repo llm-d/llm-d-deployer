@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart for OpenShift
 
-![Version: 0.8.0](https://img.shields.io/badge/Version-0.8.0-informational?style=flat-square)
+![Version: 0.8.1](https://img.shields.io/badge/Version-0.8.1-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for llm-d
@@ -174,7 +174,7 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.epp | Endpoint picker configuration | object | See below |
 | modelservice.epp.defaultEnvVars | Default environment variables for endpoint picker, use `extraEnvVars` to override default behavior by defining the same variable again. Ref: https://github.com/neuralmagic/gateway-api-inference-extension/tree/dev?tab=readme-ov-file#temporary-fork-configuration | list | `[{"name":"ENABLE_KVCACHE_AWARE_SCORER","value":"false"},{"name":"KVCACHE_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"KVCACHE_INDEXER_REDIS_ADDR","value":"{{ if .Values.redis.enabled }}{{ include \"redis.master.service.fullurl\" . }}{{ end }}"},{"name":"ENABLE_PREFIX_AWARE_SCORER","value":"true"},{"name":"PREFIX_AWARE_SCORER_WEIGHT","value":"2.0"},{"name":"ENABLE_LOAD_AWARE_SCORER","value":"true"},{"name":"LOAD_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"ENABLE_SESSION_AWARE_SCORER","value":"false"},{"name":"SESSION_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"PD_ENABLED","value":"false"},{"name":"PD_PROMPT_LEN_THRESHOLD","value":"10"},{"name":"PREFILL_ENABLE_KVCACHE_AWARE_SCORER","value":"false"},{"name":"PREFILL_KVCACHE_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"PREFILL_ENABLE_LOAD_AWARE_SCORER","value":"false"},{"name":"PREFILL_LOAD_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"PREFILL_ENABLE_PREFIX_AWARE_SCORER","value":"false"},{"name":"PREFILL_PREFIX_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"DECODE_ENABLE_KVCACHE_AWARE_SCORER","value":"false"},{"name":"DECODE_KVCACHE_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"DECODE_ENABLE_LOAD_AWARE_SCORER","value":"false"},{"name":"DECODE_LOAD_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"DECODE_ENABLE_PREFIX_AWARE_SCORER","value":"false"},{"name":"DECODE_PREFIX_AWARE_SCORER_WEIGHT","value":"1.0"}]` |
 | modelservice.epp.extraEnvVars | Additional environment variables for endpoint picker | list | `[]` |
-| modelservice.epp.image | Endpoint picker image used in ModelService CR presets | object | `{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-gateway-api-inference-extension-dev","tag":"0.0.5"}` |
+| modelservice.epp.image | Endpoint picker image used in ModelService CR presets | object | `{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-inference-scheduler","tag":"0.0.2"}` |
 | modelservice.epp.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true,"serviceMonitor":{"annotations":{},"interval":"10s","labels":{},"namespaceSelector":{"any":false,"matchNames":[]},"path":"/metrics","port":"metrics","selector":{"matchLabels":{}}}}` |
 | modelservice.epp.metrics.enabled | Enable metrics scraping from endpoint picker service | bool | `true` |
 | modelservice.epp.metrics.serviceMonitor | Prometheus ServiceMonitor configuration <br /> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md | object | See below |
