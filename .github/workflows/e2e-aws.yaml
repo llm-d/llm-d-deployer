@@ -305,8 +305,9 @@ jobs:
             mkdir -p pod-logs
             echo "Fetching llm-d pods log..."
             kubectl get pods -n llm-d --no-headers -o custom-columns=":metadata.name" \
-            | xargs -I{} sh -c 'kubectl logs -n llm-d {} > "pod-logs/{}.log" 2>&1'
+            | xargs -I{} sh -c 'kubectl logs --all-containers=true -n llm-d {} > "pod-logs/{}.log" 2>&1'
 
+            echo "Fetching llm-d pods descriptions..."
             kubectl get pods -n llm-d --no-headers -o custom-columns=":metadata.name" \
             | xargs -I{} sh -c 'kubectl describe pod -n llm-d {} > "pod-logs/{}-describe.log" 2>&1'
 
