@@ -289,10 +289,11 @@ install() {
     log_success "✅ GAIE infra applied"
   fi
 
-  if kubectl get namespace "${MONITORING_NAMESPACE}" &>/dev/null; then
-    log_info "🧹 Cleaning up existing monitoring namespace..."
-    kubectl delete namespace "${MONITORING_NAMESPACE}" --ignore-not-found
-  fi
+  # # temp workaround
+  # if kubectl get namespace "${MONITORING_NAMESPACE}" &>/dev/null; then
+  #   log_info "🧹 Cleaning up existing monitoring namespace..."
+  #   kubectl delete namespace "${MONITORING_NAMESPACE}" --ignore-not-found
+  # fi
 
   log_info "📦 Creating namespace ${NAMESPACE}..."
   kubectl create namespace "${NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -

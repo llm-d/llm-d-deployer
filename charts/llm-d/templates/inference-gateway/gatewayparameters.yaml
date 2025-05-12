@@ -32,6 +32,7 @@ spec:
       type: {{ .Values.gateway.serviceType | default "NodePort" | quote }}
       extraLabels:
         gateway: custom
+        {{ include "metrics.label" . }}
     podTemplate:
       extraLabels:
         gateway: custom

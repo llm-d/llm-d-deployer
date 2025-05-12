@@ -466,5 +466,9 @@ redis:
       size: "5Gi"
     pdb:
       create: false
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
   networkPolicy:
     enabled: false
