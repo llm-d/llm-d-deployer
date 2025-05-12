@@ -307,6 +307,9 @@ jobs:
             kubectl get pods -n llm-d --no-headers -o custom-columns=":metadata.name" \
             | xargs -I{} sh -c 'kubectl logs -n llm-d {} > "pod-logs/{}.log" 2>&1'
 
+            kubectl get pods -n llm-d --no-headers -o custom-columns=":metadata.name" \
+            | xargs -I{} sh -c 'kubectl describe pod -n llm-d {} > "pod-logs/{}-describe.log" 2>&1'
+
             mv ~/llmd-installer.log pod-logs
             mv ~/install-deps.log pod-logs
             tar -czf pod-logs.tar.gz pod-logs
