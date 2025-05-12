@@ -45,6 +45,15 @@ test:
   # -- Enable rendering of helm test resources
   enabled: false
 
+  image:
+    # -- Test connection pod image registry
+    registry: quay.io
+
+    # -- Test connection pod image repository. Note that the image needs to have both the `sh` and `curl` binaries in it.
+    repository: curl/curl
+
+    # -- Test connection pod image tag. Note that the image needs to have both the `sh` and `curl` binaries in it.
+    tag: latest
 # -- Sample application deploying a p-d pair of specific model
 # @default -- See below
 sampleApplication:

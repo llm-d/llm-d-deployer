@@ -2,7 +2,7 @@
 apiVersion: llm-d.ai/v1alpha1
 kind: ModelService
 metadata:
-  name: vllm-sim-model-service
+  name: {{ include "common.names.fullname" . }}-vllm-sim
   annotations:
     "helm.sh/hook": test
 spec:
@@ -14,6 +14,13 @@ spec:
   modelArtifacts:
     uri: hf://stub
   decode:
+    replicas: 1
+    containers:
+    - name: "vllm"
+      args:
+      - "--model"
+      - food-review
+  prefill:
     replicas: 1
     containers:
     - name: "vllm"
