@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart for OpenShift
 
-![Version: 0.7.0](https://img.shields.io/badge/Version-0.7.0-informational?style=flat-square)
+![Version: 0.7.1](https://img.shields.io/badge/Version-0.7.1-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for llm-d
@@ -174,7 +174,7 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.epp | Endpoint picker configuration | object | See below |
 | modelservice.epp.defaultEnvVars | Default environment variables for endpoint picker, use `extraEnvVars` to override default behavior by defining the same variable again. Ref: https://github.com/neuralmagic/gateway-api-inference-extension/tree/dev?tab=readme-ov-file#temporary-fork-configuration | list | `[{"name":"ENABLE_KVCACHE_AWARE_SCORER","value":"{{ .Values.redis.enabled }}"},{"name":"KVCACHE_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"KVCACHE_INDEXER_REDIS_ADDR","value":"{{ if .Values.redis.enabled }}{{ include \"redis.master.service.fullurl\" . }}{{ end }}"},{"name":"ENABLE_PREFIX_AWARE_SCORER","value":"true"},{"name":"PREFIX_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"ENABLE_LOAD_AWARE_SCORER","value":"true"},{"name":"LOAD_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"ENABLE_SESSION_AWARE_SCORER","value":"true"},{"name":"SESSION_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"PD_ENABLED","value":"true"},{"name":"PD_PROMPT_LEN_THRESHOLD","value":"10"},{"name":"PREFILL_ENABLE_KVCACHE_AWARE_SCORER","value":"true"},{"name":"PREFILL_KVCACHE_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"PREFILL_ENABLE_LOAD_AWARE_SCORER","value":"true"},{"name":"PREFILL_LOAD_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"PREFILL_ENABLE_PREFIX_AWARE_SCORER","value":"true"},{"name":"PREFILL_PREFIX_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"DECODE_ENABLE_KVCACHE_AWARE_SCORER","value":"true"},{"name":"DECODE_KVCACHE_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"DECODE_ENABLE_LOAD_AWARE_SCORER","value":"true"},{"name":"DECODE_LOAD_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"DECODE_ENABLE_PREFIX_AWARE_SCORER","value":"true"},{"name":"DECODE_PREFIX_AWARE_SCORER_WEIGHT","value":"1.0"}]` |
 | modelservice.epp.extraEnvVars | Additional environment variables for endpoint picker | list | `[]` |
-| modelservice.epp.image | Endpoint picker image used in ModelService CR presets | object | `{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-inference-scheduler","tag":"0.0.1"}` |
+| modelservice.epp.image | Endpoint picker image used in ModelService CR presets | object | `{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-gateway-api-inference-extension-dev","tag":"0.0.5"}` |
 | modelservice.epp.metrics.enabled | Enable metrics scraping from endpoint picker service, see `modelservice.serviceMonitor` for configuration | bool | `true` |
 | modelservice.fullnameOverride | String to fully override modelservice.fullname | string | `""` |
 | modelservice.image | Modelservice controller image, please change only if appropriate adjustments to the CRD are being made | object | `{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-model-service","tag":"0.0.8"}` |
@@ -207,7 +207,7 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.serviceMonitor.port | ServiceMonitor endpoint port | string | `"vllm"` |
 | modelservice.serviceMonitor.selector | ServiceMonitor selector matchLabels </br> matchLabels must match labels on modelservice Services | object | `{"matchLabels":{}}` |
 | modelservice.vllm | vLLM container options | object | See below |
-| modelservice.vllm.image | vLLM image used in ModelService CR presets | object | `{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d-dev","tag":"0.0.5"}` |
+| modelservice.vllm.image | vLLM image used in ModelService CR presets | object | `{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-dev","tag":"vllm-nixl-0.0.6"}` |
 | modelservice.vllm.metrics.enabled | Enable metrics scraping from vllm service, see `modelservice.serviceMonitor` for configuration | bool | `true` |
 | modelservice.vllmSim | vLL sim container options | object | See below |
 | modelservice.vllmSim.image | vLLM sim image used in ModelService CR presets | object | `{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/vllm-sim","tag":"0.0.4"}` |
