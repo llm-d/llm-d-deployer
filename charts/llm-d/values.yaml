@@ -231,7 +231,7 @@ modelservice:
   image:
     registry: quay.io
     repository: llm-d/llm-d-model-service
-    tag: "0.0.8"
+    tag: "0.0.9"
     imagePullPolicy: "Always"
 
   # -- Endpoint picker configuration

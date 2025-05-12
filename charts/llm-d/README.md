@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart for OpenShift
 
-![Version: 0.7.6](https://img.shields.io/badge/Version-0.7.6-informational?style=flat-square)
+![Version: 0.7.7](https://img.shields.io/badge/Version-0.7.7-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for llm-d
@@ -186,7 +186,7 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.epp.metrics.serviceMonitor.port | ServiceMonitor endpoint port | string | `"metrics"` |
 | modelservice.epp.metrics.serviceMonitor.selector | ServiceMonitor selector matchLabels </br> matchLabels must match labels on modelservice Services | object | `{"matchLabels":{}}` |
 | modelservice.fullnameOverride | String to fully override modelservice.fullname | string | `""` |
-| modelservice.image | Modelservice controller image, please change only if appropriate adjustments to the CRD are being made | object | `{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-model-service","tag":"0.0.8"}` |
+| modelservice.image | Modelservice controller image, please change only if appropriate adjustments to the CRD are being made | object | `{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-model-service","tag":"0.0.9"}` |
 | modelservice.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true,"serviceMonitor":{"annotations":{},"interval":"15s","labels":{},"namespaceSelector":{"any":false,"matchNames":[]},"path":"/metrics","port":"vllm","selector":{"matchLabels":{}}}}` |
 | modelservice.metrics.enabled | Enable metrics scraping from prefill and decode services, see `model | bool | `true` |
 | modelservice.metrics.serviceMonitor | Prometheus ServiceMonitor configuration <br /> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md | object | See below |
