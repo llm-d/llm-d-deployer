@@ -1340,20 +1340,6 @@
       "default": "See below",
       "description": "Sample application deploying a p-d pair of specific model",
       "properties": {
-        "downloadModelJob": {
-          "additionalProperties": false,
-          "properties": {
-            "hfModelID": {
-              "default": "meta-llama/Llama-3.2-3B-Instruct",
-              "description": "If `.Values.sampleApplication.model.modelArtifactURI` starts with `pvc://` what huggingface repo to load onto the pvc",
-              "required": [],
-              "title": "hfModelID"
-            }
-          },
-          "required": [],
-          "title": "downloadModelJob",
-          "type": "object"
-        },
         "enabled": {
           "default": "true",
           "description": "Enable rendering of sample application resources",

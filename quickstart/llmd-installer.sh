@@ -168,8 +168,13 @@ create_pvc_and_download_model_if_needed() {
         exit 1
     fi
     if [[ -z "${HF_MODEL_ID}" ]]; then
-        log_error "Error, \`modelArtifactURI\` indicates model from PVC, but no
-        Please set the \`.sampleApplication.downloadModelJob.hfModelID\` in the values file."
+        log_error "Error, \`modelArtifactURI\` indicates model from PVC, but no Hugging Face model is defined.
+        Please set the \`.sampleApplication.model.modelName\` in the values file."
+        exit 1
+    fi
+    if [[ "${HF_MODEL_ID}" == *"/"* ]]; then
+        log_error "Error, \`modelArtifactURI\` indicates model from PVC, but no Hugging Face model is defined.
+        Please set the \`.sampleApplication.model.modelName\` in a Hugging Face compliant format `<org>/<repo>`."
         exit 1
     fi
     if [[ -z "${HF_TOKEN_SECRET_NAME}" ]]; then
@@ -199,7 +204,7 @@ create_pvc_and_download_model_if_needed() {
     if [[ "${DOWNLOAD_MODEL}" == "true" ]]; then
       log_info "💾 Provisioning model storage…"
 
-      HF_MODEL_ID=$(cat ${VALUES_PATH} | yq .sampleApplication.downloadModelJob.hfModelID)
+      HF_MODEL_ID=$(cat ${VALUES_PATH} | yq .sampleApplication.model.modelName)
       HF_TOKEN_SECRET_NAME=$(cat ${VALUES_PATH} | yq .sampleApplication.model.auth.hfToken.name)
       HF_TOKEN_SECRET_KEY=$(cat ${VALUES_PATH} | yq .sampleApplication.model.auth.hfToken.key)
 

@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart for OpenShift
 
-![Version: 0.8.3](https://img.shields.io/badge/Version-0.8.3-informational?style=flat-square)
+![Version: 0.8.4](https://img.shields.io/badge/Version-0.8.4-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for llm-d
@@ -251,7 +251,6 @@ Kubernetes: `>= 1.25.0-0`
 | nameOverride | String to partially override common.names.fullname | string | `""` |
 | redis | Bitnami/Redis chart configuration | object | Use sane defaults for minimal Redis deployment |
 | sampleApplication | Sample application deploying a p-d pair of specific model | object | See below |
-| sampleApplication.downloadModelJob.hfModelID | If `.Values.sampleApplication.model.modelArtifactURI` starts with `pvc://` what huggingface repo to load onto the pvc | string | `"meta-llama/Llama-3.2-3B-Instruct"` |
 | sampleApplication.enabled | Enable rendering of sample application resources | bool | `true` |
 | sampleApplication.inferencePoolPort | InferencePool port configuration | int | `8000` |
 | sampleApplication.model.auth.hfToken | HF token auth config via k8s secret. | object | `{"create":true,"key":"HF_TOKEN","name":"llm-d-hf-token"}` |
