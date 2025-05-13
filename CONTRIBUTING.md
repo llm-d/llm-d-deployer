@@ -72,7 +72,7 @@ For every Pull Request submitted, ensure the following steps have been done:
 1. [Sign your commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits)
 2. Run `helm template` on the changes you're making to ensure they are correctly rendered into Kubernetes manifests.
 3. Lint tests has been run for the Chart using the [Chart Testing](https://github.com/helm/chart-testing) tool and the `ct lint` command.
-4. Ensure variables are documented in `values.yaml`
+4. Ensure variables are documented in `values.yaml`. See section [Documenting Variables](#documenting-variables) below.
 5. Update the version number in the [`charts/llm-d/Chart.yaml`](charts/llm-d/Chart.yaml) file using
    [semantic versioning](https://semver.org/). Follow the `X.Y.Z` format so the nature of the changes is reflected in the
    chart.
@@ -82,6 +82,62 @@ For every Pull Request submitted, ensure the following steps have been done:
 6. Make sure that [pre-commit](https://pre-commit.com/) hook has been run to generate/update the `README.md` documentation. To preview the content, use `helm-docs --dry-run`.
 
 ### FAQ and Troubleshooting
+
+#### Documenting Variables
+
+When adding new variables to the `values.yaml` file, please ensure that you document them in the file. The documentation should include:
+
+- A brief description of the variable
+- A guideline for schema generator for nontrivial types
+
+We use a combination of [`helm-docs`](https://github.com/norwoodj/helm-docs) and [`helm-schema`](https://github.com/dadav/helm-schema/) to generate the documentation for the chart. The documentation is generated in the `README.md` file and schema in `values.schema.json`.
+
+A properly documented value should look like this:
+
+```yaml
+# -- Enable something
+enabled: true
+```
+
+The default behavior is to use the actual value of the variable as the default value in documentation. If you want to override it, you can use the `@default -- <value>` directive. This is useful to hide complex values or to provide a more user-friendly default value.
+
+```yaml
+# -- Tolerations configuration
+# @default -- See below
+tolerations:
+# -- Default NVIDIA GPU toleration
+- key: nvidia.com/gpu
+   operator: Exists
+   effect: NoSchedule
+```
+
+Generates:
+
+```md
+| tolerations | Tolerations configuration | list | See below |
+| tolerations[0] | Default NVIDIA GPU toleration | object | `{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}` |
+```
+
+For nontrivial types, you we need to guide the schema generator using the `@schema` directive. This is useful for complex types like `object`, `map`, with unknown keys, or for incomplete types like empty `array` or `map`. See [available annotations in `helm-schema`](https://github.com/dadav/helm-schema/#available-annotations) for more details.
+
+```yaml
+# @schema
+# items:
+#   type: [string, object]
+# @schema
+# -- Array of extra objects to deploy with the release
+extraDeploy: []
+```
+
+> [!TIP]
+> For values that match a specific JSON schema that already exist remotely, you can use the `@schema` directive with `$ref` value pointing to the URL of the schema reference.
+>
+> ```yaml
+> # @schema
+> # $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector
+> # @schema
+> matchLabels: {}
+> ```
 
 #### I see weird errors when running `helm template`, `helm install`, `pre-commit run`
 
