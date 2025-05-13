@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart for OpenShift
 
-![Version: 0.8.4](https://img.shields.io/badge/Version-0.8.4-informational?style=flat-square)
+![Version: 0.8.5](https://img.shields.io/badge/Version-0.8.5-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for llm-d
@@ -251,6 +251,8 @@ Kubernetes: `>= 1.25.0-0`
 | nameOverride | String to partially override common.names.fullname | string | `""` |
 | redis | Bitnami/Redis chart configuration | object | Use sane defaults for minimal Redis deployment |
 | sampleApplication | Sample application deploying a p-d pair of specific model | object | See below |
+| sampleApplication.decode.extraArgs | args to add to the decode deployment | list | `[]` |
+| sampleApplication.decode.replicas | number of desired decode replicas | int | `1` |
 | sampleApplication.enabled | Enable rendering of sample application resources | bool | `true` |
 | sampleApplication.inferencePoolPort | InferencePool port configuration | int | `8000` |
 | sampleApplication.model.auth.hfToken | HF token auth config via k8s secret. | object | `{"create":true,"key":"HF_TOKEN","name":"llm-d-hf-token"}` |
@@ -260,6 +262,8 @@ Kubernetes: `>= 1.25.0-0`
 | sampleApplication.model.modelArtifactURI | Fully qualified pvc URI: pvc://<pvc-name>/<model-path> modelArtifactURI: pvc://llama-3.2-3b-instruct-pvc/models/meta-llama/Llama-3.2-3B-Instruct | string | `"pvc://model-pvc/models/meta-llama/Llama-3.2-3B-Instruct"` |
 | sampleApplication.model.modelName | Name of the model | string | `"meta-llama/Llama-3.2-3B-Instruct"` |
 | sampleApplication.model.servedModelNames | Aliases to the Model named vllm will serve with | list | `[]` |
+| sampleApplication.prefill.extraArgs | args to add to the prefill deployment | list | `[]` |
+| sampleApplication.prefill.replicas | number of desired prefill replicas | int | `1` |
 | sampleApplication.resources | Resource requests/limits <br /> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-requests-and-limits-of-pod-and-container | object | `{"limits":{"nvidia.com/gpu":1},"requests":{"nvidia.com/gpu":1}}` |
 | test | Helm tests | object | `{"enabled":false,"image":{"imagePullPolicy":"Always","pullSecrets":[],"registry":"quay.io","repository":"curl/curl","tag":"latest"}}` |
 | test.enabled | Enable rendering of helm test resources | bool | `false` |

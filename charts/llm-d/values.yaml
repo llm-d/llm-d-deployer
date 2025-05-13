@@ -140,6 +140,20 @@ sampleApplication:
   # -- InferencePool port configuration
   inferencePoolPort: 8000
 
+  prefill:
+    # -- number of desired prefill replicas
+    replicas: 1
+
+    # -- args to add to the prefill deployment
+    extraArgs: []
+
+  decode:
+    # -- number of desired decode replicas
+    replicas: 1
+
+    # -- args to add to the decode deployment
+    extraArgs: []
+
 # -- Gateway configuration
 # @default -- See below
 gateway:
