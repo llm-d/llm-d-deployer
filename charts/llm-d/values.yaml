@@ -274,6 +274,9 @@ ingress:
   #     secretName: llm-d-env -->
   extraTls: []
 
+  # -- used as part of the host dirivation if not specified from OCP cluster domain (dont edit)
+  clusterRouterBase: ""
+
 # -- Model service controller configuration
 # @default -- See below
 modelservice:
