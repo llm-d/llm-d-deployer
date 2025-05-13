@@ -938,7 +938,7 @@
               "title": "repository"
             },
             "tag": {
-              "default": "0.0.9",
+              "default": "0.0.10",
               "description": "Model Service controller image tag",
               "required": [],
               "title": "tag"
