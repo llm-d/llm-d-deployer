@@ -11,6 +11,17 @@ repos:
           - --template-files=./_templates.gotmpl
           # A base filename makes it relative to each chart directory found
           - --template-files=README.md.gotmpl
+  - repo: https://github.com/dadav/helm-schema
+    rev: "0.18.1"
+    hooks:
+      - id: helm-schema
+        args:
+          - --append-newline
+          - --chart-search-root=charts
+          - --add-schema-reference
+          - --helm-docs-compatibility-mode
+          - --skip-auto-generation=required
+          - --no-dependencies
   - repo: https://github.com/woodruffw/zizmor-pre-commit
     rev: v1.6.0
     hooks:

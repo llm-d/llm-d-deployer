@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=values.schema.json
+
 # Default values for the llm-d chart.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
@@ -11,12 +13,24 @@ global:
   # -- Global Docker image registry
   imageRegistry: ""
 
+  # @schema
+  # items:
+  #   type: string
+  # @schema
   # -- Global Docker registry secret names as an array
   # </br> E.g. `imagePullSecrets: [myRegistryKeySecretName]`
   imagePullSecrets: []
 
   security:
     allowInsecureImages: true
+
+
+# @schema
+# additionalProperties: true
+# @schema
+# -- Parameters for bitnami.common dependency
+common: {}
+
 # -- Common parameters
 # -- Override Kubernetes version
 kubeVersion: ""
@@ -30,12 +44,22 @@ fullnameOverride: ""
 # -- Default Kubernetes cluster domain
 clusterDomain: cluster.local
 
+# @schema
+# additionalProperties: true
+# @schema
 # -- Labels to add to all deployed objects
 commonLabels: {}
 
+# @schema
+# additionalProperties: true
+# @schema
 # -- Annotations to add to all deployed objects
 commonAnnotations: {}
 
+# @schema
+# items:
+#   type: [string, object]
+# @schema
 # -- Array of extra objects to deploy with the release
 extraDeploy: []
 
@@ -45,7 +69,9 @@ test:
   # -- Enable rendering of helm test resources
   enabled: false
 
+  # @default -- See below
   image:
+
     # -- Test connection pod image registry
     registry: quay.io
 
@@ -54,6 +80,17 @@ test:
 
     # -- Test connection pod image tag. Note that the image needs to have both the `sh` and `curl` binaries in it.
     tag: latest
+
+    # -- Specify a imagePullPolicy
+    imagePullPolicy: "Always"
+
+    # @schema
+    # items:
+    #   type: string
+    # @schema
+    # -- Optionally specify an array of imagePullSecrets (evaluated as templates)
+    pullSecrets: []
+
 # -- Sample application deploying a p-d pair of specific model
 # @default -- See below
 sampleApplication:
@@ -89,6 +126,10 @@ sampleApplication:
       # -- If `.Values.sampleApplication.model.modelArtifactURI` starts with `pvc://` what huggingface repo to load onto the pvc
     hfModelID: "meta-llama/Llama-3.2-3B-Instruct"
 
+  # @schema
+  # items:
+  #   $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements
+  # @schema
   # -- Modify resource limits/requests available to the pods
   # -- Resource requests/limits
   # <br /> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-requests-and-limits-of-pod-and-container
@@ -120,14 +161,38 @@ gateway:
   # Currently supported values: "kgateway" or "istio"
   gatewayClassName: kgateway
 
+  # @schema
+  # additionalProperties: true
+  # @schema
   # -- Additional annotations provided to the Gateway resource
   annotations: {}
 
   # Special parameters applied to kGateway via GatewayParameters resource
   kGatewayParameters:
-
+    # @schema
+    # type: [number, boolean]
+    # @schema
     proxyUID: false
 
+  # @schema
+  # items:
+  #  type: object
+  #  properties:
+  #    name:
+  #      description: Name is the name of the Listener. This name MUST be unique within a Gateway
+  #      type: string
+  #    path:
+  #      description: Path to expose via Ingress
+  #      type: string
+  #    port:
+  #      description: Port is the network port. Multiple listeners may use the same port, subject to the Listener compatibility rules
+  #      type: integer
+  #      minimum: 1
+  #      maximum: 65535
+  #    protocol:
+  #      description: Protocol specifies the network protocol this listener expects to receive
+  #      type: string
+  # @schema
   # Set of listeners exposed via the Gateway, also propagated to the Ingress if enabled
   listeners:
     - name: default
@@ -148,6 +213,9 @@ ingress:
   # -- Name of the IngressClass cluster resource which defines which controller will implement the resource (e.g nginx)
   ingressClassName: ""
 
+  # @schema
+  # additionalProperties: true
+  # @schema
   # -- Additional annotations for the Ingress resource
   annotations: {}
 
@@ -175,6 +243,10 @@ ingress:
     # -- The name to which the TLS Secret will be called
     secretName: ""
 
+  # @schema
+  # items:
+  #   $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.networking.v1.IngressTLS
+  # @schema
   # -- The TLS configuration for additional hostnames to be covered with this ingress record.
   # <br /> Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
   # <!-- E.g.
@@ -202,9 +274,15 @@ modelservice:
     # @default -- See below
     serviceMonitor:
 
+      # @schema
+      # additionalProperties: true
+      # @schema
       # -- Additional annotations provided to the ServiceMonitor
       annotations: {}
 
+      # @schema
+      # additionalProperties: true
+      # @schema
       # -- Additional labels provided to the ServiceMonitor
       labels: {}
 
@@ -220,11 +298,20 @@ modelservice:
       # -- ServiceMonitor namespace selector
       namespaceSelector:
         any: false
+
+        # @schema
+        # items:
+        #   type: string
+        # @schema
         matchNames: []
 
       # -- ServiceMonitor selector matchLabels
       # </br> matchLabels must match labels on modelservice Services
       selector:
+
+        # @schema
+        # $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector
+        # @schema
         matchLabels: {}
 
 
@@ -238,21 +325,53 @@ modelservice:
   replicas: 1
 
   # -- Modelservice controller image, please change only if appropriate adjustments to the CRD are being made
+  # @default -- See below
   image:
+
+    # -- Model Service controller image registry
     registry: quay.io
+
+    # -- Model Service controller image repository
     repository: llm-d/llm-d-model-service
+
+    # -- Model Service controller image tag
     tag: "0.0.9"
+
+    # -- Specify a imagePullPolicy
     imagePullPolicy: "Always"
+
+    # @schema
+    # items:
+    #   type: string
+    # @schema
+    # -- Optionally specify an array of imagePullSecrets (evaluated as templates)
+    pullSecrets: []
 
   # -- Endpoint picker configuration
   # @default -- See below
   epp:
     # -- Endpoint picker image used in ModelService CR presets
+    # @default -- See below
     image:
+
+      # -- Endpoint picker image registry
       registry: quay.io
+
+      # -- Endpoint picker image repository
       repository: llm-d/llm-d-inference-scheduler
+
+      # -- Endpoint picker image tag
       tag: 0.0.2
+
+    # -- Specify a imagePullPolicy
       imagePullPolicy: "Always"
+
+      # @schema
+      # items:
+      #   type: string
+      # @schema
+      # -- Optionally specify an array of imagePullSecrets (evaluated as templates)
+      pullSecrets: []
 
     # -- Enable metrics gathering via podMonitor / ServiceMonitor
     metrics:
@@ -265,9 +384,15 @@ modelservice:
       # @default -- See below
       serviceMonitor:
 
+        # @schema
+        # additionalProperties: true
+        # @schema
         # -- Additional annotations provided to the ServiceMonitor
         annotations: {}
 
+        # @schema
+        # additionalProperties: true
+        # @schema
         # -- Additional labels provided to the ServiceMonitor
         labels: {}
 
@@ -283,11 +408,20 @@ modelservice:
         # -- ServiceMonitor namespace selector
         namespaceSelector:
           any: false
+
+          # @schema
+          # items:
+          #   type: string
+          # @schema
           matchNames: []
 
         # -- ServiceMonitor selector matchLabels
         # </br> matchLabels must match labels on modelservice Services
         selector:
+
+          # @schema
+          # $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector
+          # @schema
           matchLabels: {}
 
     # -- Default environment variables for endpoint picker, use `extraEnvVars` to override default behavior by defining the same variable again.
@@ -339,6 +473,11 @@ modelservice:
         value: "false"
       - name: DECODE_PREFIX_AWARE_SCORER_WEIGHT
         value: "1.0"
+
+    # @schema
+    # items:
+    #   $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar
+    # @schema
     # -- Additional environment variables for endpoint picker
     extraEnvVars: []
 
@@ -346,6 +485,10 @@ modelservice:
   # @default -- See below
   prefill:
 
+    # @schema
+    # items:
+    #   $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration
+    # @schema
     # -- Tolerations configuration to deploy prefill pods to tainted nodes
     # @default -- See below
     tolerations:
@@ -359,6 +502,10 @@ modelservice:
   # @default -- See below
   decode:
 
+    # @schema
+    # items:
+    #   $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration
+    # @schema
     # -- Tolerations configuration to deploy decode pods to tainted nodes
     # @default -- See below
     tolerations:
@@ -373,11 +520,27 @@ modelservice:
   vllm:
 
     # -- vLLM image used in ModelService CR presets
+    # @default -- See below
     image:
+
+      # -- llm-d image registry
       registry: quay.io
+
+      # -- llm-d image repository
       repository: "llm-d/llm-d"
+
+      # -- llm-d image tag
       tag: 0.0.7
+
+      # -- Specify a imagePullPolicy
       imagePullPolicy: "IfNotPresent"
+
+      # @schema
+      # items:
+      #   type: string
+      # @schema
+      # -- Optionally specify an array of imagePullSecrets (evaluated as templates)
+      pullSecrets: []
 
     # -- Enable metrics gathering via podMonitor / ServiceMonitor
     metrics:
@@ -388,30 +551,71 @@ modelservice:
   # -- Routing proxy container options
   # @default -- See below
   routingProxy:
+
     # -- Routing proxy image used in ModelService CR presets
     image:
+
+      # -- Routing proxy image registry
       registry: quay.io
+
+      # -- Routing proxy image repository
       repository: llm-d/llm-d-routing-sidecar
+
+      # -- Routing proxy image tag
       tag: "0.0.6"
-      imagePullPolicy: "Always"
+
+      # -- Specify a imagePullPolicy
+      imagePullPolicy: "IfNotPresent"
+
+      # @schema
+      # items:
+      #   type: string
+      # @schema
+      # -- Optionally specify an array of imagePullSecrets (evaluated as templates)
+      pullSecrets: []
 
   # -- vLL sim container options
   # @default -- See below
   vllmSim:
 
     # -- vLLM sim image used in ModelService CR presets
+    # @default -- See below
     image:
+
+      # -- vllm-sim image registry
       registry: quay.io
+
+      # -- vllm-sim image repository
       repository: llm-d/vllm-sim
+
+      # -- vllm-sim image tag
       tag: "0.0.4"
+
+      # -- Specify a imagePullPolicy
       imagePullPolicy: "IfNotPresent"
 
+      # @schema
+      # items:
+      #   type: string
+      # @schema
+      # -- Optionally specify an array of imagePullSecrets (evaluated as templates)
+      pullSecrets: []
+
+  # @schema
+  # additionalProperties: true
+  # @schema
   # -- Annotations to add to all modelservice resources
   annotations: {}
 
+  # @schema
+  # additionalProperties: true
+  # @schema
   # -- Pod annotations for modelservice
   podAnnotations: {}
 
+  # @schema
+  # additionalProperties: true
+  # @schema
   # -- Pod labels for modelservice
   podLabels: {}
 
@@ -440,9 +644,15 @@ modelservice:
     # --  String to partially override modelservice.serviceAccountName, defaults to modelservice.fullname
     nameOverride: ""
 
+    # @schema
+    # additionalProperties: true
+    # @schema
     # -- Additional custom labels to the service ServiceAccount.
     labels: {}
 
+    # @schema
+    # additionalProperties: true
+    # @schema
     # -- Additional custom annotations for the ServiceAccount.
     annotations: {}
 
@@ -450,6 +660,9 @@ modelservice:
     # -- Enable the creation of RBAC resources
     create: true
 
+# @schema
+# $ref: https://raw.githubusercontent.com/bitnami/charts/refs/tags/redis/20.13.4/bitnami/redis/values.schema.json
+# @schema
 # -- Bitnami/Redis chart configuration
 # @default -- Use sane defaults for minimal Redis deployment
 redis:

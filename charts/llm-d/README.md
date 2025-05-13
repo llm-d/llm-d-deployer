@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart for OpenShift
 
-![Version: 0.8.2](https://img.shields.io/badge/Version-0.8.2-informational?style=flat-square)
+![Version: 0.8.3](https://img.shields.io/badge/Version-0.8.3-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for llm-d
@@ -139,6 +139,7 @@ Kubernetes: `>= 1.25.0-0`
 | Key | Description | Type | Default |
 |-----|-------------|------|---------|
 | clusterDomain | Default Kubernetes cluster domain | string | `"cluster.local"` |
+| common | Parameters for bitnami.common dependency | object | `{}` |
 | commonAnnotations | Annotations to add to all deployed objects | object | `{}` |
 | commonLabels | Labels to add to all deployed objects | object | `{}` |
 | extraDeploy | Array of extra objects to deploy with the release | list | `[]` |
@@ -174,7 +175,12 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.epp | Endpoint picker configuration | object | See below |
 | modelservice.epp.defaultEnvVars | Default environment variables for endpoint picker, use `extraEnvVars` to override default behavior by defining the same variable again. Ref: https://github.com/neuralmagic/gateway-api-inference-extension/tree/dev?tab=readme-ov-file#temporary-fork-configuration | list | `[{"name":"ENABLE_KVCACHE_AWARE_SCORER","value":"false"},{"name":"KVCACHE_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"KVCACHE_INDEXER_REDIS_ADDR","value":"{{ if .Values.redis.enabled }}{{ include \"redis.master.service.fullurl\" . }}{{ end }}"},{"name":"ENABLE_PREFIX_AWARE_SCORER","value":"true"},{"name":"PREFIX_AWARE_SCORER_WEIGHT","value":"2.0"},{"name":"ENABLE_LOAD_AWARE_SCORER","value":"true"},{"name":"LOAD_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"ENABLE_SESSION_AWARE_SCORER","value":"false"},{"name":"SESSION_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"PD_ENABLED","value":"false"},{"name":"PD_PROMPT_LEN_THRESHOLD","value":"10"},{"name":"PREFILL_ENABLE_KVCACHE_AWARE_SCORER","value":"false"},{"name":"PREFILL_KVCACHE_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"PREFILL_ENABLE_LOAD_AWARE_SCORER","value":"false"},{"name":"PREFILL_LOAD_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"PREFILL_ENABLE_PREFIX_AWARE_SCORER","value":"false"},{"name":"PREFILL_PREFIX_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"DECODE_ENABLE_KVCACHE_AWARE_SCORER","value":"false"},{"name":"DECODE_KVCACHE_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"DECODE_ENABLE_LOAD_AWARE_SCORER","value":"false"},{"name":"DECODE_LOAD_AWARE_SCORER_WEIGHT","value":"1.0"},{"name":"DECODE_ENABLE_PREFIX_AWARE_SCORER","value":"false"},{"name":"DECODE_PREFIX_AWARE_SCORER_WEIGHT","value":"1.0"}]` |
 | modelservice.epp.extraEnvVars | Additional environment variables for endpoint picker | list | `[]` |
-| modelservice.epp.image | Endpoint picker image used in ModelService CR presets | object | `{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-inference-scheduler","tag":"0.0.2"}` |
+| modelservice.epp.image | Endpoint picker image used in ModelService CR presets | object | See below |
+| modelservice.epp.image.imagePullPolicy | Specify a imagePullPolicy | string | `"Always"` |
+| modelservice.epp.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
+| modelservice.epp.image.registry | Endpoint picker image registry | string | `"quay.io"` |
+| modelservice.epp.image.repository | Endpoint picker image repository | string | `"llm-d/llm-d-inference-scheduler"` |
+| modelservice.epp.image.tag | Endpoint picker image tag | string | `"0.0.2"` |
 | modelservice.epp.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true,"serviceMonitor":{"annotations":{},"interval":"10s","labels":{},"namespaceSelector":{"any":false,"matchNames":[]},"path":"/metrics","port":"metrics","selector":{"matchLabels":{}}}}` |
 | modelservice.epp.metrics.enabled | Enable metrics scraping from endpoint picker service | bool | `true` |
 | modelservice.epp.metrics.serviceMonitor | Prometheus ServiceMonitor configuration <br /> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md | object | See below |
@@ -186,7 +192,12 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.epp.metrics.serviceMonitor.port | ServiceMonitor endpoint port | string | `"metrics"` |
 | modelservice.epp.metrics.serviceMonitor.selector | ServiceMonitor selector matchLabels </br> matchLabels must match labels on modelservice Services | object | `{"matchLabels":{}}` |
 | modelservice.fullnameOverride | String to fully override modelservice.fullname | string | `""` |
-| modelservice.image | Modelservice controller image, please change only if appropriate adjustments to the CRD are being made | object | `{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-model-service","tag":"0.0.9"}` |
+| modelservice.image | Modelservice controller image, please change only if appropriate adjustments to the CRD are being made | object | See below |
+| modelservice.image.imagePullPolicy | Specify a imagePullPolicy | string | `"Always"` |
+| modelservice.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
+| modelservice.image.registry | Model Service controller image registry | string | `"quay.io"` |
+| modelservice.image.repository | Model Service controller image repository | string | `"llm-d/llm-d-model-service"` |
+| modelservice.image.tag | Model Service controller image tag | string | `"0.0.9"` |
 | modelservice.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true,"serviceMonitor":{"annotations":{},"interval":"15s","labels":{},"namespaceSelector":{"any":false,"matchNames":[]},"path":"/metrics","port":"vllm","selector":{"matchLabels":{}}}}` |
 | modelservice.metrics.enabled | Enable metrics scraping from prefill and decode services, see `model | bool | `true` |
 | modelservice.metrics.serviceMonitor | Prometheus ServiceMonitor configuration <br /> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md | object | See below |
@@ -206,7 +217,12 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.rbac.create | Enable the creation of RBAC resources | bool | `true` |
 | modelservice.replicas | Number of controller replicas | int | `1` |
 | modelservice.routingProxy | Routing proxy container options | object | See below |
-| modelservice.routingProxy.image | Routing proxy image used in ModelService CR presets | object | `{"imagePullPolicy":"Always","registry":"quay.io","repository":"llm-d/llm-d-routing-sidecar","tag":"0.0.6"}` |
+| modelservice.routingProxy.image | Routing proxy image used in ModelService CR presets | object | `{"imagePullPolicy":"IfNotPresent","pullSecrets":[],"registry":"quay.io","repository":"llm-d/llm-d-routing-sidecar","tag":"0.0.6"}` |
+| modelservice.routingProxy.image.imagePullPolicy | Specify a imagePullPolicy | string | `"IfNotPresent"` |
+| modelservice.routingProxy.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
+| modelservice.routingProxy.image.registry | Routing proxy image registry | string | `"quay.io"` |
+| modelservice.routingProxy.image.repository | Routing proxy image repository | string | `"llm-d/llm-d-routing-sidecar"` |
+| modelservice.routingProxy.image.tag | Routing proxy image tag | string | `"0.0.6"` |
 | modelservice.service.enabled | Toggle to deploy a Service resource for Model service controller | bool | `true` |
 | modelservice.service.port | Port number exposed from Model Service controller | int | `8443` |
 | modelservice.service.type | Service type | string | `"ClusterIP"` |
@@ -217,11 +233,21 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.serviceAccount.labels | Additional custom labels to the service ServiceAccount. | object | `{}` |
 | modelservice.serviceAccount.nameOverride | String to partially override modelservice.serviceAccountName, defaults to modelservice.fullname | string | `""` |
 | modelservice.vllm | vLLM container options | object | See below |
-| modelservice.vllm.image | vLLM image used in ModelService CR presets | object | `{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/llm-d","tag":"0.0.7"}` |
+| modelservice.vllm.image | vLLM image used in ModelService CR presets | object | See below |
+| modelservice.vllm.image.imagePullPolicy | Specify a imagePullPolicy | string | `"IfNotPresent"` |
+| modelservice.vllm.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
+| modelservice.vllm.image.registry | llm-d image registry | string | `"quay.io"` |
+| modelservice.vllm.image.repository | llm-d image repository | string | `"llm-d/llm-d"` |
+| modelservice.vllm.image.tag | llm-d image tag | string | `"0.0.7"` |
 | modelservice.vllm.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true}` |
 | modelservice.vllm.metrics.enabled | Enable metrics scraping from prefill & decode services | bool | `true` |
 | modelservice.vllmSim | vLL sim container options | object | See below |
-| modelservice.vllmSim.image | vLLM sim image used in ModelService CR presets | object | `{"imagePullPolicy":"IfNotPresent","registry":"quay.io","repository":"llm-d/vllm-sim","tag":"0.0.4"}` |
+| modelservice.vllmSim.image | vLLM sim image used in ModelService CR presets | object | See below |
+| modelservice.vllmSim.image.imagePullPolicy | Specify a imagePullPolicy | string | `"IfNotPresent"` |
+| modelservice.vllmSim.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
+| modelservice.vllmSim.image.registry | vllm-sim image registry | string | `"quay.io"` |
+| modelservice.vllmSim.image.repository | vllm-sim image repository | string | `"llm-d/vllm-sim"` |
+| modelservice.vllmSim.image.tag | vllm-sim image tag | string | `"0.0.4"` |
 | nameOverride | String to partially override common.names.fullname | string | `""` |
 | redis | Bitnami/Redis chart configuration | object | Use sane defaults for minimal Redis deployment |
 | sampleApplication | Sample application deploying a p-d pair of specific model | object | See below |
@@ -236,8 +262,10 @@ Kubernetes: `>= 1.25.0-0`
 | sampleApplication.model.modelName | Name of the model | string | `"meta-llama/Llama-3.2-3B-Instruct"` |
 | sampleApplication.model.servedModelNames | Aliases to the Model named vllm will serve with | list | `[]` |
 | sampleApplication.resources | Resource requests/limits <br /> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-requests-and-limits-of-pod-and-container | object | `{"limits":{"nvidia.com/gpu":1},"requests":{"nvidia.com/gpu":1}}` |
-| test | Helm tests | object | `{"enabled":false,"image":{"registry":"quay.io","repository":"curl/curl","tag":"latest"}}` |
+| test | Helm tests | object | `{"enabled":false,"image":{"imagePullPolicy":"Always","pullSecrets":[],"registry":"quay.io","repository":"curl/curl","tag":"latest"}}` |
 | test.enabled | Enable rendering of helm test resources | bool | `false` |
+| test.image.imagePullPolicy | Specify a imagePullPolicy | string | `"Always"` |
+| test.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
 | test.image.registry | Test connection pod image registry | string | `"quay.io"` |
 | test.image.repository | Test connection pod image repository. Note that the image needs to have both the `sh` and `curl` binaries in it. | string | `"curl/curl"` |
 | test.image.tag | Test connection pod image tag. Note that the image needs to have both the `sh` and `curl` binaries in it. | string | `"latest"` |
