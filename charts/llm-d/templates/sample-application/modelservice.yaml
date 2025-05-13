@@ -21,12 +21,15 @@ spec:
   modelArtifacts:
     uri: {{ .Values.sampleApplication.model.modelArtifactURI }}
   decode:
-    replicas: 1
+    replicas: {{ .Values.sampleApplication.decode.replicas }}
     containers:
     - name: "vllm"
       args:
       - "--served-model-name"
       - {{ include "sampleApplication.servedModelNames" .}}
+      {{- range .Values.sampleApplication.decode.extraArgs }}
+      - {{ include "common.tplvalues.render" ( dict "value" . "context" $) | quote }}
+      {{- end }}
       resources: {{ .Values.sampleApplication.resources | toYaml | nindent 8 }}
       env:
       {{- if eq (include "sampleApplication.modelArtifactType" . ) "hf" }}
@@ -37,12 +40,15 @@ spec:
             key: {{ .Values.sampleApplication.model.auth.hfToken.key }}
       {{- end }}
   prefill:
-    replicas: 1
+    replicas: {{ .Values.sampleApplication.prefill.replicas }}
     containers:
     - name: "vllm"
       args:
       - "--served-model-name"
       - {{ include "sampleApplication.servedModelNames" .}}
+      {{- range .Values.sampleApplication.prefill.extraArgs }}
+      - {{ include "common.tplvalues.render" ( dict "value" . "context" $) | quote }}
+      {{- end }}
       resources: {{ .Values.sampleApplication.resources | toYaml | nindent 8 }}
       env:
       {{- if eq (include "sampleApplication.modelArtifactType" . ) "hf" }}

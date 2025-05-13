@@ -1340,6 +1340,29 @@
       "default": "See below",
       "description": "Sample application deploying a p-d pair of specific model",
       "properties": {
+        "decode": {
+          "additionalProperties": false,
+          "properties": {
+            "extraArgs": {
+              "description": "args to add to the decode deployment",
+              "items": {
+                "required": [],
+                "type": "string"
+              },
+              "required": [],
+              "title": "extraArgs"
+            },
+            "replicas": {
+              "default": "1",
+              "description": "number of desired decode replicas",
+              "required": [],
+              "title": "replicas"
+            }
+          },
+          "required": [],
+          "title": "decode",
+          "type": "object"
+        },
         "enabled": {
           "default": "true",
           "description": "Enable rendering of sample application resources",
@@ -1412,6 +1435,29 @@
           },
           "required": [],
           "title": "model",
+          "type": "object"
+        },
+        "prefill": {
+          "additionalProperties": false,
+          "properties": {
+            "extraArgs": {
+              "description": "args to add to the prefill deployment",
+              "items": {
+                "required": [],
+                "type": "string"
+              },
+              "required": [],
+              "title": "extraArgs"
+            },
+            "replicas": {
+              "default": "1",
+              "description": "number of desired prefill replicas",
+              "required": [],
+              "title": "replicas"
+            }
+          },
+          "required": [],
+          "title": "prefill",
           "type": "object"
         },
         "resources": {

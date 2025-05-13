@@ -40,8 +40,6 @@ Define the type of the modelArtifactURI
   {{- end }}
 {{- end }}
 
-
-
 {{/*
 Define served model names for vllm
 */}}
