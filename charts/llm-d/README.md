@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart for OpenShift
 
-![Version: 0.8.6](https://img.shields.io/badge/Version-0.8.6-informational?style=flat-square)
+![Version: 0.8.7](https://img.shields.io/badge/Version-0.8.7-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for llm-d
@@ -179,7 +179,7 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.epp.image | Endpoint picker image used in ModelService CR presets | object | See below |
 | modelservice.epp.image.imagePullPolicy | Specify a imagePullPolicy | string | `"Always"` |
 | modelservice.epp.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
-| modelservice.epp.image.registry | Endpoint picker image registry | string | `"quay.io"` |
+| modelservice.epp.image.registry | Endpoint picker image registry | string | `"ghcr.io"` |
 | modelservice.epp.image.repository | Endpoint picker image repository | string | `"llm-d/llm-d-inference-scheduler"` |
 | modelservice.epp.image.tag | Endpoint picker image tag | string | `"0.0.2"` |
 | modelservice.epp.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true,"serviceMonitor":{"annotations":{},"interval":"10s","labels":{},"namespaceSelector":{"any":false,"matchNames":[]},"path":"/metrics","port":"metrics","selector":{"matchLabels":{}}}}` |
@@ -196,7 +196,7 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.image | Modelservice controller image, please change only if appropriate adjustments to the CRD are being made | object | See below |
 | modelservice.image.imagePullPolicy | Specify a imagePullPolicy | string | `"Always"` |
 | modelservice.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
-| modelservice.image.registry | Model Service controller image registry | string | `"quay.io"` |
+| modelservice.image.registry | Model Service controller image registry | string | `"ghcr.io"` |
 | modelservice.image.repository | Model Service controller image repository | string | `"llm-d/llm-d-model-service"` |
 | modelservice.image.tag | Model Service controller image tag | string | `"0.0.9"` |
 | modelservice.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true,"serviceMonitor":{"annotations":{},"interval":"15s","labels":{},"namespaceSelector":{"any":false,"matchNames":[]},"path":"/metrics","port":"vllm","selector":{"matchLabels":{}}}}` |
@@ -218,10 +218,10 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.rbac.create | Enable the creation of RBAC resources | bool | `true` |
 | modelservice.replicas | Number of controller replicas | int | `1` |
 | modelservice.routingProxy | Routing proxy container options | object | See below |
-| modelservice.routingProxy.image | Routing proxy image used in ModelService CR presets | object | `{"imagePullPolicy":"IfNotPresent","pullSecrets":[],"registry":"quay.io","repository":"llm-d/llm-d-routing-sidecar","tag":"0.0.6"}` |
+| modelservice.routingProxy.image | Routing proxy image used in ModelService CR presets | object | `{"imagePullPolicy":"IfNotPresent","pullSecrets":[],"registry":"ghcr.io","repository":"llm-d/llm-d-routing-sidecar","tag":"0.0.6"}` |
 | modelservice.routingProxy.image.imagePullPolicy | Specify a imagePullPolicy | string | `"IfNotPresent"` |
 | modelservice.routingProxy.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
-| modelservice.routingProxy.image.registry | Routing proxy image registry | string | `"quay.io"` |
+| modelservice.routingProxy.image.registry | Routing proxy image registry | string | `"ghcr.io"` |
 | modelservice.routingProxy.image.repository | Routing proxy image repository | string | `"llm-d/llm-d-routing-sidecar"` |
 | modelservice.routingProxy.image.tag | Routing proxy image tag | string | `"0.0.6"` |
 | modelservice.service.enabled | Toggle to deploy a Service resource for Model service controller | bool | `true` |
@@ -237,7 +237,7 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.vllm.image | vLLM image used in ModelService CR presets | object | See below |
 | modelservice.vllm.image.imagePullPolicy | Specify a imagePullPolicy | string | `"IfNotPresent"` |
 | modelservice.vllm.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
-| modelservice.vllm.image.registry | llm-d image registry | string | `"quay.io"` |
+| modelservice.vllm.image.registry | llm-d image registry | string | `"ghcr.io"` |
 | modelservice.vllm.image.repository | llm-d image repository | string | `"llm-d/llm-d"` |
 | modelservice.vllm.image.tag | llm-d image tag | string | `"0.0.7"` |
 | modelservice.vllm.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true}` |
@@ -246,7 +246,7 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.vllmSim.image | vLLM sim image used in ModelService CR presets | object | See below |
 | modelservice.vllmSim.image.imagePullPolicy | Specify a imagePullPolicy | string | `"IfNotPresent"` |
 | modelservice.vllmSim.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
-| modelservice.vllmSim.image.registry | vllm-sim image registry | string | `"quay.io"` |
+| modelservice.vllmSim.image.registry | vllm-sim image registry | string | `"ghcr.io"` |
 | modelservice.vllmSim.image.repository | vllm-sim image repository | string | `"llm-d/vllm-sim"` |
 | modelservice.vllmSim.image.tag | vllm-sim image tag | string | `"0.0.4"` |
 | nameOverride | String to partially override common.names.fullname | string | `""` |

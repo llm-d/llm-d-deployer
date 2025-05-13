@@ -785,7 +785,7 @@
                   "title": "pullSecrets"
                 },
                 "registry": {
-                  "default": "quay.io",
+                  "default": "ghcr.io",
                   "description": "Endpoint picker image registry",
                   "required": [],
                   "title": "registry"
@@ -926,7 +926,7 @@
               "title": "pullSecrets"
             },
             "registry": {
-              "default": "quay.io",
+              "default": "ghcr.io",
               "description": "Model Service controller image registry",
               "required": [],
               "title": "registry"
@@ -1118,7 +1118,7 @@
                   "title": "pullSecrets"
                 },
                 "registry": {
-                  "default": "quay.io",
+                  "default": "ghcr.io",
                   "description": "Routing proxy image registry",
                   "required": [],
                   "title": "registry"
@@ -1235,7 +1235,7 @@
                   "title": "pullSecrets"
                 },
                 "registry": {
-                  "default": "quay.io",
+                  "default": "ghcr.io",
                   "description": "llm-d image registry",
                   "required": [],
                   "title": "registry"
@@ -1300,7 +1300,7 @@
                   "title": "pullSecrets"
                 },
                 "registry": {
-                  "default": "quay.io",
+                  "default": "ghcr.io",
                   "description": "vllm-sim image registry",
                   "required": [],
                   "title": "registry"
