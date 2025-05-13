@@ -1,0 +1,14 @@
+policy:
+- section:
+  - id:
+    - component
+    block-list:
+    - I don't know
+    - Other
+    label:
+    - name: quickstart
+      keys:
+      - Quickstart
+    - name: chart
+      keys:
+      - Helm Chart
