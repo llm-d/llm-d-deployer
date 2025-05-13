@@ -122,10 +122,6 @@ sampleApplication:
         # -- Value of the token. Do not set this but use `envsubst` in conjunction with the helm chart
         key: HF_TOKEN
 
-  downloadModelJob:
-      # -- If `.Values.sampleApplication.model.modelArtifactURI` starts with `pvc://` what huggingface repo to load onto the pvc
-    hfModelID: "meta-llama/Llama-3.2-3B-Instruct"
-
   # @schema
   # items:
   #   $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements

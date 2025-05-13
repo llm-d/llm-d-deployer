@@ -290,10 +290,6 @@ Here is an example snippet of the default model values being replaced with
         name: llm-d-hf-token
         # -- Value of the token. Do not set this but use `envsubst` in conjunction with the helm chart
         key: HF_TOKEN
-
-  downloadModelJob:
-      # -- If `.Values.sampleApplication.model.modelArtifactURI` starts with `pvc://` what huggingface repo to load onto the pvc
-    hfModelID: "meta-llama/Llama-3.2-1B-Instruct"
 ```
 
 ### Metrics Collection
