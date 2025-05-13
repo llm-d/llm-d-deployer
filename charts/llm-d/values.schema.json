@@ -190,6 +190,12 @@
           "required": [],
           "title": "annotations"
         },
+        "clusterRouterBase": {
+          "default": "",
+          "description": "used as part of the host dirivation if not specified from OCP cluster domain (dont edit)",
+          "required": [],
+          "title": "clusterRouterBase"
+        },
         "enabled": {
           "default": "true",
           "description": "Deploy Ingress",
