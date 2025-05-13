@@ -1346,7 +1346,8 @@
             "extraArgs": {
               "description": "args to add to the decode deployment",
               "items": {
-                "required": []
+                "required": [],
+                "type": "string"
               },
               "required": [],
               "title": "extraArgs"
@@ -1442,7 +1443,8 @@
             "extraArgs": {
               "description": "args to add to the prefill deployment",
               "items": {
-                "required": []
+                "required": [],
+                "type": "string"
               },
               "required": [],
               "title": "extraArgs"

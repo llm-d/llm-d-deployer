@@ -46,27 +46,3 @@ Define served model names for vllm
 {{- define "sampleApplication.servedModelNames" -}}
   {{- .Values.sampleApplication.model.modelName }} {{ join " " .Values.sampleApplication.model.servedModelNames -}}
 {{- end }}
-
-
-{{/*
-Define Additional Prefill arguments to pass to the modelservice sample Application
-*/}}
-{{- define "sampleApplication.prefillExtraArgs" -}}
-  {{- if .Values.sampleApplication.prefill.extraArgs }}
-    {{- range .Values.sampleApplication.prefill.extraArgs }}
-      - {{ . | quote }}
-    {{- end }}
-  {{- end }}
-{{- end }}
-
-
-{{/*
-Define Additional Decode arguments to pass to the modelservice sample Application
-*/}}
-{{- define "sampleApplication.decodeExtraArgs" -}}
-  {{- if .Values.sampleApplication.decode.extraArgs }}
-    {{- range .Values.sampleApplication.decode.extraArgs }}
-      - {{ . | quote }}
-    {{ end }}
-  {{- end }}
-{{- end }}

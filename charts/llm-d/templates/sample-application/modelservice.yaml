@@ -27,7 +27,9 @@ spec:
       args:
       - "--served-model-name"
       - {{ include "sampleApplication.servedModelNames" .}}
-      {{- include "sampleApplication.decodeExtraArgs" . }}
+      {{- range .Values.sampleApplication.decode.extraArgs }}
+      - {{ include "common.tplvalues.render" ( dict "value" . "context" $) | quote }}
+      {{- end }}
       resources: {{ .Values.sampleApplication.resources | toYaml | nindent 8 }}
       env:
       {{- if eq (include "sampleApplication.modelArtifactType" . ) "hf" }}
@@ -44,7 +46,9 @@ spec:
       args:
       - "--served-model-name"
       - {{ include "sampleApplication.servedModelNames" .}}
-      {{- include "sampleApplication.prefillExtraArgs" . }}
+      {{- range .Values.sampleApplication.prefill.extraArgs }}
+      - {{ include "common.tplvalues.render" ( dict "value" . "context" $) | quote }}
+      {{- end }}
       resources: {{ .Values.sampleApplication.resources | toYaml | nindent 8 }}
       env:
       {{- if eq (include "sampleApplication.modelArtifactType" . ) "hf" }}
