@@ -174,7 +174,7 @@ create_pvc_and_download_model_if_needed() {
     fi
     if [[ "${HF_MODEL_ID}" == *"/"* ]]; then
         log_error "Error, \`modelArtifactURI\` indicates model from PVC, but no Hugging Face model is defined.
-        Please set the \`.sampleApplication.model.modelName\` in a Hugging Face compliant format `<org>/<repo>`."
+        Please set the \`.sampleApplication.model.modelName\` in a Hugging Face compliant format \"<org>/<repo>\"."
         exit 1
     fi
     if [[ -z "${HF_TOKEN_SECRET_NAME}" ]]; then
