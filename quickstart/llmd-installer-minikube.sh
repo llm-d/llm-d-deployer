@@ -23,7 +23,7 @@ PROXY_UID=""
 AUTH_FILE=""
 HOSTPATH_DIR=${HOSTPATH_DIR:="/mnt/data/llama-model-storage"}
 VALUES_FILE="values.yaml"
-DEBUG=""
+DEBUG_MODE=false
 DISABLE_METRICS=false
 MONITORING_NAMESPACE="llm-d-monitoring"
 MODEL_PV_NAME="model-hostpath-pv"
@@ -46,7 +46,7 @@ Options:
   --namespace NAME               K8s namespace (default: llm-d)
   --values-file PATH             Path to Helm values.yaml file (default: values.yaml)
   --uninstall                    Uninstall the llm-d components from the current cluster
-  --debug                        Add debug mode to the helm install
+  -d, --debug                    Add debug mode to the helm install
   --disable-metrics-collection   Disable metrics collection (Prometheus will not be installed)
   -s, --skip-download-model      Skip downloading the model to PVC if modelArtifactURI is pvc based
   -h, --help                     Show this help and exit
@@ -58,7 +58,35 @@ log_success() { echo -e "$*"; }
 log_error()   { echo -e "❌ $*" >&2; }
 die()         { log_error "$*"; exit 1; }
 
-### UTILITIES ###
+log_debug() {
+  if [[ "$DEBUG_MODE" == true ]]; then
+    echo "🔎 DEBUG: $*"
+  fi
+}
+
+# Detect which yq we have:
+#  - go-yq (“yq_eval …”) prints “version …” in its --version
+#  - python-yq is the jq-wrapper and does *not*
+if yq --version 2>&1 | grep -q 'version'; then
+  YQ_FLAVOR=go
+else
+  YQ_FLAVOR=py
+fi
+
+# Wrap yq calls so that later code can do:
+#    yq_eval 'has(.foo)' file.yaml
+# or yq_eval '.foo' file.yaml
+function yq_eval() {
+  if [[ "$YQ_FLAVOR" == "go" ]]; then
+    # mikefarah/yq: use `eval -r` for raw output
+    yq eval -r "$@"
+  else
+    # python-yq: first arg is the jq-style filter, then files
+    local filter="$1"; shift
+    yq -r "$filter" "$@"
+  fi
+}
+
 check_cmd() {
   command -v "$1" &>/dev/null || die "Required command not found: $1"
 }
@@ -78,17 +106,16 @@ check_cluster_reachability() {
   fi
 }
 
-# Derive an OpenShift PROXY_UID; default to 0 if not available
 fetch_kgateway_proxy_uid() {
-  log_info "Fetching OCP proxy UID..."
+  log_debug "Fetching OCP proxy UID..."
   local uid_range
   uid_range=$(kubectl get namespace "${NAMESPACE}" -o jsonpath='{.metadata.annotations.openshift\.io/sa\.scc\.uid-range}' 2>/dev/null || true)
   if [[ -n "$uid_range" ]]; then
     PROXY_UID=$(echo "$uid_range" | awk -F'/' '{print $1 + 1}')
-    log_success "Derived PROXY_UID=${PROXY_UID}"
+    log_debug "Derived PROXY_UID=${PROXY_UID}"
   else
     PROXY_UID=0
-    log_info "No OpenShift SCC annotation found; defaulting PROXY_UID=${PROXY_UID}"
+    log_debug "No OpenShift SCC annotation found; defaulting PROXY_UID=${PROXY_UID}"
   fi
 }
 
@@ -104,13 +131,94 @@ parse_args() {
       --namespace)                    NAMESPACE="$2"; shift 2 ;;
       --values-file)                  VALUES_FILE="$2"; shift 2 ;;
       --uninstall)                    ACTION="uninstall"; shift ;;
-      --debug)                        DEBUG="--debug"; shift;;
+      -d|--debug)                     DEBUG_MODE=true; shift;;
       --disable-metrics-collection)   DISABLE_METRICS=true; shift;;
       -s|--skip-download-model)       DOWNLOAD_MODEL=false; shift ;;
       -h|--help)                      print_help; exit 0 ;;
       *)                              die "Unknown option: $1" ;;
     esac
   done
+
+  # If debug was requested, turn on Bash xtrace with a friendly prefix:
+  if [[ "$DEBUG_MODE" == true ]]; then
+    log_debug "debug mode enabled"
+  fi
+}
+
+# Helper to read a top-level value from override if present,
+# otherwise fall back to chart’s values.yaml, and log the source
+get_value() {
+  local path="$1" src result
+  if [[ "${VALUES_FILE}" != "values.yaml" ]] && \
+     yq_eval "has(${path})" "${SCRIPT_DIR}/${VALUES_FILE}" &>/dev/null; then
+    src="$(realpath "${SCRIPT_DIR}/${VALUES_FILE}")"
+  else
+    src="${CHART_DIR}/values.yaml"
+  fi
+  # send logs to stderr so stdout is _only_ the value
+  >&2 log_info  "🔹 Reading ${path} from ${src}"
+  >&2 log_debug "🔹 yq command: yq_eval '${path}' '${src}'"
+  result="$(yq_eval "${path}" "${src}")"
+  >&2 log_debug "🔹 yq result for '${path}': '${result}'"
+  # raw value on stdout
+  echo "${result}"
+}
+
+# Populate VALUES_PATH and VALUES_ARGS for any value overrides
+resolve_values() {
+  # show where we’re looking
+  log_debug "🔹 CHART_DIR=${CHART_DIR}"
+  local base="${CHART_DIR}/values.yaml"
+  log_debug "🔹 Looking for base values at ${base}"
+  [[ -f "${base}" ]] || die "❌ Base values.yaml not found at ${base}"
+
+  if [[ "${VALUES_FILE}" != "values.yaml" ]]; then
+    # resolve override file path
+    local ov="${VALUES_FILE}"
+    [[ -f "${ov}" ]] || [[ -f "${SCRIPT_DIR}/${ov}" ]] || die "Override values file not found: ${ov}"
+    [[ -f "${ov}" ]] || ov="${SCRIPT_DIR}/${ov}"
+    ov="$(realpath "${ov}")"
+
+    # log inputs
+    log_debug "🔹 Merge inputs:"
+    log_debug "    base:     ${base}"
+    log_debug "    override: ${ov}"
+
+    # detect yq flavor
+    if yq --version 2>&1 | grep -q 'version'; then
+      YQ_TYPE=go
+    else
+      YQ_TYPE=py
+    fi
+    log_debug "🔹 Detected yq flavor: ${YQ_TYPE}"
+    log_info  "🔹 Base values: ${base}"
+
+    # merge into a temp file
+    local merged
+    merged="$(mktemp)"
+    if [[ "${YQ_TYPE}" == "go" ]]; then
+      merge_cmd=(yq_eval-all 'select(fileIndex==0) * select(fileIndex==1)' "${base}" "${ov}")
+    else
+      merge_cmd=(yq -s --yaml-output 'reduce .[] as $item ({}; . * $item)' "${base}" "${ov}")
+    fi
+    log_debug "🔹 Running merge command: ${merge_cmd[*]}"
+    "${merge_cmd[@]}" > "${merged}"
+
+    # final args
+    VALUES_PATH="${merged}"
+    VALUES_ARGS=(--values "${base}" --values "${ov}")
+
+  else
+    # no override, only base
+    VALUES_PATH="${base}"
+    log_info  "🔹 No override; using only base values: ${base}"
+    VALUES_ARGS=(--values "${base}")
+    log_debug "🔹 No override; using only base: ${base}"
+  fi
+
+  log_debug "🔹 Final VALUES_PATH=${VALUES_PATH}"
+  log_debug "🔹 Final VALUES_ARGS=${VALUES_ARGS[*]}"
+  log_info  "🔹 Merged values path: ${VALUES_PATH}"
 }
 
 ### ENV & PATH SETUP ###
@@ -238,7 +346,7 @@ delete_minikube() {
 create_pvc_and_download_model_if_needed() {
   YQ_TYPE=$(yq --version 2>/dev/null | grep -q 'version' && echo 'go' || echo 'py')
 
-  MODEL_ARTIFACT_URI=$(yq '.sampleApplication.model.modelArtifactURI' "${VALUES_PATH}" )
+  MODEL_ARTIFACT_URI=$(get_value '.sampleApplication.model.modelArtifactURI')
   if [[ "${YQ_TYPE}" == "py" ]]; then
     MODEL_ARTIFACT_URI=$(echo "${MODEL_ARTIFACT_URI}" | cut -d "\"" -f 2)
   fi
@@ -246,6 +354,13 @@ create_pvc_and_download_model_if_needed() {
   PROTOCOL="${MODEL_ARTIFACT_URI%%://*}"
 
   verify_env() {
+    log_debug "MODEL_ARTIFACT_URI=${MODEL_ARTIFACT_URI}"
+    log_debug "HF_MODEL_ID=${HF_MODEL_ID}"
+    log_debug "HF_TOKEN_SECRET_NAME=${HF_TOKEN_SECRET_NAME}"
+    log_debug "HF_TOKEN_SECRET_KEY=${HF_TOKEN_SECRET_KEY}"
+    log_debug "PVC_NAME=${PVC_NAME}"
+    log_debug "MODEL_PATH=${MODEL_PATH}"
+
     if [[ -z "${MODEL_ARTIFACT_URI}" ]]; then
         log_error "No Model Artifact URI set. Please set the \`.sampleApplication.model.modelArtifactURI\` in the values file."
         exit 1
@@ -287,9 +402,9 @@ create_pvc_and_download_model_if_needed() {
     if [[ "${DOWNLOAD_MODEL}" == "true" ]]; then
       log_info "💾 Provisioning model storage…"
 
-      HF_MODEL_ID=$(yq '.sampleApplication.model.modelName' "${VALUES_PATH}" )
-      HF_TOKEN_SECRET_NAME=$(yq '.sampleApplication.model.auth.hfToken.name' "${VALUES_PATH}" )
-      HF_TOKEN_SECRET_KEY=$(yq '.sampleApplication.model.auth.hfToken.key' "${VALUES_PATH}" )
+      HF_MODEL_ID=$(get_value '.sampleApplication.model.modelName')
+      HF_TOKEN_SECRET_NAME=$(get_value '.sampleApplication.model.auth.hfToken.name')
+      HF_TOKEN_SECRET_KEY=$(get_value '.sampleApplication.model.auth.hfToken.key')
 
       if [[ "${YQ_TYPE}" == "py" ]]; then
         HF_MODEL_ID=$(echo "${HF_MODEL_ID}" | cut -d "\"" -f 2)
@@ -299,12 +414,16 @@ create_pvc_and_download_model_if_needed() {
 
       DOWNLOAD_MODEL_JOB_TEMPLATE_FILE_PATH=$(realpath "${REPO_ROOT}/helpers/k8s/load-model-on-pvc-template.yaml")
 
+      log_info "🔹 HF_MODEL_ID = ${HF_MODEL_ID}"
+      log_info "🔹 HF_TOKEN_SECRET_NAME = ${HF_TOKEN_SECRET_NAME}"
+      log_info "🔹 HF_TOKEN_SECRET_KEY = ${HF_TOKEN_SECRET_KEY}"
+
       verify_env
 
       log_info "🚀 Launching model download job..."
 
       if [[ "${YQ_TYPE}" == "go" ]]; then
-        yq eval "
+        yq_eval "
         (.spec.template.spec.containers[0].env[] | select(.name == \"MODEL_PATH\")).value = \"${MODEL_PATH}\" |
         (.spec.template.spec.containers[0].env[] | select(.name == \"HF_MODEL_ID\")).value = \"${HF_MODEL_ID}\" |
         (.spec.template.spec.containers[0].env[] | select(.name == \"HF_TOKEN\")).valueFrom.secretKeyRef.name = \"${HF_TOKEN_SECRET_NAME}\" |
@@ -379,28 +498,19 @@ install() {
   log_success "✅ Namespace ready"
 
   cd "${CHART_DIR}"
-  # Resolve which values.yaml to use:
-  #   - If the user passed --values-file (i.e. $VALUES_FILE != "values.yaml"), treat it as
-  #     either relative or absolute path and require it to exist.
-  #   - Otherwise default to $CHART_DIR/values.yaml.
-  if [[ "$VALUES_FILE" != "values.yaml" ]]; then
-    if [[ -f "$VALUES_FILE" ]]; then
-      VALUES_PATH=$(realpath "$VALUES_FILE")
-      log_info "✅ Using custom values file: ${VALUES_PATH}"
-    else
-      die "Custom values file not found: $VALUES_FILE"
-    fi
-  else
-    VALUES_PATH="${CHART_DIR}/values.yaml"
-  fi
 
-  log_info "🔍 DEBUG: raw MODEL_ARTIFACT_URI = $(yq -r .sampleApplication.model.modelArtifactURI "${VALUES_PATH}")"
-  MODEL_ARTIFACT_URI=$(yq -r .sampleApplication.model.modelArtifactURI "${VALUES_PATH}")
+  # merge base and override into $VALUES_PATH/$VALUES_ARGS
+  resolve_values
+
+  MODEL_ARTIFACT_URI=$(yq_eval '.sampleApplication.model.modelArtifactURI' "${VALUES_PATH}")
+  log_debug "🔹 MODEL_ARTIFACT_URI = ${MODEL_ARTIFACT_URI}"
+
   PROTOCOL="${MODEL_ARTIFACT_URI%%://*}"
   PVC_AND_MODEL_PATH="${MODEL_ARTIFACT_URI#*://}"
   PVC_NAME="${PVC_AND_MODEL_PATH%%/*}"
   MODEL_PATH="${PVC_AND_MODEL_PATH#*/}"
-  log_info "🔍 DEBUG: PVC_NAME will be ${PVC_NAME}"
+  log_debug "PVC_NAME=${PVC_NAME}"
+  log_debug "MODEL_PATH=${MODEL_PATH}"
 
   # Create hostPath PV & PVC for model storage (hostPath is minikube specific)
   setup_minikube_storage
@@ -439,15 +549,10 @@ install() {
 
   export STORAGE_CLASS="manual"
 
-  # DEBUG PVC CREATION TODO: setup debug logging
-  log_info "🔍 DEBUG: Using values file: ${VALUES_PATH}"
-  log_info "🔍 DEBUG: raw MODEL_ARTIFACT_URI = $(yq -r .sampleApplication.model.modelArtifactURI "${VALUES_PATH}")"
-  log_info "🔍 DEBUG: raw DOWNLOAD_MODEL flag = ${DOWNLOAD_MODEL}"
-  log_info "🔍 DEBUG: PROTOCOL=${PROTOCOL}"
-  log_info "🔍 DEBUG: PVC_NAME=${PVC_NAME}"
-  log_info "🔍 DEBUG: MODEL_PATH=${MODEL_PATH}"
-  log_info "🔍 DEBUG: STORAGE_CLASS=${STORAGE_CLASS}"
-  log_info "🔍 DEBUG: STORAGE_SIZE=${STORAGE_SIZE}"
+  log_debug "HF_NAME=${HF_NAME}"
+  log_debug "PROTOCOL=${PROTOCOL}"
+  log_debug "STORAGE_CLASS=${STORAGE_CLASS}"
+  log_debug "STORAGE_SIZE=${STORAGE_SIZE}"
 
   #  create_pvc_and_download_model_if_needed
   create_pvc_and_download_model_if_needed
@@ -457,6 +562,13 @@ install() {
   helm dependency build .
   log_success "✅ Dependencies built"
 
+  # Prepare Helm flags for debug and metrics toggling
+  HELM_DEBUG_ARGS=()
+  if [[ "$DEBUG_MODE" == true ]]; then
+    HELM_DEBUG_ARGS=(--debug)
+  fi
+
+  METRICS_ARGS=()
   if [[ "${DISABLE_METRICS}" == "true" ]]; then
     log_info "ℹ️ Metrics collection disabled"
     METRICS_ARGS=(
@@ -468,14 +580,31 @@ install() {
     METRICS_ARGS=()
   fi
 
-  log_info "🚚 Deploying llm-d chart with ${VALUES_PATH}..."
+  cd "${CHART_DIR}"
+
+  # always include the stock chart defaults…
+  VALUES_ARGS=(--values "${CHART_DIR}/values.yaml")
+
+  # …and if the user passed a custom --values-file, layer it on top
+  if [[ "${VALUES_FILE}" != "values.yaml" ]]; then
+    if [[ -f "${VALUES_FILE}" ]]; then
+      OV="${VALUES_FILE}"
+    elif [[ -f "${SCRIPT_DIR}/${VALUES_FILE}" ]]; then
+      OV="${SCRIPT_DIR}/${VALUES_FILE}"
+    else
+      die "Override values file not found: ${VALUES_FILE}"
+    fi
+    VALUES_ARGS+=(--values "$(realpath "${OV}")")
+  fi
+
   helm upgrade -i llm-d . \
-    ${DEBUG} \
+    "${HELM_DEBUG_ARGS[@]}" \
     --namespace "${NAMESPACE}" \
-    --values "${VALUES_PATH}" \
+    "${VALUES_ARGS[@]}" \
     --set global.imagePullSecrets[0]=llm-d-pull-secret \
     --set gateway.kGatewayParameters.proxyUID="${PROXY_UID}" \
     "${METRICS_ARGS[@]}"
+
   log_success "✅ llm-d deployed"
 
   log_info "🔄 Patching all ServiceAccounts with pull-secret..."

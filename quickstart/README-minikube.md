@@ -150,6 +150,9 @@ For additional information regarding Minikube support with GPUs see [Using NVIDI
 ### Provision Minikube cluster with GPU support and install llm-d
 
 A hugging-face token is required either exported in your environment or passed via the `--hf-token` flag.
+You will need to run `--provision-minikube-gpu` at least once to provision the minikube container. After that,
+a common workflow might be to make some change to your code, run `--uninstall` to reset the minikube cluster to default
+and then run the installer again without the `--provision-minikube-gpu` flag.
 
 ```bash
 export HF_TOKEN="your-token"
@@ -290,6 +293,18 @@ Here is an example snippet of the default model values being replaced with
         name: llm-d-hf-token
         # -- Value of the token. Do not set this but use `envsubst` in conjunction with the helm chart
         key: HF_TOKEN
+```
+
+### Deploy with a Preconfigured Values File
+
+To make swapping in your own model even easier, we include a ready-to-use values files in[`quickstart/models/`](models/).
+
+Simply run the installer with the path to the included values file (or your own custom one) deploy the llm-d
+chart with all the correct overrides. These examples, also show you how you can pass custom arguments to vLLM
+prefill and decode pods.
+
+```bash
+./llmd-installer-minikube.sh --values-file models/gpt2-e2e-tiny-minikube.yaml
 ```
 
 ### Metrics Collection
