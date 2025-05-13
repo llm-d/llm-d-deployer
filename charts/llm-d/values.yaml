@@ -500,7 +500,9 @@ modelservice:
     #   $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar
     # @schema
     # -- Additional environment variables for endpoint picker
-    extraEnvVars: []
+    extraEnvVars:
+      - name: PD_ENABLED
+        value: "true"
 
   # -- Prefill options
   # @default -- See below
