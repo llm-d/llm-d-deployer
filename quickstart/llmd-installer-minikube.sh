@@ -486,11 +486,7 @@ create_pvc_and_download_model_if_needed() {
 
 install() {
   log_info "🏗️ Installing GAIE Kubernetes infrastructure…"
-  clone_gaie_repo
-  pushd gateway-api-inference-extension >/dev/null
-    INFRASTRUCTURE_OVERRIDE=true make environment.dev.kubernetes.infrastructure
-  popd >/dev/null
-  rm -rf gateway-api-inference-extension
+  bash ../chart-dependencies/ci-deps.sh
   log_success "✅ GAIE infra applied"
   log_info "📦 Creating namespace ${NAMESPACE}..."
   kubectl create namespace "${NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
@@ -690,12 +686,6 @@ EOF
   log_success "✅ llama model PV and PVC (${PVC_NAME}) created."
 }
 
-clone_gaie_repo() {
-  if [[ ! -d gateway-api-inference-extension ]]; then
-    git clone --branch main https://github.com/llm-d/gateway-api-inference-extension.git
-  fi
-}
-
 # function called right before the installer exits
 post_install() {
   # download-model pod deletion if it exists and in a succeeded phase
@@ -719,11 +709,7 @@ post_install() {
 
 uninstall() {
   log_info "🗑️ Tearing down GAIE Kubernetes infrastructure…"
-  clone_gaie_repo
-  pushd gateway-api-inference-extension >/dev/null
-    INFRASTRUCTURE_OVERRIDE=true make clean.environment.dev.kubernetes.infrastructure
-  popd >/dev/null
-  rm -rf gateway-api-inference-extension
+  bash ../chart-dependencies/ci-deps.sh delete
   # Check if we installed the Prometheus stack and delete the ServiceMonitor CRD if we did
   if helm list -n "${MONITORING_NAMESPACE}" | grep -q "prometheus" 2>/dev/null; then
     log_info "🗑️ Deleting ServiceMonitor CRD..."

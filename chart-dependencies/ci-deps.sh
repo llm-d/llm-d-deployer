@@ -16,17 +16,25 @@ fi
 CWD=$( dirname -- "$( readlink -f -- "$0"; )"; )
 
 ## Populate manifests
+MODE=${1:-apply} # allowed values "apply" or "delete"
+
+if [[ "$MODE" == "apply" ]]; then
+    LOG_ACTION_NAME="Installing"
+else
+    LOG_ACTION_NAME="Deleting"
+fi
 
 ### Base CRDs
-echo -e "\e[32m📜 Applying base CRDs\e[0m"
-kubectl apply -k https://github.com/llm-d/llm-d-inference-scheduler/deploy/components/crds-gateway-api?ref=dev
+echo -e "\e[32m📜 Base CRDs: ${LOG_ACTION_NAME}...\e[0m"
+kubectl $MODE -k https://github.com/llm-d/llm-d-inference-scheduler/deploy/components/crds-gateway-api?ref=dev
 
 ### GAIE CRDs
-echo -e "\e[32m🚪 Applying GAIE CRDs\e[0m"
-kubectl apply -k https://github.com/llm-d/llm-d-inference-scheduler/deploy/components/crds-gie?ref=dev
+echo -e "\e[32m🚪 GAIE CRDs: ${LOG_ACTION_NAME}...\e[0m"
+kubectl $MODE -k https://github.com/llm-d/llm-d-inference-scheduler/deploy/components/crds-gie?ref=dev
 
 ### Install Gateway provider
 backend=$(helm show values $CWD/../charts/llm-d --jsonpath '{.gateway.gatewayClassName}')
 
-echo -e "\e[32m🎒 Installing Gateway provider:\e[0m '\e[34m$backend\e[0m'"
-$CWD/$backend/install.sh
+echo -e "\e[32m🎒 Gateway provider \e[0m '\e[34m$backend\e[0m'\e[32m: ${LOG_ACTION_NAME}...\e[0m"
+
+$CWD/$backend/install.sh $MODE
