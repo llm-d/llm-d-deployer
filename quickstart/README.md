@@ -173,7 +173,7 @@ The installer needs to be run from the `llm-d-deployer/quickstart` directory.
 | `--skip-download-model`        | Skip downloading the model to PVC if modelArtifactURI is pvc based                                      | `./llmd-installer.sh --skip-download-model`                      |
 | `--storage-class CLASS`        | Storage class to use (default: efs-sc)                                                                  | `./llmd-installer.sh --storage-class ocs-storagecluster-cephfs`  |
 | `--namespace NAME`             | Kubernetes namespace to use (default: `llm-d`)                                                          | `./llmd-installer.sh --namespace foo`                            |
-| `--values NAME`                | Absolute path to a Helm values.yaml file (default: llm-d-deployer/charts/llm-d/values.yaml)             | `./llmd-installer.sh --values /path/to/values.yaml`              |
+| `--values-file NAME`           | Absolute path to a Helm values.yaml file (default: llm-d-deployer/charts/llm-d/values.yaml)             | `./llmd-installer.sh --values-file /path/to/values.yaml`         |
 | `--uninstall`                  | Uninstall llm-d and cleanup resources                                                                   | `./llmd-installer.sh --uninstall`                                |
 | `--disable-metrics-collection` | Disable metrics collection (Prometheus will not be installed)                                           | `./llmd-installer.sh --disable-metrics-collection`               |
 | `-h`, `--help`                 | Show help and exit                                                                                      | `./llmd-installer.sh --help`                                     |
