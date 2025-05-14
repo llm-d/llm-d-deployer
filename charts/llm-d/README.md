@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart for OpenShift
 
-![Version: 0.0.3](https://img.shields.io/badge/Version-0.0.3-informational?style=flat-square)
+![Version: 0.0.4](https://img.shields.io/badge/Version-0.0.4-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 llm-d is a High-Performance Distributed Inferencing Framework for any Kubernetes, any accelerator, any inference engine, any Linux
@@ -38,8 +38,10 @@ chmod +x kubectl
 sudo mv kubectl /usr/local/bin/
 ```
 
-- Kubernetes 1.25+ (OpenShift 4.12+)
+- Kubernetes 1.30+ (OpenShift 4.17+)
 - Helm 3.10+ or [latest release](https://github.com/helm/helm/releases)
+- [Gateway API](https://gateway-api.sigs.k8s.io/guides/) (see for [examples](https://github.com/llm-d/llm-d-deployer/blob/6db03770626f6e67b099300c66bfa535b2504727/chart-dependencies/ci-deps.sh#L22) we use in our CI)
+- [kGateway](https://kgateway.dev/) (or [Istio](http://istio.io/)) installed in the cluster (see for [examples](https://github.com/llm-d/llm-d-deployer/blob/6db03770626f6e67b099300c66bfa535b2504727/chart-dependencies/kgateway/install.sh) we use in our CI)
 
 ## Usage
 
