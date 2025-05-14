@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart for OpenShift
 
-![Version: 0.0.2](https://img.shields.io/badge/Version-0.0.2-informational?style=flat-square)
+![Version: 0.0.3](https://img.shields.io/badge/Version-0.0.3-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 llm-d is a High-Performance Distributed Inferencing Framework for any Kubernetes, any accelerator, any inference engine, any Linux
@@ -199,6 +199,13 @@ Kubernetes: `>= 1.30.0-0`
 | modelservice.image.registry | Model Service controller image registry | string | `"ghcr.io"` |
 | modelservice.image.repository | Model Service controller image repository | string | `"llm-d/llm-d-model-service"` |
 | modelservice.image.tag | Model Service controller image tag | string | `"0.0.10"` |
+| modelservice.inferenceSimulator | llm-d inference simulator container options | object | See below |
+| modelservice.inferenceSimulator.image | llm-d inference simulator image used in ModelService CR presets | object | See below |
+| modelservice.inferenceSimulator.image.imagePullPolicy | Specify a imagePullPolicy | string | `"IfNotPresent"` |
+| modelservice.inferenceSimulator.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
+| modelservice.inferenceSimulator.image.registry | llm-d inference simulator image registry | string | `"ghcr.io"` |
+| modelservice.inferenceSimulator.image.repository | llm-d inference simulator image repository | string | `"llm-d/llm-d-inference-sim"` |
+| modelservice.inferenceSimulator.image.tag | llm-d inference simulator image tag | string | `"0.0.4"` |
 | modelservice.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true,"serviceMonitor":{"annotations":{},"interval":"15s","labels":{},"namespaceSelector":{"any":false,"matchNames":[]},"path":"/metrics","port":"vllm","selector":{"matchLabels":{}}}}` |
 | modelservice.metrics.enabled | Enable metrics scraping from prefill and decode services, see `model | bool | `true` |
 | modelservice.metrics.serviceMonitor | Prometheus ServiceMonitor configuration <br /> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md | object | See below |
@@ -242,13 +249,6 @@ Kubernetes: `>= 1.30.0-0`
 | modelservice.vllm.image.tag | llm-d image tag | string | `"0.0.7"` |
 | modelservice.vllm.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true}` |
 | modelservice.vllm.metrics.enabled | Enable metrics scraping from prefill & decode services | bool | `true` |
-| modelservice.vllmSim | vLL sim container options | object | See below |
-| modelservice.vllmSim.image | vLLM sim image used in ModelService CR presets | object | See below |
-| modelservice.vllmSim.image.imagePullPolicy | Specify a imagePullPolicy | string | `"IfNotPresent"` |
-| modelservice.vllmSim.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
-| modelservice.vllmSim.image.registry | vllm-sim image registry | string | `"ghcr.io"` |
-| modelservice.vllmSim.image.repository | vllm-sim image repository | string | `"llm-d/vllm-sim"` |
-| modelservice.vllmSim.image.tag | vllm-sim image tag | string | `"0.0.4"` |
 | nameOverride | String to partially override common.names.fullname | string | `""` |
 | redis | Bitnami/Redis chart configuration | object | Use sane defaults for minimal Redis deployment |
 | sampleApplication | Sample application deploying a p-d pair of specific model | object | See below |
