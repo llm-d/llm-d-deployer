@@ -162,6 +162,16 @@ sampleApplication:
     # -- args to add to the decode deployment
     extraArgs: []
 
+  endpointPicker:
+
+    # @schema
+    # items:
+    #   $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar
+    # @schema
+    # -- Apply additional env variables to the endpoint picker deployment
+    # <br /> Ref: https://github.com/neuralmagic/llm-d-inference-scheduler/blob/0.0.2/docs/architecture.md
+    env: []
+
 # -- Gateway configuration
 # @default -- See below
 gateway:
@@ -445,7 +455,7 @@ modelservice:
           # @schema
           matchLabels: {}
 
-    # -- Default environment variables for endpoint picker, use `extraEnvVars` to override default behavior by defining the same variable again.
+    # -- Default environment variables for endpoint picker, use `defaultEnvVarsOverride` to override default behavior by defining the same variable again.
     # Ref: https://github.com/llm-d/llm-d-inference-scheduler/blob/main/docs/architecture.md#scorers--configuration
     defaultEnvVars:
       - name: ENABLE_KVCACHE_AWARE_SCORER
@@ -507,8 +517,8 @@ modelservice:
     # items:
     #   $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar
     # @schema
-    # -- Additional environment variables for endpoint picker
-    extraEnvVars: []
+    # -- Override default environment variables for endpoint picker. This list has priorito over `defaultEnvVars`
+    defaultEnvVarsOverride: []
 
   # -- Prefill options
   # @default -- See below

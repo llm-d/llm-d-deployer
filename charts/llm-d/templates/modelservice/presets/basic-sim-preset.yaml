@@ -175,15 +175,7 @@ data:
                 - --grpcHealthPort
                 - "9003"
               env:
-              {{- if .Values.modelservice.epp.defaultEnvVars }}
-              {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.epp.defaultEnvVars "context" $) | nindent 14 }}
-              {{- end }}
-              {{- if .Values.modelservice.epp.extraEnvVars }}
-              {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.epp.extraEnvVars "context" $) | nindent 14 }}
-              {{- end }}
-              {{/* Kvcache aware scorer doesn't make sense in inferenceSimulator */}}
-              - name: ENABLE_KVCACHE_AWARE_SCORER
-                value: "false"
+              {{- include "modelservice.epp.envList" . | nindent 14 }}
               image: {{ include "modelservice.eppImage" . }}
               imagePullPolicy: {{ .Values.modelservice.epp.image.imagePullPolicy }}
               livenessProbe:
