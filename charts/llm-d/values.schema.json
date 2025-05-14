@@ -309,7 +309,7 @@
           "description": "Endpoint picker configuration",
           "properties": {
             "defaultEnvVars": {
-              "description": "Default environment variables for endpoint picker, use `extraEnvVars` to override default behavior by defining the same variable again. Ref: https://github.com/llm-d/gateway-api-inference-extension/tree/dev?tab=readme-ov-file#temporary-fork-configuration",
+              "description": "Default environment variables for endpoint picker, use `extraEnvVars` to override default behavior by defining the same variable again. Ref: https://github.com/llm-d/llm-d-inference-scheduler/blob/main/docs/architecture.md#scorers--configuration",
               "items": {
                 "anyOf": [
                   {
@@ -341,7 +341,7 @@
                         "type": "string"
                       },
                       "value": {
-                        "default": "1.0",
+                        "default": "1",
                         "required": [],
                         "title": "value",
                         "type": "string"
@@ -398,7 +398,7 @@
                         "type": "string"
                       },
                       "value": {
-                        "default": "2.0",
+                        "default": "2",
                         "required": [],
                         "title": "value",
                         "type": "string"
@@ -436,7 +436,7 @@
                         "type": "string"
                       },
                       "value": {
-                        "default": "1.0",
+                        "default": "1",
                         "required": [],
                         "title": "value",
                         "type": "string"
@@ -474,7 +474,7 @@
                         "type": "string"
                       },
                       "value": {
-                        "default": "1.0",
+                        "default": "1",
                         "required": [],
                         "title": "value",
                         "type": "string"
@@ -550,7 +550,7 @@
                         "type": "string"
                       },
                       "value": {
-                        "default": "1.0",
+                        "default": "1",
                         "required": [],
                         "title": "value",
                         "type": "string"
@@ -588,7 +588,7 @@
                         "type": "string"
                       },
                       "value": {
-                        "default": "1.0",
+                        "default": "1",
                         "required": [],
                         "title": "value",
                         "type": "string"
@@ -626,7 +626,45 @@
                         "type": "string"
                       },
                       "value": {
-                        "default": "1.0",
+                        "default": "1",
+                        "required": [],
+                        "title": "value",
+                        "type": "string"
+                      }
+                    },
+                    "required": [],
+                    "type": "object"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "name": {
+                        "default": "PREFILL_ENABLE_SESSION_AWARE_SCORER",
+                        "required": [],
+                        "title": "name",
+                        "type": "string"
+                      },
+                      "value": {
+                        "default": "false",
+                        "required": [],
+                        "title": "value",
+                        "type": "string"
+                      }
+                    },
+                    "required": [],
+                    "type": "object"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "name": {
+                        "default": "PREFILL_SESSION_AWARE_SCORER_WEIGHT",
+                        "required": [],
+                        "title": "name",
+                        "type": "string"
+                      },
+                      "value": {
+                        "default": "1",
                         "required": [],
                         "title": "value",
                         "type": "string"
@@ -664,7 +702,7 @@
                         "type": "string"
                       },
                       "value": {
-                        "default": "1.0",
+                        "default": "1",
                         "required": [],
                         "title": "value",
                         "type": "string"
@@ -702,7 +740,7 @@
                         "type": "string"
                       },
                       "value": {
-                        "default": "1.0",
+                        "default": "1",
                         "required": [],
                         "title": "value",
                         "type": "string"
@@ -740,7 +778,45 @@
                         "type": "string"
                       },
                       "value": {
-                        "default": "1.0",
+                        "default": "1",
+                        "required": [],
+                        "title": "value",
+                        "type": "string"
+                      }
+                    },
+                    "required": [],
+                    "type": "object"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "name": {
+                        "default": "DECODE_ENABLE_SESSION_AWARE_SCORER",
+                        "required": [],
+                        "title": "name",
+                        "type": "string"
+                      },
+                      "value": {
+                        "default": "false",
+                        "required": [],
+                        "title": "value",
+                        "type": "string"
+                      }
+                    },
+                    "required": [],
+                    "type": "object"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "name": {
+                        "default": "DECODE_SESSION_AWARE_SCORER_WEIGHT",
+                        "required": [],
+                        "title": "name",
+                        "type": "string"
+                      },
+                      "value": {
+                        "default": "1",
                         "required": [],
                         "title": "value",
                         "type": "string"
