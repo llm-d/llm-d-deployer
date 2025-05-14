@@ -398,7 +398,7 @@
                         "type": "string"
                       },
                       "value": {
-                        "default": "2.0",
+                        "default": "2",
                         "required": [],
                         "title": "value",
                         "type": "string"
@@ -436,7 +436,7 @@
                         "type": "string"
                       },
                       "value": {
-                        "default": "1.0",
+                        "default": "1",
                         "required": [],
                         "title": "value",
                         "type": "string"
@@ -474,7 +474,7 @@
                         "type": "string"
                       },
                       "value": {
-                        "default": "1.0",
+                        "default": "1",
                         "required": [],
                         "title": "value",
                         "type": "string"
@@ -550,7 +550,7 @@
                         "type": "string"
                       },
                       "value": {
-                        "default": "1.0",
+                        "default": "1",
                         "required": [],
                         "title": "value",
                         "type": "string"
@@ -588,7 +588,7 @@
                         "type": "string"
                       },
                       "value": {
-                        "default": "1.0",
+                        "default": "1",
                         "required": [],
                         "title": "value",
                         "type": "string"
@@ -626,7 +626,7 @@
                         "type": "string"
                       },
                       "value": {
-                        "default": "1.0",
+                        "default": "1",
                         "required": [],
                         "title": "value",
                         "type": "string"
@@ -664,7 +664,7 @@
                         "type": "string"
                       },
                       "value": {
-                        "default": "1.0",
+                        "default": "1",
                         "required": [],
                         "title": "value",
                         "type": "string"
@@ -702,7 +702,7 @@
                         "type": "string"
                       },
                       "value": {
-                        "default": "1.0",
+                        "default": "1",
                         "required": [],
                         "title": "value",
                         "type": "string"
@@ -740,7 +740,7 @@
                         "type": "string"
                       },
                       "value": {
-                        "default": "1.0",
+                        "default": "1",
                         "required": [],
                         "title": "value",
                         "type": "string"

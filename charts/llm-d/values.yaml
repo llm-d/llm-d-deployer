@@ -457,15 +457,15 @@ modelservice:
       - name: ENABLE_PREFIX_AWARE_SCORER
         value: "true"
       - name: PREFIX_AWARE_SCORER_WEIGHT
-        value: "2.0"
+        value: "2"
       - name: ENABLE_LOAD_AWARE_SCORER
         value: "true"
       - name: LOAD_AWARE_SCORER_WEIGHT
-        value: "1.0"
+        value: "1"
       - name: ENABLE_SESSION_AWARE_SCORER
         value: "false"
       - name: SESSION_AWARE_SCORER_WEIGHT
-        value: "1.0"
+        value: "1"
       - name: PD_ENABLED
         value: "false"
       - name: PD_PROMPT_LEN_THRESHOLD
@@ -473,27 +473,27 @@ modelservice:
       - name: PREFILL_ENABLE_KVCACHE_AWARE_SCORER
         value: "false"
       - name: PREFILL_KVCACHE_AWARE_SCORER_WEIGHT
-        value: "1.0"
+        value: "1"
       - name: PREFILL_ENABLE_LOAD_AWARE_SCORER
         value: "false"
       - name: PREFILL_LOAD_AWARE_SCORER_WEIGHT
-        value: "1.0"
+        value: "1"
       - name: PREFILL_ENABLE_PREFIX_AWARE_SCORER
         value: "false"
       - name: PREFILL_PREFIX_AWARE_SCORER_WEIGHT
-        value: "1.0"
+        value: "1"
       - name: DECODE_ENABLE_KVCACHE_AWARE_SCORER
         value: "false"
       - name: DECODE_KVCACHE_AWARE_SCORER_WEIGHT
-        value: "1.0"
+        value: "1"
       - name: DECODE_ENABLE_LOAD_AWARE_SCORER
         value: "false"
       - name: DECODE_LOAD_AWARE_SCORER_WEIGHT
-        value: "1.0"
+        value: "1"
       - name: DECODE_ENABLE_PREFIX_AWARE_SCORER
         value: "false"
       - name: DECODE_PREFIX_AWARE_SCORER_WEIGHT
-        value: "1.0"
+        value: "1"
 
     # @schema
     # items:
