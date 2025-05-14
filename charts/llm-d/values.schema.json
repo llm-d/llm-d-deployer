@@ -1718,15 +1718,9 @@
                   "additionalProperties": false,
                   "description": "HF token auth config via k8s secret.",
                   "properties": {
-                    "create": {
-                      "default": "true",
-                      "description": "If the secret should be created or one already exists",
-                      "required": [],
-                      "title": "create"
-                    },
                     "key": {
                       "default": "HF_TOKEN",
-                      "description": "Value of the token. Do not set this but use `envsubst` in conjunction with the helm chart",
+                      "description": "Key within the secret under which the token is located",
                       "required": [],
                       "title": "key"
                     },

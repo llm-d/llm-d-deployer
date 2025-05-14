@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart for OpenShift
 
-![Version: 0.0.7](https://img.shields.io/badge/Version-0.0.7-informational?style=flat-square)
+![Version: 0.0.8](https://img.shields.io/badge/Version-0.0.8-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 llm-d is a High-Performance Distributed Inferencing Framework for any Kubernetes, any accelerator, any inference engine, any Linux
@@ -287,9 +287,8 @@ Kubernetes: `>= 1.30.0-0`
 | sampleApplication.enabled | Enable rendering of sample application resources | bool | `true` |
 | sampleApplication.endpointPicker.env | Apply additional env variables to the endpoint picker deployment <br /> Ref: https://github.com/neuralmagic/llm-d-inference-scheduler/blob/0.0.2/docs/architecture.md | list | `[]` |
 | sampleApplication.inferencePoolPort | InferencePool port configuration | int | `8000` |
-| sampleApplication.model.auth.hfToken | HF token auth config via k8s secret. | object | `{"create":true,"key":"HF_TOKEN","name":"llm-d-hf-token"}` |
-| sampleApplication.model.auth.hfToken.create | If the secret should be created or one already exists | bool | `true` |
-| sampleApplication.model.auth.hfToken.key | Value of the token. Do not set this but use `envsubst` in conjunction with the helm chart | string | `"HF_TOKEN"` |
+| sampleApplication.model.auth.hfToken | HF token auth config via k8s secret. | object | `{"key":"HF_TOKEN","name":"llm-d-hf-token"}` |
+| sampleApplication.model.auth.hfToken.key | Key within the secret under which the token is located | string | `"HF_TOKEN"` |
 | sampleApplication.model.auth.hfToken.name | Name of the secret to create to store your huggingface token | string | `"llm-d-hf-token"` |
 | sampleApplication.model.modelArtifactURI | Fully qualified pvc URI: pvc://<pvc-name>/<model-path> modelArtifactURI: pvc://llama-3.2-3b-instruct-pvc/models/meta-llama/Llama-3.2-3B-Instruct | string | `"pvc://model-pvc/models/meta-llama/Llama-3.2-3B-Instruct"` |
 | sampleApplication.model.modelName | Name of the model | string | `"meta-llama/Llama-3.2-3B-Instruct"` |

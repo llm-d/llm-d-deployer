@@ -113,13 +113,14 @@ sampleApplication:
     servedModelNames: []
 
     auth:
+
       # -- HF token auth config via k8s secret.
       hfToken:
-        # -- If the secret should be created or one already exists
-        create: true
+
         # -- Name of the secret to create to store your huggingface token
         name: llm-d-hf-token
-        # -- Value of the token. Do not set this but use `envsubst` in conjunction with the helm chart
+
+        # -- Key within the secret under which the token is located
         key: HF_TOKEN
 
   # @schema

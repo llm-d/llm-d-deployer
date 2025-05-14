@@ -335,15 +335,14 @@ install() {
     VALUES_PATH="${CHART_DIR}/values.yaml"
   fi
 
-  if [[ "$(yq -r .sampleApplication.model.auth.hfToken.create "${VALUES_PATH}")" == "true" ]]; then
-    log_info "🔐 Creating HF token secret (from ${VALUES_PATH})..."
-    HF_NAME=$(yq -r .sampleApplication.model.auth.hfToken.name "${VALUES_PATH}")
-    HF_KEY=$(yq -r .sampleApplication.model.auth.hfToken.key  "${VALUES_PATH}")
-    kubectl create secret generic "${HF_NAME}" \
-      --from-literal="${HF_KEY}=${HF_TOKEN}" \
-      --dry-run=client -o yaml | kubectl apply -f -
-    log_success "✅ HF token secret created"
-  fi
+  log_info "🔐 Creating/updating HF token secret..."
+  HF_NAME=$(yq -r .sampleApplication.model.auth.hfToken.name "${VALUES_PATH}")
+  HF_KEY=$(yq -r .sampleApplication.model.auth.hfToken.key  "${VALUES_PATH}")
+  kubectl delete secret "${HF_NAME}" -n "${NAMESPACE}" --ignore-not-found
+  kubectl create secret generic "${HF_NAME}" \
+    --from-literal="${HF_KEY}=${HF_TOKEN}" \
+    --dry-run=client -o yaml | kubectl apply -f -
+  log_success "✅ HF token secret created"
 
   # can be fetched non-invasily if using kgateway or not
   fetch_kgateway_proxy_uid
