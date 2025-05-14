@@ -309,7 +309,7 @@
           "description": "Endpoint picker configuration",
           "properties": {
             "defaultEnvVars": {
-              "description": "Default environment variables for endpoint picker, use `extraEnvVars` to override default behavior by defining the same variable again. Ref: https://github.com/llm-d/llm-d-inference-scheduler/blob/main/docs/architecture.md#scorers--configuration",
+              "description": "Default environment variables for endpoint picker, use `defaultEnvVarsOverride` to override default behavior by defining the same variable again. Ref: https://github.com/llm-d/llm-d-inference-scheduler/blob/main/docs/architecture.md#scorers--configuration",
               "items": {
                 "anyOf": [
                   {
@@ -831,14 +831,14 @@
               "required": [],
               "title": "defaultEnvVars"
             },
-            "extraEnvVars": {
-              "description": "Additional environment variables for endpoint picker",
+            "defaultEnvVarsOverride": {
+              "description": "Override default environment variables for endpoint picker. This list has priorito over `defaultEnvVars`",
               "items": {
                 "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar",
                 "required": []
               },
               "required": [],
-              "title": "extraEnvVars"
+              "title": "defaultEnvVarsOverride"
             },
             "image": {
               "additionalProperties": false,
@@ -1450,6 +1450,23 @@
           "description": "Enable rendering of sample application resources",
           "required": [],
           "title": "enabled"
+        },
+        "endpointPicker": {
+          "additionalProperties": false,
+          "properties": {
+            "env": {
+              "description": "Apply additional env variables to the endpoint picker deployment \u003cbr /\u003e Ref: https://github.com/neuralmagic/llm-d-inference-scheduler/blob/0.0.2/docs/architecture.md",
+              "items": {
+                "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar",
+                "required": []
+              },
+              "required": [],
+              "title": "env"
+            }
+          },
+          "required": [],
+          "title": "endpointPicker",
+          "type": "object"
         },
         "inferencePoolPort": {
           "default": "8000",

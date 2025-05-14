@@ -13,6 +13,8 @@ modelservice:
   metrics:
     enabled: false
   epp:
-    extraEnvVars:
-      - name: PD_ENABLED
-        value: 'false'
+    defaultEnvVarsOverride:
+    - name: PD_ENABLED
+      value: 'false'
+    - name: ENABLE_KVCACHE_AWARE_SCORER
+      value: "false"

@@ -58,4 +58,11 @@ spec:
             name: {{ .Values.sampleApplication.model.auth.hfToken.name }}
             key: {{ .Values.sampleApplication.model.auth.hfToken.key }}
       {{- end }}
+  endpointPicker:
+    containers:
+    - name: epp
+      env:
+      {{- if .Values.sampleApplication.endpointPicker.env }}
+      {{- include "common.tplvalues.render" ( dict "value" .Values.sampleApplication.endpointPicker.env "context" $) | nindent 6 }}
+      {{- end }}
 {{- end }}

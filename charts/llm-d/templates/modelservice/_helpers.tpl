@@ -96,3 +96,17 @@ Return the proper Docker Image Registry Secret Names
 
   {{- join "," ($pullSecrets | uniq) | quote }}
 {{- end }}
+
+{{- define "modelservice.epp.envList" -}}
+  {{- $env := dict }}
+  {{- range .Values.modelservice.epp.defaultEnvVars }}
+    {{- $_ := set $env (include "common.tplvalues.render" ( dict "value" .name "context" $ )) (include "common.tplvalues.render" ( dict "value" .value "context" $ ))}}
+  {{- end }}
+  {{- range  .Values.modelservice.epp.defaultEnvVarsOverride }}
+    {{- $_ := set $env (include "common.tplvalues.render" ( dict "value" .name "context" $ )) (include "common.tplvalues.render" ( dict "value" .value "context" $ ))}}
+  {{- end }}
+{{- range $k, $v := $env }}
+- name: {{ $k }}
+  value: {{ $v }}
+{{- end }}
+{{- end }}
