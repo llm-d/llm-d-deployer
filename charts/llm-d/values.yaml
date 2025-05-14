@@ -787,7 +787,7 @@ modelservice:
       repository: llm-d/llm-d
 
       # -- llm-d image tag
-      tag: 0.0.7
+      tag: 0.0.8
 
       # -- Specify a imagePullPolicy
       imagePullPolicy: "IfNotPresent"

@@ -1608,7 +1608,7 @@
                   "title": "repository"
                 },
                 "tag": {
-                  "default": "0.0.7",
+                  "default": "0.0.8",
                   "description": "llm-d image tag",
                   "required": [],
                   "title": "tag"
