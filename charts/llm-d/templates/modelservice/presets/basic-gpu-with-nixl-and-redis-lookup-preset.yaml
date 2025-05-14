@@ -22,18 +22,33 @@ data:
     spec:
       template:
         spec:
+          {{- if .Values.modelservice.decode.podSecurityContext }}
+          securityContext:
+            {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.decode.podSecurityContext "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.modelservice.decode.affinity }}
+          affinity:
+            {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.decode.affinity "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.modelservice.decode.topologySpreadConstraints }}
+          topologySpreadConstraints:
+            {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.decode.topologySpreadConstraints "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.modelservice.decode.nodeSelector }}
+          nodeSelector:
+            {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.decode.nodeSelector "context" $) | nindent 12 }}
+          {{- end }}
           {{- if .Values.modelservice.decode.tolerations }}
           tolerations:
-            {{- toYaml .Values.modelservice.decode.tolerations | nindent 12 }}
+            {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.decode.tolerations "context" $) | nindent 12 }}
           {{- end }}
           initContainers:
             - name: routing-proxy
               image: {{ include "modelservice.routingProxyImage" . }}
+              {{- if .Values.modelservice.decode.vllm.containerSecurityContext }}
               securityContext:
-                capabilities:
-                  drop:
-                    - MKNOD
-                allowPrivilegeEscalation: false
+                {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.decode.vllm.containerSecurityContext "context" $) | nindent 16 }}
+              {{- end }}
               args:
                 - "--port=8000"
                 - "--vllm-port=8001"
@@ -136,16 +151,34 @@ data:
     spec:
       template:
         spec:
+          {{- if .Values.modelservice.prefill.podSecurityContext }}
+          securityContext:
+            {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.prefill.podSecurityContext "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.modelservice.prefill.affinity }}
+          affinity:
+            {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.prefill.affinity "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.modelservice.prefill.topologySpreadConstraints }}
+          topologySpreadConstraints:
+            {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.prefill.topologySpreadConstraints "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.modelservice.prefill.nodeSelector }}
+          nodeSelector:
+            {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.prefill.nodeSelector "context" $) | nindent 12 }}
+          {{- end }}
           {{- if .Values.modelservice.prefill.tolerations }}
           tolerations:
-            {{- toYaml .Values.modelservice.prefill.tolerations | nindent 12 }}
+            {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.prefill.tolerations "context" $) | nindent 12 }}
           {{- end }}
           containers:
             - name: vllm
               image: {{ include "modelservice.vllmImage" . }}
               imagePullPolicy: {{ .Values.modelservice.vllm.image.imagePullPolicy }}
+              {{- if .Values.modelservice.prefill.vllm.containerSecurityContext }}
               securityContext:
-                allowPrivilegeEscalation: false
+                {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.prefill.vllm.containerSecurityContext "context" $) | nindent 16 }}
+              {{- end }}
               command:
                 - vllm
                 - serve
@@ -299,6 +332,26 @@ data:
           labels:
             app.kubernetes.io/gateway: {{ include "gateway.fullname" . }}
         spec:
+          {{- if .Values.modelservice.epp.podSecurityContext }}
+          securityContext:
+            {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.epp.podSecurityContext "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.modelservice.epp.affinity }}
+          affinity:
+            {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.epp.affinity "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.modelservice.epp.topologySpreadConstraints }}
+          topologySpreadConstraints:
+            {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.epp.topologySpreadConstraints "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.modelservice.epp.nodeSelector }}
+          nodeSelector:
+            {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.epp.nodeSelector "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.modelservice.epp.tolerations }}
+          tolerations:
+            {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.epp.tolerations "context" $) | nindent 12 }}
+          {{- end }}
           containers:
             - args:
                 - --poolName
@@ -325,6 +378,10 @@ data:
               {{ `{{- end }}` }}
               image: {{ include "modelservice.eppImage" . }}
               imagePullPolicy: {{ .Values.modelservice.epp.image.imagePullPolicy }}
+              {{- if .Values.modelservice.epp.containerSecurityContext }}
+              securityContext:
+                {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.epp.containerSecurityContext "context" $) | nindent 16 }}
+              {{- end }}
               livenessProbe:
                 failureThreshold: 3
                 grpc:

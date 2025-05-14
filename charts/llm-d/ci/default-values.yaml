@@ -18,3 +18,7 @@ modelservice:
       value: 'false'
     - name: ENABLE_KVCACHE_AWARE_SCORER
       value: "false"
+  prefill:
+    tolerations: []
+  decode:
+    tolerations: []

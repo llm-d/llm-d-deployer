@@ -37,6 +37,26 @@ spec:
         {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.podAnnotations "context" $ ) | nindent 8 }}
         {{- end }}
     spec:
+      {{- if .Values.modelservice.podSecurityContext }}
+      securityContext:
+        {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.podSecurityContext "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.modelservice.affinity }}
+      affinity:
+        {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.affinity "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.modelservice.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.topologySpreadConstraints "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.modelservice.nodeSelector }}
+      nodeSelector:
+        {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.nodeSelector "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.modelservice.tolerations }}
+      tolerations:
+        {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.tolerations "context" $) | nindent 8 }}
+      {{- end }}
       containers:
       - args:
         - --leader-elect=false
@@ -51,6 +71,10 @@ spec:
         - /manager
         image: {{ include "modelservice.image" . }}
         imagePullPolicy: {{ .Values.modelservice.image.imagePullPolicy }}
+        {{- if .Values.modelservice.containerSecurityContext }}
+        securityContext:
+          {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.containerSecurityContext "context" $) | nindent 10 }}
+        {{- end }}
         livenessProbe:
           httpGet:
             path: /healthz
