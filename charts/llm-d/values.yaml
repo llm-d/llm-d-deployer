@@ -446,12 +446,12 @@ modelservice:
           matchLabels: {}
 
     # -- Default environment variables for endpoint picker, use `extraEnvVars` to override default behavior by defining the same variable again.
-    # Ref: https://github.com/llm-d/gateway-api-inference-extension/tree/dev?tab=readme-ov-file#temporary-fork-configuration
+    # Ref: https://github.com/llm-d/llm-d-inference-scheduler/blob/main/docs/architecture.md#scorers--configuration
     defaultEnvVars:
       - name: ENABLE_KVCACHE_AWARE_SCORER
         value: "false"
       - name: KVCACHE_AWARE_SCORER_WEIGHT
-        value: "1.0"
+        value: "1"
       - name: KVCACHE_INDEXER_REDIS_ADDR
         value: '{{ if .Values.redis.enabled }}{{ include "redis.master.service.fullurl" . }}{{ end }}'
       - name: ENABLE_PREFIX_AWARE_SCORER
@@ -482,6 +482,10 @@ modelservice:
         value: "false"
       - name: PREFILL_PREFIX_AWARE_SCORER_WEIGHT
         value: "1"
+      - name: PREFILL_ENABLE_SESSION_AWARE_SCORER
+        value: "false"
+      - name: PREFILL_SESSION_AWARE_SCORER_WEIGHT
+        value: "1"
       - name: DECODE_ENABLE_KVCACHE_AWARE_SCORER
         value: "false"
       - name: DECODE_KVCACHE_AWARE_SCORER_WEIGHT
@@ -493,6 +497,10 @@ modelservice:
       - name: DECODE_ENABLE_PREFIX_AWARE_SCORER
         value: "false"
       - name: DECODE_PREFIX_AWARE_SCORER_WEIGHT
+        value: "1"
+      - name: DECODE_ENABLE_SESSION_AWARE_SCORER
+        value: "false"
+      - name: DECODE_SESSION_AWARE_SCORER_WEIGHT
         value: "1"
 
     # @schema
