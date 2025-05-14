@@ -309,7 +309,7 @@
           "description": "Endpoint picker configuration",
           "properties": {
             "defaultEnvVars": {
-              "description": "Default environment variables for endpoint picker, use `extraEnvVars` to override default behavior by defining the same variable again. Ref: https://github.com/neuralmagic/gateway-api-inference-extension/tree/dev?tab=readme-ov-file#temporary-fork-configuration",
+              "description": "Default environment variables for endpoint picker, use `extraEnvVars` to override default behavior by defining the same variable again. Ref: https://github.com/llm-d/gateway-api-inference-extension/tree/dev?tab=readme-ov-file#temporary-fork-configuration",
               "items": {
                 "anyOf": [
                   {

@@ -692,7 +692,7 @@ EOF
 
 clone_gaie_repo() {
   if [[ ! -d gateway-api-inference-extension ]]; then
-    git clone --branch main https://github.com/neuralmagic/gateway-api-inference-extension.git
+    git clone --branch main https://github.com/llm-d/gateway-api-inference-extension.git
   fi
 }
 
