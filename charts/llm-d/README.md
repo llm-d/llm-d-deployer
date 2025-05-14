@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart for OpenShift
 
-![Version: 0.8.7](https://img.shields.io/badge/Version-0.8.7-informational?style=flat-square)
+![Version: 0.8.8](https://img.shields.io/badge/Version-0.8.8-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for llm-d
@@ -198,7 +198,7 @@ Kubernetes: `>= 1.25.0-0`
 | modelservice.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
 | modelservice.image.registry | Model Service controller image registry | string | `"ghcr.io"` |
 | modelservice.image.repository | Model Service controller image repository | string | `"llm-d/llm-d-model-service"` |
-| modelservice.image.tag | Model Service controller image tag | string | `"0.0.9"` |
+| modelservice.image.tag | Model Service controller image tag | string | `"0.0.10"` |
 | modelservice.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true,"serviceMonitor":{"annotations":{},"interval":"15s","labels":{},"namespaceSelector":{"any":false,"matchNames":[]},"path":"/metrics","port":"vllm","selector":{"matchLabels":{}}}}` |
 | modelservice.metrics.enabled | Enable metrics scraping from prefill and decode services, see `model | bool | `true` |
 | modelservice.metrics.serviceMonitor | Prometheus ServiceMonitor configuration <br /> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md | object | See below |
