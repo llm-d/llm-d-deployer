@@ -378,6 +378,57 @@ modelservice:
     # -- Optionally specify an array of imagePullSecrets (evaluated as templates)
     pullSecrets: []
 
+  # @schema
+  # $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
+  # @schema
+  # -- Security settings for a Pod.
+  #  The security settings that you specify for a Pod apply to all Containers in the Pod.
+  # <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  podSecurityContext: {}
+
+  # @schema
+  # $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
+  # @schema
+  # -- Security settings for a Container.
+  # <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  containerSecurityContext: {}
+
+  # @schema
+  # properties:
+  #  nodeAffinity:
+  #    $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.NodeAffinity
+  #  podAffinity:
+  #    $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.PodAffinity
+  #  podAntiAffinity:
+  #    $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.PodAntiAffinity
+  # @schema
+  # -- Affinity for pod assignment
+  # <br /> Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  affinity: {}
+
+  # @schema
+  # items:
+  #   $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.TopologySpreadConstraint
+  # @schema
+  # -- Topology Spread Constraints for pod assignment
+  # <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints
+  topologySpreadConstraints: []
+
+  # @schema
+  # additionalProperties: true
+  # @schema
+  # -- Node labels for pod assignment
+  # <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+  nodeSelector: {}
+
+  # @schema
+  # items:
+  #   $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration
+  # @schema
+  # -- Node tolerations for server scheduling to nodes with taints
+  # <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+  tolerations: []
+
   # -- Endpoint picker configuration
   # @default -- See below
   epp:
@@ -403,6 +454,58 @@ modelservice:
       # @schema
       # -- Optionally specify an array of imagePullSecrets (evaluated as templates)
       pullSecrets: []
+
+    # @schema
+    # $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
+    # @schema
+    # -- Security settings for a Pod.
+    #  The security settings that you specify for a Pod apply to all Containers in the Pod.
+    # <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+    podSecurityContext: {}
+
+    # @schema
+    # $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
+    # @schema
+    # -- Security settings for a Container.
+    # <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+    containerSecurityContext: {}
+
+    # @schema
+    # properties:
+    #  nodeAffinity:
+    #    $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.NodeAffinity
+    #  podAffinity:
+    #    $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.PodAffinity
+    #  podAntiAffinity:
+    #    $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.PodAntiAffinity
+    # @schema
+    # -- Affinity for pod assignment
+    # <br /> Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    affinity: {}
+
+    # @schema
+    # items:
+    #   $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.TopologySpreadConstraint
+    # @schema
+    # -- Topology Spread Constraints for pod assignment
+    # <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints
+    topologySpreadConstraints: []
+
+    # @schema
+    # additionalProperties: true
+    # @schema
+    # -- Node labels for pod assignment
+    # <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+    nodeSelector: {}
+
+    # @schema
+    # items:
+    #   $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration
+    # @schema
+    # -- Node tolerations for server scheduling to nodes with taints
+    # <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+    tolerations: []
+
 
     # -- Enable metrics gathering via podMonitor / ServiceMonitor
     metrics:
@@ -524,35 +627,149 @@ modelservice:
   # @default -- See below
   prefill:
 
+   # @schema
+    # $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
+    # @schema
+    # -- Security settings for a Pod.
+    #  The security settings that you specify for a Pod apply to all Containers in the Pod.
+    # <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+    podSecurityContext: {}
+
+    # @schema
+    # $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
+    # @schema
+    # -- Security settings for a Container.
+    # <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+    containerSecurityContext: {}
+
+    # @schema
+    # properties:
+    #  nodeAffinity:
+    #    $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.NodeAffinity
+    #  podAffinity:
+    #    $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.PodAffinity
+    #  podAntiAffinity:
+    #    $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.PodAntiAffinity
+    # @schema
+    # -- Affinity for pod assignment
+    # <br /> Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    affinity: {}
+
+    # @schema
+    # items:
+    #   $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.TopologySpreadConstraint
+    # @schema
+    # -- Topology Spread Constraints for pod assignment
+    # <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints
+    topologySpreadConstraints: []
+
+    # @schema
+    # additionalProperties: true
+    # @schema
+    # -- Node labels for pod assignment
+    # <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+    nodeSelector: {}
+
     # @schema
     # items:
     #   $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration
     # @schema
-    # -- Tolerations configuration to deploy prefill pods to tainted nodes
-    # @default -- See below
+    # -- Node tolerations for server scheduling to nodes with taints
+    # <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
     tolerations:
 
       # -- default NVIDIA GPU toleration
       - key: nvidia.com/gpu
         operator: Exists
         effect: NoSchedule
+
+    # -- vLLM container settings
+    vllm:
+
+      # @schema
+      # additionalProperties: true
+      # $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
+      # @schema
+      # -- Security settings for a Container.
+      # <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+      containerSecurityContext:
+          allowPrivilegeEscalation: false
 
   # -- Decode options
   # @default -- See below
   decode:
 
+   # @schema
+    # $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
+    # @schema
+    # -- Security settings for a Pod.
+    #  The security settings that you specify for a Pod apply to all Containers in the Pod.
+    # <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+    podSecurityContext: {}
+
+    # @schema
+    # $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
+    # @schema
+    # -- Security settings for a Container.
+    # <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+    containerSecurityContext: {}
+
+    # @schema
+    # properties:
+    #  nodeAffinity:
+    #    $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.NodeAffinity
+    #  podAffinity:
+    #    $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.PodAffinity
+    #  podAntiAffinity:
+    #    $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.PodAntiAffinity
+    # @schema
+    # -- Affinity for pod assignment
+    # <br /> Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    affinity: {}
+
+    # @schema
+    # items:
+    #   $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.TopologySpreadConstraint
+    # @schema
+    # -- Topology Spread Constraints for pod assignment
+    # <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints
+    topologySpreadConstraints: []
+
+    # @schema
+    # additionalProperties: true
+    # @schema
+    # -- Node labels for pod assignment
+    # <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+    nodeSelector: {}
+
     # @schema
     # items:
     #   $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration
     # @schema
-    # -- Tolerations configuration to deploy decode pods to tainted nodes
-    # @default -- See below
+    # -- Node tolerations for server scheduling to nodes with taints
+    # <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
     tolerations:
 
       # -- default NVIDIA GPU toleration
       - key: nvidia.com/gpu
         operator: Exists
         effect: NoSchedule
+
+    # -- vLLM container settings
+    vllm:
+
+      # @schema
+      # additionalProperties: true
+      # $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
+      # @schema
+      # -- Security settings for a Container.
+      # <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+      containerSecurityContext:
+        securityContext:
+          capabilities:
+            drop:
+              - MKNOD
+          allowPrivilegeEscalation: false
 
   # -- vLLM container options
   # @default -- See below
@@ -613,6 +830,13 @@ modelservice:
       # -- Optionally specify an array of imagePullSecrets (evaluated as templates)
       pullSecrets: []
 
+    # @schema
+    # $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
+    # @schema
+    # -- Security settings for a Container.
+    # <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+    containerSecurityContext: {}
+
   # -- llm-d inference simulator container options
   # @default -- See below
   inferenceSimulator:
@@ -639,6 +863,13 @@ modelservice:
       # @schema
       # -- Optionally specify an array of imagePullSecrets (evaluated as templates)
       pullSecrets: []
+
+    # @schema
+    # $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
+    # @schema
+    # -- Security settings for a Container.
+    # <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+    containerSecurityContext: {}
 
   # @schema
   # additionalProperties: true

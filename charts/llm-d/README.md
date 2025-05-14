@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart for OpenShift
 
-![Version: 0.0.6](https://img.shields.io/badge/Version-0.0.6-informational?style=flat-square)
+![Version: 0.0.7](https://img.shields.io/badge/Version-0.0.7-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 llm-d is a High-Performance Distributed Inferencing Framework for any Kubernetes, any accelerator, any inference engine, any Linux
@@ -170,12 +170,23 @@ Kubernetes: `>= 1.30.0-0`
 | ingress.tls.secretName | The name to which the TLS Secret will be called | string | `""` |
 | kubeVersion | Override Kubernetes version | string | `""` |
 | modelservice | Model service controller configuration | object | See below |
+| modelservice.affinity | Affinity for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity | object | `{}` |
 | modelservice.annotations | Annotations to add to all modelservice resources | object | `{}` |
+| modelservice.containerSecurityContext | Security settings for a Container. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container | object | `{}` |
 | modelservice.decode | Decode options | object | See below |
-| modelservice.decode.tolerations | Tolerations configuration to deploy decode pods to tainted nodes | list | See below |
+| modelservice.decode.affinity | Affinity for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity | object | `{}` |
+| modelservice.decode.containerSecurityContext | Security settings for a Container. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container | object | `{}` |
+| modelservice.decode.nodeSelector | Node labels for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector | object | `{}` |
+| modelservice.decode.podSecurityContext | Security settings for a Pod.  The security settings that you specify for a Pod apply to all Containers in the Pod. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod | object | `{}` |
+| modelservice.decode.tolerations | Node tolerations for server scheduling to nodes with taints <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ | list | `[{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}]` |
 | modelservice.decode.tolerations[0] | default NVIDIA GPU toleration | object | `{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}` |
+| modelservice.decode.topologySpreadConstraints | Topology Spread Constraints for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints | list | `[]` |
+| modelservice.decode.vllm | vLLM container settings | object | `{"containerSecurityContext":{"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["MKNOD"]}}}}` |
+| modelservice.decode.vllm.containerSecurityContext | Security settings for a Container. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container | object | `{"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["MKNOD"]}}}` |
 | modelservice.enabled | Toggle to deploy modelservice controller related resources | bool | `true` |
 | modelservice.epp | Endpoint picker configuration | object | See below |
+| modelservice.epp.affinity | Affinity for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity | object | `{}` |
+| modelservice.epp.containerSecurityContext | Security settings for a Container. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container | object | `{}` |
 | modelservice.epp.defaultEnvVars | Default environment variables for endpoint picker, use `defaultEnvVarsOverride` to override default behavior by defining the same variable again. Ref: https://github.com/llm-d/llm-d-inference-scheduler/blob/main/docs/architecture.md#scorers--configuration | list | `[{"name":"ENABLE_KVCACHE_AWARE_SCORER","value":"false"},{"name":"KVCACHE_AWARE_SCORER_WEIGHT","value":"1"},{"name":"KVCACHE_INDEXER_REDIS_ADDR","value":"{{ if .Values.redis.enabled }}{{ include \"redis.master.service.fullurl\" . }}{{ end }}"},{"name":"ENABLE_PREFIX_AWARE_SCORER","value":"true"},{"name":"PREFIX_AWARE_SCORER_WEIGHT","value":"2"},{"name":"ENABLE_LOAD_AWARE_SCORER","value":"true"},{"name":"LOAD_AWARE_SCORER_WEIGHT","value":"1"},{"name":"ENABLE_SESSION_AWARE_SCORER","value":"false"},{"name":"SESSION_AWARE_SCORER_WEIGHT","value":"1"},{"name":"PD_ENABLED","value":"false"},{"name":"PD_PROMPT_LEN_THRESHOLD","value":"10"},{"name":"PREFILL_ENABLE_KVCACHE_AWARE_SCORER","value":"false"},{"name":"PREFILL_KVCACHE_AWARE_SCORER_WEIGHT","value":"1"},{"name":"PREFILL_ENABLE_LOAD_AWARE_SCORER","value":"false"},{"name":"PREFILL_LOAD_AWARE_SCORER_WEIGHT","value":"1"},{"name":"PREFILL_ENABLE_PREFIX_AWARE_SCORER","value":"false"},{"name":"PREFILL_PREFIX_AWARE_SCORER_WEIGHT","value":"1"},{"name":"PREFILL_ENABLE_SESSION_AWARE_SCORER","value":"false"},{"name":"PREFILL_SESSION_AWARE_SCORER_WEIGHT","value":"1"},{"name":"DECODE_ENABLE_KVCACHE_AWARE_SCORER","value":"false"},{"name":"DECODE_KVCACHE_AWARE_SCORER_WEIGHT","value":"1"},{"name":"DECODE_ENABLE_LOAD_AWARE_SCORER","value":"false"},{"name":"DECODE_LOAD_AWARE_SCORER_WEIGHT","value":"1"},{"name":"DECODE_ENABLE_PREFIX_AWARE_SCORER","value":"false"},{"name":"DECODE_PREFIX_AWARE_SCORER_WEIGHT","value":"1"},{"name":"DECODE_ENABLE_SESSION_AWARE_SCORER","value":"false"},{"name":"DECODE_SESSION_AWARE_SCORER_WEIGHT","value":"1"}]` |
 | modelservice.epp.defaultEnvVarsOverride | Override default environment variables for endpoint picker. This list has priorito over `defaultEnvVars` | list | `[]` |
 | modelservice.epp.image | Endpoint picker image used in ModelService CR presets | object | See below |
@@ -194,6 +205,10 @@ Kubernetes: `>= 1.30.0-0`
 | modelservice.epp.metrics.serviceMonitor.path | ServiceMonitor endpoint path | string | `"/metrics"` |
 | modelservice.epp.metrics.serviceMonitor.port | ServiceMonitor endpoint port | string | `"metrics"` |
 | modelservice.epp.metrics.serviceMonitor.selector | ServiceMonitor selector matchLabels </br> matchLabels must match labels on modelservice Services | object | `{"matchLabels":{}}` |
+| modelservice.epp.nodeSelector | Node labels for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector | object | `{}` |
+| modelservice.epp.podSecurityContext | Security settings for a Pod.  The security settings that you specify for a Pod apply to all Containers in the Pod. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod | object | `{}` |
+| modelservice.epp.tolerations | Node tolerations for server scheduling to nodes with taints <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ | list | `[]` |
+| modelservice.epp.topologySpreadConstraints | Topology Spread Constraints for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints | list | `[]` |
 | modelservice.fullnameOverride | String to fully override modelservice.fullname | string | `""` |
 | modelservice.image | Modelservice controller image, please change only if appropriate adjustments to the CRD are being made | object | See below |
 | modelservice.image.imagePullPolicy | Specify a imagePullPolicy | string | `"Always"` |
@@ -202,6 +217,7 @@ Kubernetes: `>= 1.30.0-0`
 | modelservice.image.repository | Model Service controller image repository | string | `"llm-d/llm-d-model-service"` |
 | modelservice.image.tag | Model Service controller image tag | string | `"0.0.10"` |
 | modelservice.inferenceSimulator | llm-d inference simulator container options | object | See below |
+| modelservice.inferenceSimulator.containerSecurityContext | Security settings for a Container. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container | object | `{}` |
 | modelservice.inferenceSimulator.image | llm-d inference simulator image used in ModelService CR presets | object | See below |
 | modelservice.inferenceSimulator.image.imagePullPolicy | Specify a imagePullPolicy | string | `"IfNotPresent"` |
 | modelservice.inferenceSimulator.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
@@ -219,14 +235,24 @@ Kubernetes: `>= 1.30.0-0`
 | modelservice.metrics.serviceMonitor.port | ServiceMonitor endpoint port | string | `"vllm"` |
 | modelservice.metrics.serviceMonitor.selector | ServiceMonitor selector matchLabels </br> matchLabels must match labels on modelservice Services | object | `{"matchLabels":{}}` |
 | modelservice.nameOverride | String to partially override modelservice.fullname | string | `""` |
+| modelservice.nodeSelector | Node labels for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector | object | `{}` |
 | modelservice.podAnnotations | Pod annotations for modelservice | object | `{}` |
 | modelservice.podLabels | Pod labels for modelservice | object | `{}` |
+| modelservice.podSecurityContext | Security settings for a Pod.  The security settings that you specify for a Pod apply to all Containers in the Pod. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod | object | `{}` |
 | modelservice.prefill | Prefill options | object | See below |
-| modelservice.prefill.tolerations | Tolerations configuration to deploy prefill pods to tainted nodes | list | See below |
+| modelservice.prefill.affinity | Affinity for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity | object | `{}` |
+| modelservice.prefill.containerSecurityContext | Security settings for a Container. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container | object | `{}` |
+| modelservice.prefill.nodeSelector | Node labels for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector | object | `{}` |
+| modelservice.prefill.podSecurityContext | Security settings for a Pod.  The security settings that you specify for a Pod apply to all Containers in the Pod. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod | object | `{}` |
+| modelservice.prefill.tolerations | Node tolerations for server scheduling to nodes with taints <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ | list | `[{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}]` |
 | modelservice.prefill.tolerations[0] | default NVIDIA GPU toleration | object | `{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}` |
+| modelservice.prefill.topologySpreadConstraints | Topology Spread Constraints for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints | list | `[]` |
+| modelservice.prefill.vllm | vLLM container settings | object | `{"containerSecurityContext":{"allowPrivilegeEscalation":false}}` |
+| modelservice.prefill.vllm.containerSecurityContext | Security settings for a Container. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container | object | `{"allowPrivilegeEscalation":false}` |
 | modelservice.rbac.create | Enable the creation of RBAC resources | bool | `true` |
 | modelservice.replicas | Number of controller replicas | int | `1` |
 | modelservice.routingProxy | Routing proxy container options | object | See below |
+| modelservice.routingProxy.containerSecurityContext | Security settings for a Container. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container | object | `{}` |
 | modelservice.routingProxy.image | Routing proxy image used in ModelService CR presets | object | `{"imagePullPolicy":"IfNotPresent","pullSecrets":[],"registry":"ghcr.io","repository":"llm-d/llm-d-routing-sidecar","tag":"0.0.6"}` |
 | modelservice.routingProxy.image.imagePullPolicy | Specify a imagePullPolicy | string | `"IfNotPresent"` |
 | modelservice.routingProxy.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
@@ -242,6 +268,8 @@ Kubernetes: `>= 1.30.0-0`
 | modelservice.serviceAccount.fullnameOverride | String to fully override modelservice.serviceAccountName, defaults to modelservice.fullname | string | `""` |
 | modelservice.serviceAccount.labels | Additional custom labels to the service ServiceAccount. | object | `{}` |
 | modelservice.serviceAccount.nameOverride | String to partially override modelservice.serviceAccountName, defaults to modelservice.fullname | string | `""` |
+| modelservice.tolerations | Node tolerations for server scheduling to nodes with taints <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ | list | `[]` |
+| modelservice.topologySpreadConstraints | Topology Spread Constraints for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints | list | `[]` |
 | modelservice.vllm | vLLM container options | object | See below |
 | modelservice.vllm.image | vLLM image used in ModelService CR presets | object | See below |
 | modelservice.vllm.image.imagePullPolicy | Specify a imagePullPolicy | string | `"IfNotPresent"` |

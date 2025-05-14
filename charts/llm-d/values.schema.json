@@ -272,26 +272,109 @@
       "default": "See below",
       "description": "Model service controller configuration",
       "properties": {
+        "affinity": {
+          "additionalProperties": false,
+          "description": "Affinity for pod assignment \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity",
+          "properties": {
+            "nodeAffinity": {
+              "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.NodeAffinity",
+              "required": []
+            },
+            "podAffinity": {
+              "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.PodAffinity",
+              "required": []
+            },
+            "podAntiAffinity": {
+              "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.PodAntiAffinity",
+              "required": []
+            }
+          },
+          "required": [],
+          "title": "affinity"
+        },
         "annotations": {
           "additionalProperties": true,
           "description": "Annotations to add to all modelservice resources",
           "required": [],
           "title": "annotations"
         },
+        "containerSecurityContext": {
+          "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
+          "description": "Security settings for a Container. \u003cbr /\u003e Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container",
+          "required": []
+        },
         "decode": {
           "additionalProperties": false,
           "default": "See below",
           "description": "Decode options",
           "properties": {
+            "affinity": {
+              "additionalProperties": false,
+              "description": "Affinity for pod assignment \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity",
+              "properties": {
+                "nodeAffinity": {
+                  "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.NodeAffinity",
+                  "required": []
+                },
+                "podAffinity": {
+                  "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.PodAffinity",
+                  "required": []
+                },
+                "podAntiAffinity": {
+                  "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.PodAntiAffinity",
+                  "required": []
+                }
+              },
+              "required": [],
+              "title": "affinity"
+            },
+            "containerSecurityContext": {
+              "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
+              "description": "Security settings for a Container. \u003cbr /\u003e Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container",
+              "required": []
+            },
+            "nodeSelector": {
+              "additionalProperties": true,
+              "description": "Node labels for pod assignment \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector",
+              "required": [],
+              "title": "nodeSelector"
+            },
+            "podSecurityContext": {
+              "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
+              "description": "Security settings for a Pod.  The security settings that you specify for a Pod apply to all Containers in the Pod. \u003cbr /\u003e Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod",
+              "required": []
+            },
             "tolerations": {
-              "default": "See below",
-              "description": "Tolerations configuration to deploy decode pods to tainted nodes",
+              "description": "Node tolerations for server scheduling to nodes with taints \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/",
               "items": {
                 "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration",
                 "required": []
               },
               "required": [],
               "title": "tolerations"
+            },
+            "topologySpreadConstraints": {
+              "description": "Topology Spread Constraints for pod assignment \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints",
+              "items": {
+                "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.TopologySpreadConstraint",
+                "required": []
+              },
+              "required": [],
+              "title": "topologySpreadConstraints"
+            },
+            "vllm": {
+              "additionalProperties": false,
+              "description": "vLLM container settings",
+              "properties": {
+                "containerSecurityContext": {
+                  "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
+                  "additionalProperties": true,
+                  "description": "Security settings for a Container. \u003cbr /\u003e Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container",
+                  "required": []
+                }
+              },
+              "required": [],
+              "title": "vllm"
             }
           },
           "required": [],
@@ -308,6 +391,31 @@
           "default": "See below",
           "description": "Endpoint picker configuration",
           "properties": {
+            "affinity": {
+              "additionalProperties": false,
+              "description": "Affinity for pod assignment \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity",
+              "properties": {
+                "nodeAffinity": {
+                  "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.NodeAffinity",
+                  "required": []
+                },
+                "podAffinity": {
+                  "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.PodAffinity",
+                  "required": []
+                },
+                "podAntiAffinity": {
+                  "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.PodAntiAffinity",
+                  "required": []
+                }
+              },
+              "required": [],
+              "title": "affinity"
+            },
+            "containerSecurityContext": {
+              "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
+              "description": "Security settings for a Container. \u003cbr /\u003e Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container",
+              "required": []
+            },
             "defaultEnvVars": {
               "description": "Default environment variables for endpoint picker, use `defaultEnvVarsOverride` to override default behavior by defining the same variable again. Ref: https://github.com/llm-d/llm-d-inference-scheduler/blob/main/docs/architecture.md#scorers--configuration",
               "items": {
@@ -970,6 +1078,35 @@
               },
               "required": [],
               "title": "metrics"
+            },
+            "nodeSelector": {
+              "additionalProperties": true,
+              "description": "Node labels for pod assignment \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector",
+              "required": [],
+              "title": "nodeSelector"
+            },
+            "podSecurityContext": {
+              "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
+              "description": "Security settings for a Pod.  The security settings that you specify for a Pod apply to all Containers in the Pod. \u003cbr /\u003e Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod",
+              "required": []
+            },
+            "tolerations": {
+              "description": "Node tolerations for server scheduling to nodes with taints \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/",
+              "items": {
+                "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration",
+                "required": []
+              },
+              "required": [],
+              "title": "tolerations"
+            },
+            "topologySpreadConstraints": {
+              "description": "Topology Spread Constraints for pod assignment \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints",
+              "items": {
+                "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.TopologySpreadConstraint",
+                "required": []
+              },
+              "required": [],
+              "title": "topologySpreadConstraints"
             }
           },
           "required": [],
@@ -1028,6 +1165,11 @@
           "default": "See below",
           "description": "llm-d inference simulator container options",
           "properties": {
+            "containerSecurityContext": {
+              "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
+              "description": "Security settings for a Container. \u003cbr /\u003e Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container",
+              "required": []
+            },
             "image": {
               "additionalProperties": false,
               "default": "See below",
@@ -1169,6 +1311,12 @@
           "required": [],
           "title": "nameOverride"
         },
+        "nodeSelector": {
+          "additionalProperties": true,
+          "description": "Node labels for pod assignment \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector",
+          "required": [],
+          "title": "nodeSelector"
+        },
         "podAnnotations": {
           "additionalProperties": true,
           "description": "Pod annotations for modelservice",
@@ -1181,20 +1329,83 @@
           "required": [],
           "title": "podLabels"
         },
+        "podSecurityContext": {
+          "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
+          "description": "Security settings for a Pod.  The security settings that you specify for a Pod apply to all Containers in the Pod. \u003cbr /\u003e Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod",
+          "required": []
+        },
         "prefill": {
           "additionalProperties": false,
           "default": "See below",
           "description": "Prefill options",
           "properties": {
+            "affinity": {
+              "additionalProperties": false,
+              "description": "Affinity for pod assignment \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity",
+              "properties": {
+                "nodeAffinity": {
+                  "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.NodeAffinity",
+                  "required": []
+                },
+                "podAffinity": {
+                  "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.PodAffinity",
+                  "required": []
+                },
+                "podAntiAffinity": {
+                  "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.PodAntiAffinity",
+                  "required": []
+                }
+              },
+              "required": [],
+              "title": "affinity"
+            },
+            "containerSecurityContext": {
+              "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
+              "description": "Security settings for a Container. \u003cbr /\u003e Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container",
+              "required": []
+            },
+            "nodeSelector": {
+              "additionalProperties": true,
+              "description": "Node labels for pod assignment \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector",
+              "required": [],
+              "title": "nodeSelector"
+            },
+            "podSecurityContext": {
+              "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
+              "description": "Security settings for a Pod.  The security settings that you specify for a Pod apply to all Containers in the Pod. \u003cbr /\u003e Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod",
+              "required": []
+            },
             "tolerations": {
-              "default": "See below",
-              "description": "Tolerations configuration to deploy prefill pods to tainted nodes",
+              "description": "Node tolerations for server scheduling to nodes with taints \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/",
               "items": {
                 "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration",
                 "required": []
               },
               "required": [],
               "title": "tolerations"
+            },
+            "topologySpreadConstraints": {
+              "description": "Topology Spread Constraints for pod assignment \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints",
+              "items": {
+                "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.TopologySpreadConstraint",
+                "required": []
+              },
+              "required": [],
+              "title": "topologySpreadConstraints"
+            },
+            "vllm": {
+              "additionalProperties": false,
+              "description": "vLLM container settings",
+              "properties": {
+                "containerSecurityContext": {
+                  "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
+                  "additionalProperties": true,
+                  "description": "Security settings for a Container. \u003cbr /\u003e Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container",
+                  "required": []
+                }
+              },
+              "required": [],
+              "title": "vllm"
             }
           },
           "required": [],
@@ -1225,6 +1436,11 @@
           "default": "See below",
           "description": "Routing proxy container options",
           "properties": {
+            "containerSecurityContext": {
+              "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
+              "description": "Security settings for a Container. \u003cbr /\u003e Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container",
+              "required": []
+            },
             "image": {
               "additionalProperties": false,
               "description": "Routing proxy image used in ModelService CR presets",
@@ -1335,6 +1551,24 @@
           },
           "required": [],
           "title": "serviceAccount"
+        },
+        "tolerations": {
+          "description": "Node tolerations for server scheduling to nodes with taints \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/",
+          "items": {
+            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration",
+            "required": []
+          },
+          "required": [],
+          "title": "tolerations"
+        },
+        "topologySpreadConstraints": {
+          "description": "Topology Spread Constraints for pod assignment \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints",
+          "items": {
+            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.TopologySpreadConstraint",
+            "required": []
+          },
+          "required": [],
+          "title": "topologySpreadConstraints"
         },
         "vllm": {
           "additionalProperties": false,
