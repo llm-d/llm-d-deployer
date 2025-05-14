@@ -1,5 +1,5 @@
 
-# llm-d Helm Chart for OpenShift
+# llm-d Helm Chart
 
 See [charts/llm-d/README.md](charts/llm-d/README.md).
 
