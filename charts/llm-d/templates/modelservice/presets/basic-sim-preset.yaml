@@ -40,8 +40,8 @@ data:
               imagePullPolicy: Always
           containers:
             - name: vllm
-              image: {{ include "modelservice.vllmSimImage" . }}
-              imagePullPolicy: {{ .Values.modelservice.vllmSim.image.imagePullPolicy }}
+              image: {{ include "modelservice.inferenceSimulatorImage" . }}
+              imagePullPolicy: {{ .Values.modelservice.inferenceSimulator.image.imagePullPolicy }}
               securityContext:
                 capabilities:
                   drop:
@@ -71,8 +71,8 @@ data:
         spec:
           containers:
             - name: vllm
-              image: {{ include "modelservice.vllmSimImage" . }}
-              imagePullPolicy: {{ .Values.modelservice.vllmSim.image.imagePullPolicy }}
+              image: {{ include "modelservice.inferenceSimulatorImage" . }}
+              imagePullPolicy: {{ .Values.modelservice.inferenceSimulator.image.imagePullPolicy }}
               securityContext:
                 allowPrivilegeEscalation: false
               args:
@@ -181,7 +181,7 @@ data:
               {{- if .Values.modelservice.epp.extraEnvVars }}
               {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.epp.extraEnvVars "context" $) | nindent 14 }}
               {{- end }}
-              {{/* Kvcache aware scorer doesn't make sense in vllmSim */}}
+              {{/* Kvcache aware scorer doesn't make sense in inferenceSimulator */}}
               - name: ENABLE_KVCACHE_AWARE_SCORER
                 value: "false"
               image: {{ include "modelservice.eppImage" . }}

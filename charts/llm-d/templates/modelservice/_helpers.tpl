@@ -60,15 +60,15 @@ Return the proper Docker Image Registry Secret Names
 {{/*
 Return the proper image name for vllm sim
 */}}
-{{- define "modelservice.vllmSimImage" -}}
-  {{ include "common.images.image" (dict "imageRoot" .Values.modelservice.vllmSim.image "global" .Values.global) }}
+{{- define "modelservice.inferenceSimulatorImage" -}}
+  {{ include "common.images.image" (dict "imageRoot" .Values.modelservice.inferenceSimulator.image "global" .Values.global) }}
 {{- end -}}
 
 {{/*
 Return the proper Docker Image Registry Secret Names
 */}}
-{{- define "vllmSim.renderImagePullSecrets" -}}
-  {{- include "common.images.renderPullSecrets" (dict "images" (list .Values.modelservice.vllmSim.image) "context" $) -}}
+{{- define "inferenceSimulator.renderImagePullSecrets" -}}
+  {{- include "common.images.renderPullSecrets" (dict "images" (list .Values.modelservice.inferenceSimulator.image) "context" $) -}}
 {{- end -}}
 
 

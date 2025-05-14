@@ -947,6 +947,57 @@
           "required": [],
           "title": "image"
         },
+        "inferenceSimulator": {
+          "additionalProperties": false,
+          "default": "See below",
+          "description": "llm-d inference simulator container options",
+          "properties": {
+            "image": {
+              "additionalProperties": false,
+              "default": "See below",
+              "description": "llm-d inference simulator image used in ModelService CR presets",
+              "properties": {
+                "imagePullPolicy": {
+                  "default": "IfNotPresent",
+                  "description": "Specify a imagePullPolicy",
+                  "required": [],
+                  "title": "imagePullPolicy"
+                },
+                "pullSecrets": {
+                  "description": "Optionally specify an array of imagePullSecrets (evaluated as templates)",
+                  "items": {
+                    "required": [],
+                    "type": "string"
+                  },
+                  "required": [],
+                  "title": "pullSecrets"
+                },
+                "registry": {
+                  "default": "ghcr.io",
+                  "description": "llm-d inference simulator image registry",
+                  "required": [],
+                  "title": "registry"
+                },
+                "repository": {
+                  "default": "llm-d/llm-d-inference-sim",
+                  "description": "llm-d inference simulator image repository",
+                  "required": [],
+                  "title": "repository"
+                },
+                "tag": {
+                  "default": "0.0.4",
+                  "description": "llm-d inference simulator image tag",
+                  "required": [],
+                  "title": "tag"
+                }
+              },
+              "required": [],
+              "title": "image"
+            }
+          },
+          "required": [],
+          "title": "inferenceSimulator"
+        },
         "metrics": {
           "additionalProperties": false,
           "description": "Enable metrics gathering via podMonitor / ServiceMonitor",
@@ -1273,57 +1324,6 @@
           },
           "required": [],
           "title": "vllm"
-        },
-        "vllmSim": {
-          "additionalProperties": false,
-          "default": "See below",
-          "description": "vLL sim container options",
-          "properties": {
-            "image": {
-              "additionalProperties": false,
-              "default": "See below",
-              "description": "vLLM sim image used in ModelService CR presets",
-              "properties": {
-                "imagePullPolicy": {
-                  "default": "IfNotPresent",
-                  "description": "Specify a imagePullPolicy",
-                  "required": [],
-                  "title": "imagePullPolicy"
-                },
-                "pullSecrets": {
-                  "description": "Optionally specify an array of imagePullSecrets (evaluated as templates)",
-                  "items": {
-                    "required": [],
-                    "type": "string"
-                  },
-                  "required": [],
-                  "title": "pullSecrets"
-                },
-                "registry": {
-                  "default": "ghcr.io",
-                  "description": "vllm-sim image registry",
-                  "required": [],
-                  "title": "registry"
-                },
-                "repository": {
-                  "default": "llm-d/vllm-sim",
-                  "description": "vllm-sim image repository",
-                  "required": [],
-                  "title": "repository"
-                },
-                "tag": {
-                  "default": "0.0.4",
-                  "description": "vllm-sim image tag",
-                  "required": [],
-                  "title": "tag"
-                }
-              },
-              "required": [],
-              "title": "image"
-            }
-          },
-          "required": [],
-          "title": "vllmSim"
         }
       },
       "required": [],

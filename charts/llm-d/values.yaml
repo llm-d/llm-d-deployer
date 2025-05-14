@@ -595,21 +595,21 @@ modelservice:
       # -- Optionally specify an array of imagePullSecrets (evaluated as templates)
       pullSecrets: []
 
-  # -- vLL sim container options
+  # -- llm-d inference simulator container options
   # @default -- See below
-  vllmSim:
+  inferenceSimulator:
 
-    # -- vLLM sim image used in ModelService CR presets
+    # -- llm-d inference simulator image used in ModelService CR presets
     # @default -- See below
     image:
 
-      # -- vllm-sim image registry
+      # -- llm-d inference simulator image registry
       registry: ghcr.io
 
-      # -- vllm-sim image repository
-      repository: llm-d/vllm-sim
+      # -- llm-d inference simulator image repository
+      repository: llm-d/llm-d-inference-sim
 
-      # -- vllm-sim image tag
+      # -- llm-d inference simulator image tag
       tag: "0.0.4"
 
       # -- Specify a imagePullPolicy
