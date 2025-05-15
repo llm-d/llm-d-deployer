@@ -610,6 +610,42 @@ install() {
   kubectl patch serviceaccount default --namespace="${NAMESPACE}" --type merge --patch "${patch}"
   log_success "✅ ServiceAccounts patched"
 
+  # Keep this until upstream adds rbac for epp scraping metrics
+  log_info "🔄 Waiting for ServiceAccount matching '*-epp-sa' in namespace ${NAMESPACE}..."
+  # Wait up to 60 seconds for the sample application epp ServiceAccount to appear
+  for attempt in {1..20}; do
+    SA_NAME=$(kubectl get sa -n "${NAMESPACE}" --no-headers | awk '{print $1}' | grep -- '-epp-sa$' | head -n1 || true)
+    if [[ -n "$SA_NAME" ]]; then
+      log_info "✅ Found ServiceAccount: ${SA_NAME}"
+      break
+    fi
+    log_info "⏳ Attempt $attempt: ServiceAccount not found yet, retrying in 3s..."
+    sleep 3
+  done
+  if [[ -z "$SA_NAME" ]]; then
+    log_error "❌ No ServiceAccount ending in '-epp-sa' found in namespace ${NAMESPACE} after waiting."
+  fi
+  CR_NAME="${NAMESPACE}-modelservice-epp-metrics-scrape"
+  CRB_NAME="${SA_NAME}-metrics-scrape"
+  log_info "🔗 Creating ClusterRoleBinding '${CRB_NAME}' to bind ServiceAccount '${SA_NAME}' to ClusterRole '${CR_NAME}'..."
+
+  kubectl apply -f - <<EOF
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ${CRB_NAME}
+subjects:
+- kind: ServiceAccount
+  name: ${SA_NAME}
+  namespace: ${NAMESPACE}
+roleRef:
+  kind: ClusterRole
+  name: ${CR_NAME}
+  apiGroup: rbac.authorization.k8s.io
+EOF
+
+  log_success "✅ ClusterRoleBinding '${CRB_NAME}' created"
+
   log_info "🔄 Creating shared hostpath for Minicube PV and PVC for Redis..."
   kubectl delete pvc redis-pvc -n "${NAMESPACE}" --ignore-not-found
   kubectl apply -f - <<EOF
