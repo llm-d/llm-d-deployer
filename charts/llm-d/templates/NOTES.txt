@@ -33,24 +33,24 @@ metadata:
 spec:
   decoupleScaling: false
   baseConfigMapRef:
-    name: release-name-modelservice-basic-gpu-with-nixl-preset
+    name: {{ include "modelservice.fullname" . }}-basic-gpu-with-nixl-and-redis-lookup-preset
   routing:
-    modelName: <model-name>
+    modelName: <model_name>
   modelArtifacts:
-    uri: pvc://<pvc-name>/<path-to-model>
+    uri: pvc://<pvc_name>/<path_to_model>
   decode:
     replicas: 1
     containers:
     - name: "vllm"
       args:
       - "--model"
-      - <model-name>
+      - <model_name>
   prefill:
     replicas: 1
     containers:
     - name: "vllm"
       args:
       - "--model"
-      - <model-name>
+      - <model_name>
 ```
 {{- end }}
