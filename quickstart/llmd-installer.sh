@@ -464,8 +464,6 @@ uninstall() {
       log_info "🗑️ Deleting Model PV..."
       kubectl delete pv ${PV_NAME} --ignore-not-found
     fi
-  else
-    log_info "⏭️ skipping deletion of PV and PVCS..."
   fi
   log_success "💀 Uninstallation complete"
 }
