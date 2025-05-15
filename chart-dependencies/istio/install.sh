@@ -9,4 +9,5 @@ if [[ "$MODE" == "apply" ]]; then
 else
   helm uninstall istiod --namespace istio-system
   helm uninstall istio-base --namespace istio-system
+  helm template istio-base oci://$HUB/charts/base --version $TAG -n istio-system | kubectl delete -f - --ignore-not-found
 fi

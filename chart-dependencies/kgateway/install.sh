@@ -22,4 +22,5 @@ if [[ "$MODE" == "apply" ]]; then
 else
   helm uninstall kgateway --namespace kgateway-system
   helm uninstall kgateway-crds --namespace kgateway-system
+  helm template kgateway-crds oci://cr.kgateway.dev/kgateway-dev/charts/kgateway-crds --version v2.0.0 | kubectl delete -f - --ignore-not-found
 fi
