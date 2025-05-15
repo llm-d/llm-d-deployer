@@ -84,7 +84,7 @@ sudo docker run --rm --runtime=nvidia --gpus all ubuntu nvidia-smi
 To Provision a Minikube cluster run the `llmd-installer-minikube.sh` script.
 
 ```bash
-./llmd-installer-minikube.sh --provision-minikube-gpu
+./llmd-installer-minikube.sh --provision-minikube
 ```
 
 ## llm-d Installation
@@ -123,13 +123,13 @@ For additional information regarding Minikube support with GPUs see [Using NVIDI
 ### Provision Minikube cluster with GPU support and install llm-d
 
 A hugging-face token is required either exported in your environment or passed via the `--hf-token` flag.
-You will need to run `--provision-minikube-gpu` at least once to provision the minikube container. After that,
+You will need to run `--provision-minikube` at least once to provision the minikube container. After that,
 a common workflow might be to make some change to your code, run `--uninstall` to reset the minikube cluster to default
-and then run the installer again without the `--provision-minikube-gpu` flag.
+and then run the installer again without the `--provision-minikube` flag.
 
 ```bash
 export HF_TOKEN="your-token"
-./llmd-installer-minikube.sh --provision-minikube-gpu
+./llmd-installer-minikube.sh --provision-minikube
 ```
 
 ### Install on an existing llm-d minikube cluster
@@ -143,17 +143,7 @@ export HF_TOKEN="your-token"
 ./llmd-installer-minikube.sh
 ```
 
-### Provision Minikube cluster without GPU support and install llm-d
-
-**note**: prefill/decode pods will stay in pending status since there is no GPU node to schedule on. This scenario
-would be for testing component functionality up until p/d pod deployments and would not require any GPUs on the host.
-
-```bash
-export HF_TOKEN="your-token"
-./llmd-installer-minikube.sh --provision-minikube
-```
-
-### Manually minikube operations
+### Manual minikube operations
 
 If you prefer to start the minikube cluster manually simply run:
 

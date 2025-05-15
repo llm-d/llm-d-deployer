@@ -39,8 +39,7 @@ Usage: $(basename "$0") [OPTIONS]
 Options:
   -t, --hf-token TOKEN               Hugging Face token (or set HF_TOKEN env var)
   -a, --auth-file PATH               Path to containers auth.json
-  -p, --provision-minikube           Provision a local Minikube cluster without GPU support (p/d pods will stay pending)
-  -g, --provision-minikube-gpu       Provision a local Minikube cluster with GPU support
+  -g, --provision-minikube           Provision a local Minikube cluster with GPU support
   -x, --delete-minikube              Delete the minikube cluster and exit
   -z, --storage-size SIZE            Size of storage volume (default: 15Gi)
   -n, --namespace NAME               K8s namespace (default: llm-d)
@@ -205,7 +204,7 @@ resolve_values() {
     local merged
     merged="$(mktemp)"
     if [[ "${YQ_TYPE}" == "go" ]]; then
-      merge_cmd=(yq_eval-all 'select(fileIndex==0) * select(fileIndex==1)' "${base}" "${ov}")
+      merge_cmd=(yq eval-all 'select(fileIndex==0) * select(fileIndex==1)' "${base}" "${ov}")
     else
       merge_cmd=(yq -s --yaml-output 'reduce .[] as $item ({}; . * $item)' "${base}" "${ov}")
     fi
