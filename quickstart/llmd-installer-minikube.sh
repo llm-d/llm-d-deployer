@@ -461,7 +461,7 @@ create_pvc_and_download_model_if_needed() {
       }
 
       log_info "⏳ Waiting up to 3m for model download job to complete; this may take a while depending on connection speed and model size..."
-      kubectl wait --for=condition=complete --timeout=180s job/download-model -n "${NAMESPACE}" || {
+      kubectl wait --for=condition=complete --timeout=600s job/download-model -n "${NAMESPACE}" || {
         log_error "🙀 Model download job failed or timed out";
         JOB_POD=$(kubectl get pod --selector=job-name=download-model -o json | jq -r '.items[0].metadata.name')
         kubectl logs pod/${JOB_POD} -n "${NAMESPACE}";

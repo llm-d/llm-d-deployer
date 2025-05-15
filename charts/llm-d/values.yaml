@@ -131,9 +131,13 @@ sampleApplication:
   resources:
     limits:
       nvidia.com/gpu: 1
+      cpu: ""
+      memory: ""
+      rdma/ib: ""
     requests:
-      # cpu: "16"
-      # memory: 16Gi
+      cpu: ""
+      memory: ""
+      rdma/ib: ""
       nvidia.com/gpu: 1
 
   # -- InferencePool port configuration
