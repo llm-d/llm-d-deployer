@@ -26,7 +26,7 @@ You can use the installer script that installs all the required dependencies.
 ### Required credentials and configuration
 
 - [llm-d-deployer GitHub repo – clone here](https://github.com/llm-d/llm-d-deployer.git)
-- [ghcr.io Registry – sign-up & credentials](https:/github.com/)
+- [ghcr.io Registry – credentials](https://github.com/settings/tokens) You must have a GitHub account and a "classic" personal access token with `read:packages` access to the llm-d-deployer repository.
 - [Red Hat Registry – terms & access](https://access.redhat.com/registry/)
 - [HuggingFace HF_TOKEN](https://huggingface.co/docs/hub/en/security-tokens)
 
