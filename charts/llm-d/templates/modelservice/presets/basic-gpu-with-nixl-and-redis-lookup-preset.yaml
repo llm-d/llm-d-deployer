@@ -79,6 +79,10 @@ data:
               env:
                 - name: HOME
                   value: /home
+                {{ if .Values.modelservice.vllm.logLevel }}
+                - name: VLLM_LOGGING_LEVEL
+                  value: {{ .Values.modelservice.vllm.logLevel }}
+                {{- end }}
                 - name: VLLM_NIXL_SIDE_CHANNEL_PORT
                   value: "5557"
                 - name: VLLM_NIXL_SIDE_CHANNEL_HOST
@@ -91,6 +95,8 @@ data:
                       fieldPath: status.podIP
                 - name: UCX_TLS
                   value: "^cuda_ipc"
+                - name: LMCACHE_ENABLE_DEBUG
+                  value: "True"
                 - name: LMCACHE_USE_EXPERIMENTAL
                   value: "True"
                 - name: LMCACHE_LOCAL_CPU
@@ -190,6 +196,10 @@ data:
               env:
                 - name: HOME
                   value: /home
+                {{ if .Values.modelservice.vllm.logLevel }}
+                - name: VLLM_LOGGING_LEVEL
+                  value: {{ .Values.modelservice.vllm.logLevel }}
+                {{- end }}
                 - name: VLLM_NIXL_SIDE_CHANNEL_PORT
                   value: "5557"
                 - name: VLLM_NIXL_SIDE_CHANNEL_HOST
@@ -202,6 +212,8 @@ data:
                       fieldPath: status.podIP
                 - name: UCX_TLS
                   value: "^cuda_ipc"
+                - name: LMCACHE_ENABLE_DEBUG
+                  value: "True"
                 - name: LMCACHE_USE_EXPERIMENTAL
                   value: "True"
                 - name: LMCACHE_LOCAL_CPU

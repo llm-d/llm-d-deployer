@@ -1269,6 +1269,12 @@
                   "additionalProperties": true,
                   "description": "Security settings for a Container. \u003cbr /\u003e Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container",
                   "required": []
+                },
+                "logLevel": {
+                  "default": "INFO",
+                  "description": "Log level to run VLLM with \u003cbr /\u003e VLLM supports standard python log-levels, see: https://docs.python.org/3/library/logging.html#logging-levels \u003cbr /\u003e Options: \"DEBUG\", \"INFO\", \"WARNING\", \"ERROR\", \"CRITICAL\"",
+                  "required": [],
+                  "title": "logLevel"
                 }
               },
               "required": [],
