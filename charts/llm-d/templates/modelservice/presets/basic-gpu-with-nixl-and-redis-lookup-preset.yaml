@@ -97,8 +97,6 @@ data:
                   value: "^cuda_ipc"
                 - name: LMCACHE_ENABLE_DEBUG
                   value: "True"
-                - name: LMCACHE_USE_EXPERIMENTAL
-                  value: "True"
                 - name: LMCACHE_LOCAL_CPU
                   value: "True"
                 - name: LMCACHE_MAX_LOCAL_CPU_SIZE
@@ -213,8 +211,6 @@ data:
                 - name: UCX_TLS
                   value: "^cuda_ipc"
                 - name: LMCACHE_ENABLE_DEBUG
-                  value: "True"
-                - name: LMCACHE_USE_EXPERIMENTAL
                   value: "True"
                 - name: LMCACHE_LOCAL_CPU
                   value: "True"
