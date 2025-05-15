@@ -109,6 +109,8 @@ data:
               volumeMounts:
                 - name: home
                   mountPath: /home
+                - name: dshm
+                  mountPath: /dev/shm
                 {{ `{{- if .HFModelName }}` }}
                 - name: model-cache
                   mountPath: /models
@@ -123,6 +125,10 @@ data:
           volumes:
             - name: home
               emptyDir: {}
+            - name: dshm
+              emptyDir:
+                medium: Memory
+                sizeLimit: 1Gi
             {{ `{{- if .HFModelName }}` }}
             - name: model-cache
               emptyDir: {}
@@ -205,6 +211,8 @@ data:
               volumeMounts:
                 - name: home
                   mountPath: /home
+                - name: dshm
+                  mountPath: /dev/shm
                 {{ `{{- if .HFModelName }}` }}
                 - name: model-cache
                   mountPath: /models
@@ -219,6 +227,10 @@ data:
           volumes:
             - name: home
               emptyDir: {}
+            - name: dshm
+              emptyDir:
+                medium: Memory
+                sizeLimit: 1Gi
             {{ `{{ if .HFModelName }}` }}
             - name: model-cache
               emptyDir: {}
