@@ -356,7 +356,11 @@ install() {
   helm dependency build .
   log_success "✅ Dependencies built"
 
-  BASE_OCP_DOMAIN=$(kubectl get ingresscontroller default -n openshift-ingress-operator -o jsonpath='{.status.domain}')
+  if is_openshift; then
+    BASE_OCP_DOMAIN=$(kubectl get ingresscontroller default -n openshift-ingress-operator -o jsonpath='{.status.domain}')
+  else
+    BASE_OCP_DOMAIN=""
+  fi
 
   local metrics_enabled="true"
   if [[ "${DISABLE_METRICS}" == "true" ]]; then
