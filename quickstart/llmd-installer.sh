@@ -396,7 +396,6 @@ install() {
     --set global.imagePullSecrets[0]=llm-d-pull-secret \
     --set gateway.kGatewayParameters.proxyUID="${PROXY_UID}" \
     --set ingress.clusterRouterBase="${BASE_OCP_DOMAIN}" \
-    --set redis.master.persistence.storageClass="${STORAGE_CLASS}" \
     --set modelservice.metrics.enabled="${metrics_enabled}"
   log_success "✅ llm-d deployed"
 
