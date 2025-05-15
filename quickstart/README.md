@@ -2,64 +2,11 @@
 
 Getting Started with llm-d on Kubernetes.
 
+For more information on llm-d, see the llm-d git repository [here](https://github.com/llm-d/llm-d) and website [here](https://llmd.io).
+
 ## Overview
 
-This guide will walk you through the steps to install and deploy llm-d on a Kubernetes cluster.
-
-**What is llm-d?**
-
-llm-d is an open source project providing distributed inferencing for GenAI runtimes on any Kubernetes cluster. Its highly performant, scalable architecture helps reduce costs through a spectrum of hardware efficiency improvements. The project prioritizes ease of deployment+use as well as SRE needs + day 2 operations associated with running large GPU clusters.
-
-It includes:
-
-- Prefill/decode disaggregation
-- KV Cache distribution, offloading and storage hierarchy
-- AI-aware router with plug points for customizable scorers
-- Operational telemetry for production, prometheus/grafana
-- Kubernetes-based, works on OCP, minikube, and other k8s distributions
-- NIXL inference transfer library
-
-**llm-d consists of the following components:**
-
-- Gateway API Inference Extension (GIE) - This extension upgrades an ext-proc-capable proxy or gateway - such as Envoy Gateway, kGateway, or the GKE Gateway - to become an inference gateway - supporting inference platform teams self-hosting large language models on Kubernetes. This integration makes it easy to expose and control access to your local OpenAI-compatible chat completion endpoints to other workloads on or off cluster, or to integrate your self-hosted models alongside model-as-a-service providers in a higher level AI Gateway like LiteLLM, Solo AI Gateway, or Apigee.
-  The inference gateway:
-  - Improves the tail latency and throughput of LLM completion requests against Kubernetes-hosted model servers using an extendable request scheduling algorithm that is kv-cache and request cost aware, avoiding evictions or queueing as load increases
-  - Provides Kubernetes-native declarative APIs to route client model names to use-case specific LoRA adapters and control incremental rollout of new adapter versions, A/B traffic splitting, and safe blue-green base model and model server upgrades
-  - Adds end to end observability around service objective attainment
-  - Ensures operational guardrails between different client model names, allowing a platform team to safely serve many different GenAI workloads on the same pool of shared foundation model servers for higher utilization and fewer required accelerators
-
-- Distributed KV Cache
-  - LMCache (in llm-d container)
-  - NIXL (in llm-d container)
-  - KVCache Indexer
-  - Redis
-
-- Model Service Controller - ModelService is a Kubernetes operator (CRD + controller) that enables the creation of vllm pods and routing resources for a given model.
-  - Enables disaggregated prefill
-  - Supports creation of Gateway API Inference Extension resources for routing
-  - Supports auto-scaling with HPA
-  - Supports independent scaling of prefill and decode instances
-  - Supports independent node affinities for prefill and decode instances
-  - Supports model loading from OCI images, HuggingFace public and private registries, and PVCs
-
-- Metrics Service (Prometheus)
-
-### Architecture
-
-![llm-d Architecture](assets/arch.jpg)
-
-## Hardware Profiles
-
-Tested on:
-
-- Minikube on AWS
-  - single g6e.12xlarge
-- Red Hat OpenShift on AWS
-  - 6 x m5.4xlarge
-  - 2 x g6e.2xlarge
-  - OpenShift 4.17.21
-  - NVIDIA GPU Operator 24.9.2
-  - OpenShift Data Foundation 4.17.6
+This guide will walk you through the steps to install and deploy llm-d on a Kubernetes cluster, using an opinionated flow in order to get up and running as quickly as possible.
 
 ## Client Configuration
 
@@ -87,8 +34,9 @@ You can use the installer script that installs all the required dependencies.  C
 - [ghcr.io Registry – sign-up & credentials](https:/github.com/)
 - [Red Hat Registry – terms & access](https://access.redhat.com/registry/)
 - [HuggingFace HF_TOKEN](https://huggingface.co/docs/hub/en/security-tokens) with download access for the model you want to use.  By default the sample application will use [meta-llama/Llama-3.2-3B-Instruct](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct).
-  > ⚠️ You may need to visit Hugging Face [meta-llama/Llama-3.2-3B-Instruct](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct) and
-  > accept the usage terms to pull this with your HF token if you have not already done so.
+
+> ⚠️ Your Hugging Face account must have access to the model you want to use.  You may need to visit Hugging Face [meta-llama/Llama-3.2-3B-Instruct](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct) and
+> accept the usage terms if you have not already done so.
 
 Registry Authentication: The installer looks for an auth file in:
 
@@ -133,8 +81,7 @@ sudo docker run --rm --runtime=nvidia --gpus all ubuntu nvidia-smi
 
 - OpenShift - This quickstart was tested on OpenShift 4.18. Older versions may work but have not been tested.
 - NVIDIA GPU Operator and NFD Operator - The installation instructions can be found [here](https://docs.nvidia.com/datacenter/cloud-native/openshift/latest/steps-overview.html).
-- OpenShift Data Foundation - The installation instructions can be found [here](https://docs.redhat.com/en/documentation/red_hat_openshift_data_foundation/4.17/html/deploying_and_managing_openshift_data_foundation_using_red_hat_openstack_platform/deploying_openshift_data_foundation_on_red_hat_openstack_platform_in_internal_mode).  OF is not required, but a ReadWriteMany storage class is required.
-- NO Service Mesh or Istio installation as it will conflict with the gateway
+- NO Service Mesh or Istio installation as Istio CRDs will conflict with the gateway
 
 ## llm-d Installation
 
@@ -146,7 +93,6 @@ The llmd-installer.sh script aims to simplify the installation of llm-d using th
 - Installing the GAIE infrastructure
 - Creating the namespace with any special configurations
 - Creating the pull secret to download the images
-- Creating storage and downloading the model
 - Creating the model service CRDs
 - Applying the helm charts
 - Deploying the sample app (model service)
@@ -182,15 +128,12 @@ The installer needs to be run from the `llm-d-deployer/quickstart` directory.
 
 ### Install llm-d on an Existing Kubernetes Cluster
 
-The storage class used for AWS ec2 is `efs-sc`. Modify [model-storage-rwx-pvc.yaml](../helpers/k8s/model-storage-rwx-pvc.yaml)
-for a different type.
-
 ```bash
 export HF_TOKEN="your-token"
 ./llmd-installer.sh
 ```
 
-### Install on OpenShift with OF installed
+### Install on OpenShift
 
 Before running the installer, ensure you have logged into the cluster.  For example:
 
@@ -198,37 +141,36 @@ Before running the installer, ensure you have logged into the cluster.  For exam
 oc login --token=sha256~yourtoken --server=https://api.yourcluster.com:6443
 ```
 
-The installer will create a ReadWriteMany PVC and download the model to it, if you are using OF, you can pass in the `--storage-class ocs-storagecluster-cephfs` flag.
-
 ```bash
 export HF_TOKEN="your-token"
-./llmd-installer.sh --storage-class ocs-storagecluster-cephfs --storage-size 15Gi
+./llmd-installer.sh
 ```
 
 ### Validation
-
-#### A Simple Request
 
 The inference-gateway serves as the HTTP ingress point for all inference requests in our deployment.
 It’s implemented as a Kubernetes Gateway (`gateway.networking.k8s.io/v1`) using either kgateway or istio as the
 gatewayClassName, and sits in front of your inference pods to handle path-based routing, load balancing, retries,
 and metrics. This example validates that the gateway itself is routing your completion requests correctly.
-You can execute the [`test-request.sh`](test-request.sh) script to test completions, or run the following commands
-manually.
+You can execute the [`test-request.sh`](test-request.sh) script to test on the cluster.
+
+In addition, if you're using an OpenShift Cluster or have created an ingress, you can test the endpoint from an external location.
 
 ```bash
-NAMESPACE=llm-d
+INGRESS_ADDRESS=$(kubectl get ingress -n "$NAMESPACE" | tail -n1 | awk '{print $3}')
+
+curl -sS -X GET "http://${INGRESS_ADDRESS}/v1/models" \
+    -H 'accept: application/json' \
+    -H 'Content-Type: application/json'
+
 MODEL_ID=meta-llama/Llama-3.2-3B-Instruct
-GATEWAY_ADDRESS=$(kubectl get gateway -n ${NAMESPACE} | tail -n 1 | awk '{print $3}')
-kubectl run --rm -i curl-temp --image=curlimages/curl --restart=Never -- \
-  curl -X POST \
-  "http://${GATEWAY_ADDRESS}/v1/completions" \
+
+curl -sS -X POST "http://${INGRESS_ADDRESS}/v1/completions" \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{
-    "model": "'${MODEL_ID}'",
-    "messages": [{"content": "Who are you?", "role": "user"}],
-    "stream": false
+    "model":"'"$MODEL_ID"'",
+    "prompt": "You are a helpful AI assistant. Please introduce yourself in one sentence.",
   }'
 ```
 
