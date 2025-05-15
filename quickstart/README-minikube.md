@@ -37,7 +37,7 @@ This guide will walk you through the steps to install and deploy llm-d on a Kube
 
 Following prerequisite are required for the installer to work.
 
-- [yq – installation & releases](https://github.com/mikefarah/yq#install)
+- [yq (mikefarah) – installation](https://github.com/mikefarah/yq?tab=readme-ov-file#install)
 - [jq – download & install guide](https://stedolan.github.io/jq/download/)
 - [git – installation guide](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 - [Helm – quick-start install](https://helm.sh/docs/intro/install/)
