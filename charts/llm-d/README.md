@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart for OpenShift
 
-![Version: 0.0.8](https://img.shields.io/badge/Version-0.0.8-informational?style=flat-square)
+![Version: 0.0.9](https://img.shields.io/badge/Version-0.0.9-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 llm-d is a High-Performance Distributed Inferencing Framework for any Kubernetes, any accelerator, any inference engine, any Linux
@@ -276,7 +276,7 @@ Kubernetes: `>= 1.30.0-0`
 | modelservice.vllm.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
 | modelservice.vllm.image.registry | llm-d image registry | string | `"ghcr.io"` |
 | modelservice.vllm.image.repository | llm-d image repository | string | `"llm-d/llm-d"` |
-| modelservice.vllm.image.tag | llm-d image tag | string | `"0.0.7"` |
+| modelservice.vllm.image.tag | llm-d image tag | string | `"0.0.8"` |
 | modelservice.vllm.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true}` |
 | modelservice.vllm.metrics.enabled | Enable metrics scraping from prefill & decode services | bool | `true` |
 | nameOverride | String to partially override common.names.fullname | string | `""` |
