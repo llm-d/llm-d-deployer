@@ -99,12 +99,10 @@ sampleApplication:
   enabled: true
 
   model:
-    # -- Fully qualified pvc URI: pvc://<pvc-name>/<model-path>
-    # modelArtifactURI: pvc://llama-3.2-3b-instruct-pvc/models/meta-llama/Llama-3.2-3B-Instruct
-    modelArtifactURI: pvc://model-pvc/models/meta-llama/Llama-3.2-3B-Instruct
-
-    # # -- Fully qualified hf URI: pvc://<pvc-name>/<model-path>
-    # modelArtifactURI: hf://meta-llama/Llama-3.2-3B-Instruct
+    # -- Fully qualified model artifact location URI
+    # <br /> For Hugging Face models use: `hf://<organization>/<repo>`
+    # <br /> For models located on PVC use: `pvc://<pvc_name>/<path_to_model>`
+    modelArtifactURI: hf://meta-llama/Llama-3.2-3B-Instruct
 
     # -- Name of the model
     modelName: "meta-llama/Llama-3.2-3B-Instruct"

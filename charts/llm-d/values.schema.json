@@ -1607,8 +1607,8 @@
               "type": "object"
             },
             "modelArtifactURI": {
-              "default": "pvc://model-pvc/models/meta-llama/Llama-3.2-3B-Instruct",
-              "description": "Fully qualified pvc URI: pvc://\u003cpvc-name\u003e/\u003cmodel-path\u003e modelArtifactURI: pvc://llama-3.2-3b-instruct-pvc/models/meta-llama/Llama-3.2-3B-Instruct",
+              "default": "hf://meta-llama/Llama-3.2-3B-Instruct",
+              "description": "Fully qualified model artifact location URI \u003cbr /\u003e For Hugging Face models use: `hf://\u003corganization\u003e/\u003crepo\u003e` \u003cbr /\u003e For models located on PVC use: `pvc://\u003cpvc_name\u003e/\u003cpath_to_model\u003e`",
               "required": [],
               "title": "modelArtifactURI"
             },
