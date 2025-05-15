@@ -945,8 +945,7 @@ redis:
         memory: "128Mi"
         cpu: "100m"
     persistence:
-      enabled: true
-      size: "5Gi"
+      enabled: false
     pdb:
       create: false
     service:
