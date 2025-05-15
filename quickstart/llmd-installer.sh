@@ -361,9 +361,8 @@ install() {
 
   if is_openshift; then
     BASE_OCP_DOMAIN=$(kubectl get ingresscontroller default -n openshift-ingress-operator -o jsonpath='{.status.domain}')
-  else 
+  else
     BASE_OCP_DOMAIN=""
-
   fi
 
   local metrics_enabled="true"
