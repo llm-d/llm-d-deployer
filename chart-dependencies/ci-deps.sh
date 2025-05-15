@@ -26,11 +26,11 @@ fi
 
 ### Base CRDs
 echo -e "\e[32m📜 Base CRDs: ${LOG_ACTION_NAME}...\e[0m"
-kubectl $MODE -k https://github.com/llm-d/llm-d-inference-scheduler/deploy/components/crds-gateway-api?ref=dev
+kubectl $MODE -k https://github.com/llm-d/llm-d-inference-scheduler/deploy/components/crds-gateway-api?ref=dev || true
 
 ### GAIE CRDs
 echo -e "\e[32m🚪 GAIE CRDs: ${LOG_ACTION_NAME}...\e[0m"
-kubectl $MODE -k https://github.com/llm-d/llm-d-inference-scheduler/deploy/components/crds-gie?ref=dev
+kubectl $MODE -k https://github.com/llm-d/llm-d-inference-scheduler/deploy/components/crds-gie?ref=dev || true
 
 ### Install Gateway provider
 backend=$(helm show values $CWD/../charts/llm-d --jsonpath '{.gateway.gatewayClassName}')
