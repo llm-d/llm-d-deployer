@@ -85,8 +85,6 @@ data:
                   valueFrom:
                     fieldRef:
                       fieldPath: status.podIP
-                - name: VLLM_LOGGING_LEVEL
-                  value: DEBUG
                 - name: POD_IP
                   valueFrom:
                     fieldRef:
@@ -94,10 +92,8 @@ data:
                       fieldPath: status.podIP
                 - name: LMCACHE_DISTRIBUTED_URL
                   value: ${POD_IP}:8200
-                - name: CUDA_VISIBLE_DEVICES
-                  value: "0"
                 - name: UCX_TLS
-                  value: "cuda_ipc,cuda_copy,tcp"
+                  value: "^cuda_ipc"
                 {{- if .Values.redis.enabled }}
                 - name: LMCACHE_LOOKUP_URL
                   value: {{ include "redis.master.service.fullurl" .}}
@@ -175,14 +171,11 @@ data:
               args:
                 - "--port"
                 - "8000"
-                - "--enforce-eager"
                 - "--kv-transfer-config"
                 - '{"kv_connector":"NixlConnector","kv_role":"kv_both"}'
               env:
                 - name: HOME
                   value: /home
-                - name: VLLM_LOGGING_LEVEL
-                  value: DEBUG
                 - name: VLLM_NIXL_SIDE_CHANNEL_PORT
                   value: "5557"
                 - name: VLLM_NIXL_SIDE_CHANNEL_HOST
@@ -196,10 +189,8 @@ data:
                       fieldPath: status.podIP
                 - name: LMCACHE_DISTRIBUTED_URL
                   value: ${POD_IP}:8200
-                - name: CUDA_VISIBLE_DEVICES
-                  value: "0"
                 - name: UCX_TLS
-                  value: "cuda_ipc,cuda_copy,tcp"
+                  value: "^cuda_ipc"
                 {{- if .Values.redis.enabled }}
                 - name: LMCACHE_LOOKUP_URL
                   value: {{ include "redis.master.service.fullurl" .}}

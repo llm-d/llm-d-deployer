@@ -85,19 +85,13 @@ data:
                   valueFrom:
                     fieldRef:
                       fieldPath: status.podIP
-                - name: VLLM_LOGGING_LEVEL
-                  value: DEBUG
                 - name: LMCACHE_DISTRIBUTED_URL
                   valueFrom:
                     fieldRef:
                       fieldPath: status.podIP
-                - name: CUDA_VISIBLE_DEVICES
-                  value: "0"
                 - name: UCX_TLS
-                  value: "cuda_ipc,cuda_copy,tcp"
+                  value: "^cuda_ipc"
                 - name: LMCACHE_USE_EXPERIMENTAL
-                  value: "True"
-                - name: LMCACHE_ENABLE_DEBUG
                   value: "True"
                 - name: LMCACHE_LOCAL_CPU
                   value: "True"
@@ -191,14 +185,11 @@ data:
               args:
                 - "--port"
                 - "8000"
-                - "--enforce-eager"
                 - "--kv-transfer-config"
                 - '{"kv_connector":"MultiConnector","kv_role":"kv_both","kv_connector_extra_config":{"connectors":[{"kv_connector":"NixlConnector","kv_role":"kv_both"},{"kv_connector":"LMCacheConnectorV1","kv_role":"kv_both"}]}}'
               env:
                 - name: HOME
                   value: /home
-                - name: VLLM_LOGGING_LEVEL
-                  value: DEBUG
                 - name: VLLM_NIXL_SIDE_CHANNEL_PORT
                   value: "5557"
                 - name: VLLM_NIXL_SIDE_CHANNEL_HOST
@@ -209,13 +200,9 @@ data:
                   valueFrom:
                     fieldRef:
                       fieldPath: status.podIP
-                - name: CUDA_VISIBLE_DEVICES
-                  value: "0"
                 - name: UCX_TLS
-                  value: "cuda_ipc,cuda_copy,tcp"
+                  value: "^cuda_ipc"
                 - name: LMCACHE_USE_EXPERIMENTAL
-                  value: "True"
-                - name: LMCACHE_ENABLE_DEBUG
                   value: "True"
                 - name: LMCACHE_LOCAL_CPU
                   value: "True"
