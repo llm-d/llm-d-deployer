@@ -1,4 +1,4 @@
-# llm-d Helm Chart for OpenShift
+# llm-d Helm Chart
 
 {{ template "chart.deprecationWarning" . }}
 
@@ -132,4 +132,70 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ## Features
 
-TBD
+This chart deploys all infrastructure required to run the [llm-d](https://llm-d.ai/) project. It includes:
+
+- A Gateway
+- A `ModelService` CRD
+- A [Model Service controller](https://github.com/llm-d/llm-d-model-service) with full RBAC support
+- [Redis](https://github.com/bitnami/charts/tree/main/bitnami/redis) deployment for LMCache and smart routing
+- Enabled monitoring and metrics scraping for llm-d components
+
+Once deployed you can create `ModelService` CRs to deploy your models. The model service controller will take care of deploying the models and exposing them through the Gateway.
+
+### Sample Application
+
+By default the chart also deploys a sample application that deploys a Llama model. See `.Values.sampleApplication` in the `values.yaml` file for more details. If you wish to get rid of it, set `sampleApplication.enabled` to `false` in the `values.yaml` file:
+
+```bash
+helm upgrade -i <release_name> llm-d/llm-d \
+  --set sampleApplication.enabled=false
+```
+
+### Metrics collection
+
+There are various metrics exposed by the llm-d components. To enable/disable scraping of these metrics, look for `metrics.enabled` toggles in the `values.yaml` file. By default, all components have metrics enabled.
+
+### Model Service
+
+A new custom resource definition (CRD) called `ModelService` is created by the chart. This CRD is used to deploy models on the cluster. The model service controller will take care of deploying the models.
+
+To see the full spec of the `ModelService` CRD, refer to the [ModelService CRD API reference](https://github.com/llm-d/llm-d-model-service/blob/main/docs/api_reference/out.asciidoc).
+
+A basic example of a `ModelService` CR looks like this:
+
+```yaml
+apiVersion: llm-d.ai/v1alpha1
+kind: ModelService
+metadata:
+  name: <name>
+spec:
+  decoupleScaling: false
+  baseConfigMapRef:
+    name: <release_name>-basic-gpu-with-nixl-and-redis-lookup-preset
+  routing:
+    modelName: <model_name>
+  modelArtifacts:
+    uri: pvc://<pvc_name>/<path_to_model>
+  decode:
+    replicas: 1
+    containers:
+    - name: "vllm"
+      args:
+      - "--model"
+      - <model_name>
+  prefill:
+    replicas: 1
+    containers:
+    - name: "vllm"
+      args:
+      - "--model"
+      - <model_name>
+```
+
+## Quickstart
+
+If you want to get started quickly and experiment with llm-d, you can also take a look at the [Quickstart](https://github.com/llm-d/llm-d-deployer/blob/main/quickstart/README.md) we provide. It wraps this chart and deploys a full llm-d stack with all it's prerequisites a sample application.
+
+## Contributing
+
+We welcome contributions to this chart! If you have any suggestions or improvements, please feel free to open an issue or submit a pull request. Please read our [contributing guide](https://github.com/llm-d/llm-d-deployer/blob/main/CONTRIBUTING.md) on how to submit a pull request.
