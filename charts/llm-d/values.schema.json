@@ -1655,80 +1655,9 @@
           "type": "object"
         },
         "resources": {
-          "additionalProperties": false,
+          "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements",
           "description": "Resource requests/limits \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-requests-and-limits-of-pod-and-container",
-          "items": {
-            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements",
-            "required": []
-          },
-          "properties": {
-            "limits": {
-              "additionalProperties": false,
-              "properties": {
-                "cpu": {
-                  "default": "",
-                  "required": [],
-                  "title": "cpu",
-                  "type": "string"
-                },
-                "memory": {
-                  "default": "",
-                  "required": [],
-                  "title": "memory",
-                  "type": "string"
-                },
-                "nvidia.com/gpu": {
-                  "default": 1,
-                  "required": [],
-                  "title": "nvidia.com/gpu",
-                  "type": "integer"
-                },
-                "rdma/ib": {
-                  "default": "",
-                  "required": [],
-                  "title": "rdma/ib",
-                  "type": "string"
-                }
-              },
-              "required": [],
-              "title": "limits",
-              "type": "object"
-            },
-            "requests": {
-              "additionalProperties": false,
-              "properties": {
-                "cpu": {
-                  "default": "",
-                  "required": [],
-                  "title": "cpu",
-                  "type": "string"
-                },
-                "memory": {
-                  "default": "",
-                  "required": [],
-                  "title": "memory",
-                  "type": "string"
-                },
-                "nvidia.com/gpu": {
-                  "default": 1,
-                  "required": [],
-                  "title": "nvidia.com/gpu",
-                  "type": "integer"
-                },
-                "rdma/ib": {
-                  "default": "",
-                  "required": [],
-                  "title": "rdma/ib",
-                  "type": "string"
-                }
-              },
-              "required": [],
-              "title": "requests",
-              "type": "object"
-            }
-          },
-          "required": [],
-          "title": "resources"
+          "required": []
         }
       },
       "required": [],

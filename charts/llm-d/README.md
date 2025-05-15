@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart
 
-![Version: 0.0.13](https://img.shields.io/badge/Version-0.0.13-informational?style=flat-square)
+![Version: 0.0.14](https://img.shields.io/badge/Version-0.0.14-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 llm-d is a High-Performance Distributed Inferencing Framework for any Kubernetes, any accelerator, any inference engine, any Linux
@@ -295,7 +295,7 @@ Kubernetes: `>= 1.30.0-0`
 | sampleApplication.model.servedModelNames | Aliases to the Model named vllm will serve with | list | `[]` |
 | sampleApplication.prefill.extraArgs | args to add to the prefill deployment | list | `[]` |
 | sampleApplication.prefill.replicas | number of desired prefill replicas | int | `1` |
-| sampleApplication.resources | Resource requests/limits <br /> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-requests-and-limits-of-pod-and-container | object | `{"limits":{"cpu":"","memory":"","nvidia.com/gpu":1,"rdma/ib":""},"requests":{"cpu":"","memory":"","nvidia.com/gpu":1,"rdma/ib":""}}` |
+| sampleApplication.resources | Resource requests/limits <br /> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-requests-and-limits-of-pod-and-container | object | `{"limits":{"nvidia.com/gpu":"1"},"requests":{"nvidia.com/gpu":"1"}}` |
 | test | Helm tests | object | `{"enabled":false,"image":{"imagePullPolicy":"Always","pullSecrets":[],"registry":"quay.io","repository":"curl/curl","tag":"latest"}}` |
 | test.enabled | Enable rendering of helm test resources | bool | `false` |
 | test.image.imagePullPolicy | Specify a imagePullPolicy | string | `"Always"` |
