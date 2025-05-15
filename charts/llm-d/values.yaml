@@ -98,6 +98,10 @@ sampleApplication:
   # -- Enable rendering of sample application resources
   enabled: true
 
+  # -- Name of the base configMapRef to use
+  # <br /> For the available presets see: `templates/modelservice/presets/`
+  baseConfigMapRefName: basic-gpu-with-nixl-and-redis-lookup-preset
+
   model:
     # -- Fully qualified model artifact location URI
     # <br /> For Hugging Face models use: `hf://<organization>/<repo>`

@@ -8,7 +8,7 @@ metadata:
 spec:
   decoupleScaling: false
   baseConfigMapRef:
-    name: {{ include "modelservice.fullname" . }}-basic-sim-preset
+    name: basic-sim-preset
   routing:
     modelName: food-review
   modelArtifacts:

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "modelservice.fullname" . }}-basic-sim-preset
+  name: basic-sim-preset
   labels:
     {{- include "common.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: modelservice

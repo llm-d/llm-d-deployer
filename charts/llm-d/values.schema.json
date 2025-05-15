@@ -1523,6 +1523,12 @@
       "default": "See below",
       "description": "Sample application deploying a p-d pair of specific model",
       "properties": {
+        "baseConfigMapRefName": {
+          "default": "basic-gpu-with-nixl-and-redis-lookup-preset",
+          "description": "Name of the base configMapRef to use \u003cbr /\u003e For the available presets see: `templates/modelservice/presets/`",
+          "required": [],
+          "title": "baseConfigMapRefName"
+        },
         "decode": {
           "additionalProperties": false,
           "properties": {

@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart
 
-![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square)
+![Version: 1.0.2](https://img.shields.io/badge/Version-1.0.2-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 llm-d is a High-Performance Distributed Inferencing Framework for any Kubernetes, any accelerator, any inference engine, any Linux
@@ -282,6 +282,7 @@ Kubernetes: `>= 1.30.0-0`
 | nameOverride | String to partially override common.names.fullname | string | `""` |
 | redis | Bitnami/Redis chart configuration | object | Use sane defaults for minimal Redis deployment |
 | sampleApplication | Sample application deploying a p-d pair of specific model | object | See below |
+| sampleApplication.baseConfigMapRefName | Name of the base configMapRef to use <br /> For the available presets see: `templates/modelservice/presets/` | string | `"basic-gpu-with-nixl-and-redis-lookup-preset"` |
 | sampleApplication.decode.extraArgs | args to add to the decode deployment | list | `[]` |
 | sampleApplication.decode.replicas | number of desired decode replicas | int | `1` |
 | sampleApplication.enabled | Enable rendering of sample application resources | bool | `true` |
@@ -345,7 +346,7 @@ metadata:
 spec:
   decoupleScaling: false
   baseConfigMapRef:
-    name: <release_name>-basic-gpu-with-nixl-and-redis-lookup-preset
+    name: basic-gpu-with-nixl-and-redis-lookup-preset
   routing:
     modelName: <model_name>
   modelArtifacts:
