@@ -37,19 +37,19 @@ print_help() {
 Usage: $(basename "$0") [OPTIONS]
 
 Options:
-  --hf-token TOKEN               Hugging Face token (or set HF_TOKEN env var)
-  --auth-file PATH               Path to containers auth.json
-  --provision-minikube           Provision a local Minikube cluster without GPU support (p/d pods will stay pending)
-  --provision-minikube-gpu       Provision a local Minikube cluster with GPU support
-  --delete-minikube              Delete the minikube cluster and exit
-  --storage-size SIZE            Size of storage volume (default: 15Gi)
-  --namespace NAME               K8s namespace (default: llm-d)
-  --values-file PATH             Path to Helm values.yaml file (default: values.yaml)
-  --uninstall                    Uninstall the llm-d components from the current cluster
-  -d, --debug                    Add debug mode to the helm install
-  --disable-metrics-collection   Disable metrics collection (Prometheus will not be installed)
-  -s, --skip-download-model      Skip downloading the model to PVC if modelArtifactURI is pvc based
-  -h, --help                     Show this help and exit
+  -t, --hf-token TOKEN               Hugging Face token (or set HF_TOKEN env var)
+  -a, --auth-file PATH               Path to containers auth.json
+  -p, --provision-minikube           Provision a local Minikube cluster without GPU support (p/d pods will stay pending)
+  -g, --provision-minikube-gpu       Provision a local Minikube cluster with GPU support
+  -x, --delete-minikube              Delete the minikube cluster and exit
+  -z, --storage-size SIZE            Size of storage volume (default: 15Gi)
+  -n, --namespace NAME               K8s namespace (default: llm-d)
+  -f, --values-file PATH             Path to Helm values.yaml file (default: values.yaml)
+  -u, --uninstall                    Uninstall the llm-d components from the current cluster
+      --disable-metrics-collection   Disable metrics collection (Prometheus will not be installed)
+  -s, --skip-download-model          Skip downloading the model to PVC if modelArtifactURI is pvc based
+  -d, --debug                        Add debug mode to the helm install
+  -h, --help                         Show this help and exit
 EOF
 }
 
@@ -130,20 +130,20 @@ fetch_kgateway_proxy_uid() {
 parse_args() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --hf-token)                     HF_TOKEN_CLI="$2"; shift 2 ;;
-      --auth-file)                    AUTH_FILE_CLI="$2"; shift 2 ;;
-      --provision-minikube)           PROVISION_MINIKUBE=true; shift ;;
-      --provision-minikube-gpu)       PROVISION_MINIKUBE_GPU=true; shift ;;
-      --delete-minikube)              DELETE_MINIKUBE=true; shift ;;
-      --storage-size)                 STORAGE_SIZE="$2"; shift 2 ;;
-      --namespace)                    NAMESPACE="$2"; shift 2 ;;
-      --values-file)                  VALUES_FILE="$2"; shift 2 ;;
-      --uninstall)                    ACTION="uninstall"; shift ;;
-      -d|--debug)                     DEBUG_MODE=true; shift;;
-      --disable-metrics-collection)   DISABLE_METRICS=true; shift;;
-      -s|--skip-download-model)       DOWNLOAD_MODEL=false; shift ;;
-      -h|--help)                      print_help; exit 0 ;;
-      *)                              die "Unknown option: $1" ;;
+      -t|--hf-token)                   HF_TOKEN_CLI="$2"; shift 2 ;;
+      -a|--auth-file)                  AUTH_FILE_CLI="$2"; shift 2 ;;
+      -p|--provision-minikube)         PROVISION_MINIKUBE=true; shift ;;
+      -g|--provision-minikube-gpu)     PROVISION_MINIKUBE_GPU=true; shift ;;
+      -x|--delete-minikube)            DELETE_MINIKUBE=true; shift ;;
+      -z|--storage-size)               STORAGE_SIZE="$2"; shift 2 ;;
+      -n|--namespace)                  NAMESPACE="$2"; shift 2 ;;
+      -f|--values-file)                VALUES_FILE="$2"; shift 2 ;;
+      -u|--uninstall)                  ACTION="uninstall"; shift ;;
+      --disable-metrics-collection)    DISABLE_METRICS=true; shift ;;
+      -s|--skip-download-model)        DOWNLOAD_MODEL=false; shift ;;
+      -d|--debug)                      DEBUG_MODE=true; shift ;;
+      -h|--help)                       print_help; exit 0 ;;
+      *)                               die "Unknown option: $1" ;;
     esac
   done
 

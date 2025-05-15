@@ -32,18 +32,18 @@ print_help() {
 Usage: $(basename "$0") [OPTIONS]
 
 Options:
-  --hf-token TOKEN           Hugging Face token (or set HF_TOKEN env var)
-  --auth-file PATH           Path to containers auth.json
-  --storage-size SIZE        Size of storage volume (default: 7Gi)
-  --storage-class CLASS      Storage class to use (default: efs-sc)
-  --namespace NAME           K8s namespace (default: llm-d)
-  --values-file PATH         Path to Helm values.yaml file (default: values.yaml)
-  --uninstall                Uninstall the llm-d components from the current cluster
-  --debug                    Add debug mode to the helm install
-  --skip-infra               Skip the infrastructure components of the installation
-  --disable-metrics-collection Disable metrics collection (Prometheus will not be installed)
-  -s, --skip-download-model  Skip downloading the model to PVC if modelArtifactURI is pvc based
-  -h, --help                 Show this help and exit
+  -t, --hf-token TOKEN             Hugging Face token (or set HF_TOKEN env var)
+  -a, --auth-file PATH             Path to containers auth.json
+  -z, --storage-size SIZE          Size of storage volume
+  -c, --storage-class CLASS        Storage class to use (default: efs-sc)
+  -n, --namespace NAME             K8s namespace (default: llm-d)
+  -f, --values-file PATH           Path to Helm values.yaml file (default: values.yaml)
+  -u, --uninstall                  Uninstall the llm-d components from the current cluster
+  -d, --debug                      Add debug mode to the helm install
+  -i, --skip-infra                 Skip the infrastructure components of the installation
+  -m, --disable-metrics-collection Disable metrics collection (Prometheus will not be installed)
+  -s, --skip-download-model        Skip downloading the model to PVC if modelArtifactURI is pvc based
+  -h, --help                       Show this help and exit
 EOF
 }
 
@@ -107,7 +107,6 @@ parse_args() {
       --debug)                      DEBUG="--debug"; shift;;
       --skip-infra)                 SKIP_INFRA=true; shift;;
       --disable-metrics-collection) DISABLE_METRICS=true; shift;;
-      -d)                           DOWNLOAD_MODEL=true; shift;;
       -s|--skip-download-model)     DOWNLOAD_MODEL=false; shift ;;
       -h|--help)                    print_help; exit 0 ;;
       *)                            die "Unknown option: $1" ;;
