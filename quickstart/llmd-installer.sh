@@ -114,6 +114,47 @@ parse_args() {
   done
 }
 
+# Helper to read a top-level value from override if present,
+# otherwise fall back to chart’s values.yaml, and log the source
+get_value() {
+  local path="$1" src res
+  if [[ "${VALUES_FILE}" != "values.yaml" ]] && \
+     yq eval "has(${path})" - <"${SCRIPT_DIR}/${VALUES_FILE}" &>/dev/null; then
+    src="$(realpath "${SCRIPT_DIR}/${VALUES_FILE}")"
+  else
+    src="${CHART_DIR}/values.yaml"
+  fi
+  >&2 log_info "🔹 Reading ${path} from ${src}"
+  res=$(yq eval -r "${path}" "${src}")
+  log_info "🔹 got ${res}"
+  echo "${res}"
+}
+
+# Populate VALUES_PATH and VALUES_ARGS for any value overrides
+resolve_values() {
+  local base="${CHART_DIR}/values.yaml"
+  [[ -f "${base}" ]] || die "Base values.yaml not found at ${base}"
+
+  if [[ "${VALUES_FILE}" != "values.yaml" ]]; then
+    local ov="${VALUES_FILE}"
+    if   [[ -f "${ov}" ]]; then :;
+    elif [[ -f "${SCRIPT_DIR}/${ov}" ]]; then ov="${SCRIPT_DIR}/${ov}";
+    elif [[ -f "${REPO_ROOT}/${ov}" ]]; then    ov="${REPO_ROOT}/${ov}";
+    else die "Override values file not found: ${ov}"; fi
+    ov="$(realpath "${ov}")"
+    local tmp; tmp=$(mktemp)
+    yq eval-all 'select(fileIndex==0) * select(fileIndex==1)' "${base}" "${ov}" >"${tmp}"
+    VALUES_PATH="${tmp}"
+    VALUES_ARGS=(--values "${base}" --values "${ov}")
+  else
+    # no override, only base
+    VALUES_PATH="${base}"
+    VALUES_ARGS=(--values "${base}")
+  fi
+
+  log_info "🔹 Using merged values: ${VALUES_PATH}"
+}
+
 ### ENV & PATH SETUP ###
 setup_env() {
   log_info "📂 Setting up script environment..."
@@ -317,20 +358,7 @@ install() {
   log_success "✅ ServiceAccount patched"
 
   cd "${CHART_DIR}"
-  # Resolve which values.yaml to use:
-  #   - If the user passed --values-file (i.e. $VALUES_FILE != "values.yaml"), treat it as
-  #     either relative or absolute path and require it to exist.
-  #   - Otherwise default to $CHART_DIR/values.yaml.
-  if [[ "$VALUES_FILE" != "values.yaml" ]]; then
-    if [[ -f "$VALUES_FILE" ]]; then
-      VALUES_PATH=$(realpath "$VALUES_FILE")
-      log_info "✅ Using custom values file: ${VALUES_PATH}"
-    else
-      die "Custom values file not found: $VALUES_FILE"
-    fi
-  else
-    VALUES_PATH="${CHART_DIR}/values.yaml"
-  fi
+  resolve_values
 
   log_info "🔐 Creating/updating HF token secret..."
   HF_NAME=$(yq -r .sampleApplication.model.auth.hfToken.name "${VALUES_PATH}")
@@ -391,7 +419,7 @@ install() {
   helm upgrade -i llm-d . \
     ${DEBUG} \
     --namespace "${NAMESPACE}" \
-    --values "${VALUES_PATH}" \
+    "${VALUES_ARGS[@]}" \
     --set global.imagePullSecrets[0]="${PULL_SECRET_NAME}" \
     --set gateway.kGatewayParameters.proxyUID="${PROXY_UID}" \
     --set ingress.clusterRouterBase="${BASE_OCP_DOMAIN}" \
