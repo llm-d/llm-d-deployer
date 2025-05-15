@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 MODE=${1:-apply}
 
@@ -20,7 +20,7 @@ if [[ "$MODE" == "apply" ]]; then
     --set podSecurityContext.runAsNonRoot=true \
     kgateway oci://cr.kgateway.dev/kgateway-dev/charts/kgateway
 else
-  helm uninstall kgateway --namespace kgateway-system
-  helm uninstall kgateway-crds --namespace kgateway-system
+  helm uninstall kgateway --ignore-not-found  --namespace kgateway-system || true
+  helm uninstall kgateway-crds --ignore-not-found --namespace kgateway-system || true
   helm template kgateway-crds oci://cr.kgateway.dev/kgateway-dev/charts/kgateway-crds --version v2.0.0 | kubectl delete -f - --ignore-not-found
 fi
