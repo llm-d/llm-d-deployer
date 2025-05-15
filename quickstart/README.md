@@ -232,6 +232,19 @@ kubectl run --rm -i curl-temp --image=curlimages/curl --restart=Never -- \
   }'
 ```
 
+> If you receive an error indicating PodSecurity "restricted" violations when running the smoke-test script, you
+> need to remove the restrictive PodSecurity labels from the namespace. Once these labels are removed, re-run the
+> script and it should proceed without PodSecurity errors.
+> Run the following command:
+
+```bash
+kubectl label namespace <NAMESPACE> \
+  pod-security.kubernetes.io/warn- \
+  pod-security.kubernetes.io/warn-version- \
+  pod-security.kubernetes.io/audit- \
+  pod-security.kubernetes.io/audit-version-
+```
+
 ### Bring Your Own Model
 
 There is a default sample application that by loads [`meta-llama/Llama-3.2-3B-Instruct`](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct)
