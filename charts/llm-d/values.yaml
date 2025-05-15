@@ -356,7 +356,7 @@ modelservice:
   image:
 
     # -- Model Service controller image registry
-    registry: ghcr.io
+    registry: quay.io
 
     # -- Model Service controller image repository
     repository: llm-d/llm-d-model-service
@@ -433,7 +433,7 @@ modelservice:
     image:
 
       # -- Endpoint picker image registry
-      registry: ghcr.io
+      registry: quay.io
 
       # -- Endpoint picker image repository
       repository: llm-d/llm-d-inference-scheduler
@@ -762,7 +762,7 @@ modelservice:
     image:
 
       # -- llm-d image registry
-      registry: ghcr.io
+      registry: quay.io
 
       # -- llm-d image repository
       repository: llm-d/llm-d
@@ -794,7 +794,7 @@ modelservice:
     image:
 
       # -- Routing proxy image registry
-      registry: ghcr.io
+      registry: quay.io
 
       # -- Routing proxy image repository
       repository: llm-d/llm-d-routing-sidecar
@@ -828,7 +828,7 @@ modelservice:
     image:
 
       # -- llm-d inference simulator image registry
-      registry: ghcr.io
+      registry: quay.io
 
       # -- llm-d inference simulator image repository
       repository: llm-d/llm-d-inference-sim

@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart
 
-![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square)
+![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 llm-d is a High-Performance Distributed Inferencing Framework for any Kubernetes, any accelerator, any inference engine, any Linux
@@ -192,7 +192,7 @@ Kubernetes: `>= 1.30.0-0`
 | modelservice.epp.image | Endpoint picker image used in ModelService CR presets | object | See below |
 | modelservice.epp.image.imagePullPolicy | Specify a imagePullPolicy | string | `"Always"` |
 | modelservice.epp.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
-| modelservice.epp.image.registry | Endpoint picker image registry | string | `"ghcr.io"` |
+| modelservice.epp.image.registry | Endpoint picker image registry | string | `"quay.io"` |
 | modelservice.epp.image.repository | Endpoint picker image repository | string | `"llm-d/llm-d-inference-scheduler"` |
 | modelservice.epp.image.tag | Endpoint picker image tag | string | `"0.0.3"` |
 | modelservice.epp.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true,"serviceMonitor":{"annotations":{},"interval":"10s","labels":{},"namespaceSelector":{"any":false,"matchNames":[]},"path":"/metrics","port":"metrics","selector":{"matchLabels":{}}}}` |
@@ -213,7 +213,7 @@ Kubernetes: `>= 1.30.0-0`
 | modelservice.image | Modelservice controller image, please change only if appropriate adjustments to the CRD are being made | object | See below |
 | modelservice.image.imagePullPolicy | Specify a imagePullPolicy | string | `"Always"` |
 | modelservice.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
-| modelservice.image.registry | Model Service controller image registry | string | `"ghcr.io"` |
+| modelservice.image.registry | Model Service controller image registry | string | `"quay.io"` |
 | modelservice.image.repository | Model Service controller image repository | string | `"llm-d/llm-d-model-service"` |
 | modelservice.image.tag | Model Service controller image tag | string | `"0.0.10"` |
 | modelservice.inferenceSimulator | llm-d inference simulator container options | object | See below |
@@ -221,7 +221,7 @@ Kubernetes: `>= 1.30.0-0`
 | modelservice.inferenceSimulator.image | llm-d inference simulator image used in ModelService CR presets | object | See below |
 | modelservice.inferenceSimulator.image.imagePullPolicy | Specify a imagePullPolicy | string | `"IfNotPresent"` |
 | modelservice.inferenceSimulator.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
-| modelservice.inferenceSimulator.image.registry | llm-d inference simulator image registry | string | `"ghcr.io"` |
+| modelservice.inferenceSimulator.image.registry | llm-d inference simulator image registry | string | `"quay.io"` |
 | modelservice.inferenceSimulator.image.repository | llm-d inference simulator image repository | string | `"llm-d/llm-d-inference-sim"` |
 | modelservice.inferenceSimulator.image.tag | llm-d inference simulator image tag | string | `"0.0.4"` |
 | modelservice.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true,"serviceMonitor":{"annotations":{},"interval":"15s","labels":{},"namespaceSelector":{"any":false,"matchNames":[]},"path":"/metrics","port":"vllm","selector":{"matchLabels":{}}}}` |
@@ -253,10 +253,10 @@ Kubernetes: `>= 1.30.0-0`
 | modelservice.replicas | Number of controller replicas | int | `1` |
 | modelservice.routingProxy | Routing proxy container options | object | See below |
 | modelservice.routingProxy.containerSecurityContext | Security settings for a Container. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container | object | `{}` |
-| modelservice.routingProxy.image | Routing proxy image used in ModelService CR presets | object | `{"imagePullPolicy":"IfNotPresent","pullSecrets":[],"registry":"ghcr.io","repository":"llm-d/llm-d-routing-sidecar","tag":"0.0.6"}` |
+| modelservice.routingProxy.image | Routing proxy image used in ModelService CR presets | object | `{"imagePullPolicy":"IfNotPresent","pullSecrets":[],"registry":"quay.io","repository":"llm-d/llm-d-routing-sidecar","tag":"0.0.6"}` |
 | modelservice.routingProxy.image.imagePullPolicy | Specify a imagePullPolicy | string | `"IfNotPresent"` |
 | modelservice.routingProxy.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
-| modelservice.routingProxy.image.registry | Routing proxy image registry | string | `"ghcr.io"` |
+| modelservice.routingProxy.image.registry | Routing proxy image registry | string | `"quay.io"` |
 | modelservice.routingProxy.image.repository | Routing proxy image repository | string | `"llm-d/llm-d-routing-sidecar"` |
 | modelservice.routingProxy.image.tag | Routing proxy image tag | string | `"0.0.6"` |
 | modelservice.service.enabled | Toggle to deploy a Service resource for Model service controller | bool | `true` |
@@ -274,7 +274,7 @@ Kubernetes: `>= 1.30.0-0`
 | modelservice.vllm.image | vLLM image used in ModelService CR presets | object | See below |
 | modelservice.vllm.image.imagePullPolicy | Specify a imagePullPolicy | string | `"IfNotPresent"` |
 | modelservice.vllm.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
-| modelservice.vllm.image.registry | llm-d image registry | string | `"ghcr.io"` |
+| modelservice.vllm.image.registry | llm-d image registry | string | `"quay.io"` |
 | modelservice.vllm.image.repository | llm-d image repository | string | `"llm-d/llm-d"` |
 | modelservice.vllm.image.tag | llm-d image tag | string | `"0.0.8"` |
 | modelservice.vllm.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true}` |
