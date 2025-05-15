@@ -237,7 +237,7 @@ kubectl run --rm -i curl-temp --image=curlimages/curl --restart=Never -- \
 > script and it should proceed without PodSecurity errors.
 > Run the following command:
 
-```
+```bash
 kubectl label namespace <NAMESPACE> \
   pod-security.kubernetes.io/warn- \
   pod-security.kubernetes.io/warn-version- \
