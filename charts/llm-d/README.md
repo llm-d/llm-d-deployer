@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart
 
-![Version: 0.0.11](https://img.shields.io/badge/Version-0.0.11-informational?style=flat-square)
+![Version: 0.0.12](https://img.shields.io/badge/Version-0.0.12-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 llm-d is a High-Performance Distributed Inferencing Framework for any Kubernetes, any accelerator, any inference engine, any Linux
@@ -290,7 +290,7 @@ Kubernetes: `>= 1.30.0-0`
 | sampleApplication.model.auth.hfToken | HF token auth config via k8s secret. | object | `{"key":"HF_TOKEN","name":"llm-d-hf-token"}` |
 | sampleApplication.model.auth.hfToken.key | Key within the secret under which the token is located | string | `"HF_TOKEN"` |
 | sampleApplication.model.auth.hfToken.name | Name of the secret to create to store your huggingface token | string | `"llm-d-hf-token"` |
-| sampleApplication.model.modelArtifactURI | Fully qualified pvc URI: pvc://<pvc-name>/<model-path> modelArtifactURI: pvc://llama-3.2-3b-instruct-pvc/models/meta-llama/Llama-3.2-3B-Instruct | string | `"pvc://model-pvc/models/meta-llama/Llama-3.2-3B-Instruct"` |
+| sampleApplication.model.modelArtifactURI | Fully qualified model artifact location URI <br /> For Hugging Face models use: `hf://<organization>/<repo>` <br /> For models located on PVC use: `pvc://<pvc_name>/<path_to_model>` | string | `"hf://meta-llama/Llama-3.2-3B-Instruct"` |
 | sampleApplication.model.modelName | Name of the model | string | `"meta-llama/Llama-3.2-3B-Instruct"` |
 | sampleApplication.model.servedModelNames | Aliases to the Model named vllm will serve with | list | `[]` |
 | sampleApplication.prefill.extraArgs | args to add to the prefill deployment | list | `[]` |
