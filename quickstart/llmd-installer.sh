@@ -151,12 +151,6 @@ validate_hf_token() {
   fi
 }
 
-clone_gaie_repo() {
-  if [[ ! -d gateway-api-inference-extension ]]; then
-    git clone --branch main https://github.com/llm-d/gateway-api-inference-extension.git
-  fi
-}
-
 create_pvc_and_download_model_if_needed() {
   YQ_TYPE=$(yq --version 2>/dev/null | grep -q 'version' && echo 'go' || echo 'py')
   MODEL_ARTIFACT_URI=$(cat ${VALUES_PATH} | yq .sampleApplication.model.modelArtifactURI)
@@ -286,11 +280,7 @@ create_pvc_and_download_model_if_needed() {
 install() {
   if [[ "${SKIP_INFRA}" == "false" ]]; then
     log_info "🏗️ Installing GAIE Kubernetes infrastructure…"
-    clone_gaie_repo
-    pushd gateway-api-inference-extension >/dev/null
-      INFRASTRUCTURE_OVERRIDE=true make environment.dev.kubernetes.infrastructure
-    popd >/dev/null
-    rm -rf gateway-api-inference-extension
+    bash ../chart-dependencies/ci-deps.sh
     log_success "✅ GAIE infra applied"
   fi
 
@@ -435,11 +425,7 @@ post_install() {
 uninstall() {
   if [[ "${SKIP_INFRA}" == "false" ]]; then
     log_info "🗑️ Tearing down GAIE Kubernetes infrastructure…"
-    clone_gaie_repo
-    pushd gateway-api-inference-extension >/dev/null
-      INFRASTRUCTURE_OVERRIDE=true make clean.environment.dev.kubernetes.infrastructure
-    popd >/dev/null
-    rm -rf gateway-api-inference-extension
+    bash ../chart-dependencies/ci-deps.sh delete
   fi
   MODEL_ARTIFACT_URI=$(kubectl get modelservice --ignore-not-found -n ${NAMESPACE} -o yaml | yq '.items[].spec.modelArtifacts.uri')
   PROTOCOL="${MODEL_ARTIFACT_URI%%://*}"
