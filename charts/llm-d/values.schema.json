@@ -671,6 +671,25 @@
                     "additionalProperties": false,
                     "properties": {
                       "name": {
+                        "default": "PREFILL_KVCACHE_INDEXER_REDIS_ADDR",
+                        "required": [],
+                        "title": "name",
+                        "type": "string"
+                      },
+                      "value": {
+                        "default": "{{ if .Values.redis.enabled }}{{ include \"redis.master.service.fullurl\" . }}{{ end }}",
+                        "required": [],
+                        "title": "value",
+                        "type": "string"
+                      }
+                    },
+                    "required": [],
+                    "type": "object"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "name": {
                         "default": "PREFILL_ENABLE_LOAD_AWARE_SCORER",
                         "required": [],
                         "title": "name",
@@ -780,158 +799,6 @@
                     },
                     "required": [],
                     "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "DECODE_ENABLE_KVCACHE_AWARE_SCORER",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "false",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "DECODE_KVCACHE_AWARE_SCORER_WEIGHT",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "1",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "DECODE_ENABLE_LOAD_AWARE_SCORER",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "false",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "DECODE_LOAD_AWARE_SCORER_WEIGHT",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "1",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "DECODE_ENABLE_PREFIX_AWARE_SCORER",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "false",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "DECODE_PREFIX_AWARE_SCORER_WEIGHT",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "1",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "DECODE_ENABLE_SESSION_AWARE_SCORER",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "false",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "DECODE_SESSION_AWARE_SCORER_WEIGHT",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "1",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
                   }
                 ],
                 "required": []
@@ -981,7 +848,7 @@
                   "title": "repository"
                 },
                 "tag": {
-                  "default": "0.0.2",
+                  "default": "0.0.3",
                   "description": "Endpoint picker image tag",
                   "required": [],
                   "title": "tag"

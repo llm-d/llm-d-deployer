@@ -444,7 +444,7 @@ modelservice:
       repository: llm-d/llm-d-inference-scheduler
 
       # -- Endpoint picker image tag
-      tag: 0.0.2
+      tag: 0.0.3
 
     # -- Specify a imagePullPolicy
       imagePullPolicy: "Always"
@@ -588,6 +588,8 @@ modelservice:
         value: "false"
       - name: PREFILL_KVCACHE_AWARE_SCORER_WEIGHT
         value: "1"
+      - name: PREFILL_KVCACHE_INDEXER_REDIS_ADDR
+        value: '{{ if .Values.redis.enabled }}{{ include "redis.master.service.fullurl" . }}{{ end }}'
       - name: PREFILL_ENABLE_LOAD_AWARE_SCORER
         value: "false"
       - name: PREFILL_LOAD_AWARE_SCORER_WEIGHT
@@ -599,22 +601,6 @@ modelservice:
       - name: PREFILL_ENABLE_SESSION_AWARE_SCORER
         value: "false"
       - name: PREFILL_SESSION_AWARE_SCORER_WEIGHT
-        value: "1"
-      - name: DECODE_ENABLE_KVCACHE_AWARE_SCORER
-        value: "false"
-      - name: DECODE_KVCACHE_AWARE_SCORER_WEIGHT
-        value: "1"
-      - name: DECODE_ENABLE_LOAD_AWARE_SCORER
-        value: "false"
-      - name: DECODE_LOAD_AWARE_SCORER_WEIGHT
-        value: "1"
-      - name: DECODE_ENABLE_PREFIX_AWARE_SCORER
-        value: "false"
-      - name: DECODE_PREFIX_AWARE_SCORER_WEIGHT
-        value: "1"
-      - name: DECODE_ENABLE_SESSION_AWARE_SCORER
-        value: "false"
-      - name: DECODE_SESSION_AWARE_SCORER_WEIGHT
         value: "1"
 
     # @schema
