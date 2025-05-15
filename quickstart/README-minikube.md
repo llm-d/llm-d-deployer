@@ -53,7 +53,7 @@ You can use the installer script that installs all the required dependencies.
 ### Required credentials and configuration
 
 - [llm-d-deployer GitHub repo – clone here](https://github.com/llm-d/llm-d-deployer.git)
-- [Quay.io Registry – sign-up & credentials](https://quay.io/)
+- [ghcr.io Registry – sign-up & credentials](https:/github.com/)
 - [Red Hat Registry – terms & access](https://access.redhat.com/registry/)
 - [HuggingFace HF_TOKEN](https://huggingface.co/docs/hub/en/security-tokens)
 
@@ -70,13 +70,13 @@ If not found, you can create one with the following commands:
 Create with Docker:
 
 ```bash
-docker --config ~/.config/containers/ login quay.io
+docker --config ~/.config/containers/ login ghcr.io
 ```
 
 Create with Podman:
 
 ```bash
-podman login quay.io --authfile ~/.config/containers/auth.json
+podman login ghcr.io --authfile ~/.config/containers/auth.json
 ```
 
 > ⚠️ You may need to visit Hugging Face [meta-llama/Llama-3.2-3B-Instruct](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct) and
