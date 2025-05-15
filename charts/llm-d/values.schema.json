@@ -1665,11 +1665,29 @@
             "limits": {
               "additionalProperties": false,
               "properties": {
+                "cpu": {
+                  "default": "",
+                  "required": [],
+                  "title": "cpu",
+                  "type": "string"
+                },
+                "memory": {
+                  "default": "",
+                  "required": [],
+                  "title": "memory",
+                  "type": "string"
+                },
                 "nvidia.com/gpu": {
                   "default": 1,
                   "required": [],
                   "title": "nvidia.com/gpu",
                   "type": "integer"
+                },
+                "rdma/ib": {
+                  "default": "",
+                  "required": [],
+                  "title": "rdma/ib",
+                  "type": "string"
                 }
               },
               "required": [],
@@ -1679,11 +1697,29 @@
             "requests": {
               "additionalProperties": false,
               "properties": {
-                "nvidia.com/gpu": {
-                  "default": "1",
-                  "description": " memory: 16Gi",
+                "cpu": {
+                  "default": "",
                   "required": [],
-                  "title": "nvidia.com/gpu"
+                  "title": "cpu",
+                  "type": "string"
+                },
+                "memory": {
+                  "default": "",
+                  "required": [],
+                  "title": "memory",
+                  "type": "string"
+                },
+                "nvidia.com/gpu": {
+                  "default": 1,
+                  "required": [],
+                  "title": "nvidia.com/gpu",
+                  "type": "integer"
+                },
+                "rdma/ib": {
+                  "default": "",
+                  "required": [],
+                  "title": "rdma/ib",
+                  "type": "string"
                 }
               },
               "required": [],

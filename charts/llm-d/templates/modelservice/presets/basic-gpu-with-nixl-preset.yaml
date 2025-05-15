@@ -74,7 +74,6 @@ data:
               args:
                 - "--port"
                 - "8001"
-                - "--enforce-eager"
                 - "--kv-transfer-config"
                 - '{"kv_connector":"NixlConnector","kv_role":"kv_both"}'
               env:
