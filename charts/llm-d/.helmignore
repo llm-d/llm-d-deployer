@@ -1,23 +1,20 @@
 # Patterns to ignore when building packages.
 # This supports shell glob matching, relative path matching, and
 # negation (prefixed with !). Only one pattern per line.
+
+
+# MacOS
 .DS_Store
-# Common VCS dirs
-.git/
-.gitignore
-.bzr/
-.bzrignore
-.hg/
-.hgignore
-.svn/
+.AppleDouble
+.LSOverride
+
 # Common backup files
 *.swp
 *.bak
 *.tmp
 *.orig
 *~
-# Various IDEs
-.project
-.idea/
-*.tmproj
-.vscode/
+
+# Ignore templates for metadata that we generate the real files from
+*.md.gotmpl
+*.tmpl.json

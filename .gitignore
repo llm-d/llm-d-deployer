@@ -1,9 +1,21 @@
-charts/llm-d/charts/
-charts/llm-d/tmp.yaml
-charts/llm-d/temp/
+# Chart dependencies
+charts/**/*.tgz
+
+# Chart testing revision file
 ct-previous-revision*
 
-chart-dependencies/quickstart/gateway-api-inference-extension/
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
 
-# misc
+# Various IDEs
 .idea
+.vscode
+
+# Common backup files
+*.swp
+*.bak
+*.tmp
+*.orig
+*~
