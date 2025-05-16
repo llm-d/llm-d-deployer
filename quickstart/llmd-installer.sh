@@ -97,16 +97,16 @@ fetch_kgateway_proxy_uid() {
 parse_args() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --hf-token)                   HF_TOKEN_CLI="$2"; shift 2 ;;
-      --auth-file)                  AUTH_FILE_CLI="$2"; shift 2 ;;
-      --storage-size)               STORAGE_SIZE="$2"; shift 2 ;;
-      --storage-class)              STORAGE_CLASS="$2"; shift 2 ;;
-      --namespace)                  NAMESPACE="$2"; shift 2 ;;
-      --values-file)                VALUES_FILE="$2"; shift 2 ;;
-      --uninstall)                  ACTION="uninstall"; shift ;;
-      --debug)                      DEBUG="--debug"; shift;;
-      --skip-infra)                 SKIP_INFRA=true; shift;;
-      --disable-metrics-collection) DISABLE_METRICS=true; shift;;
+      -t|--hf-token)                HF_TOKEN_CLI="$2"; shift 2 ;;
+      -a|--auth-file)               AUTH_FILE_CLI="$2"; shift 2 ;;
+      -z|--storage-size)            STORAGE_SIZE="$2"; shift 2 ;;
+      -c|--storage-class)           STORAGE_CLASS="$2"; shift 2 ;;
+      -n|--namespace)               NAMESPACE="$2"; shift 2 ;;
+      -f|--values-file)             VALUES_FILE="$2"; shift 2 ;;
+      -u|--uninstall)               ACTION="uninstall"; shift ;;
+      -d|--debug)                   DEBUG="--debug"; shift;;
+      -i|--skip-infra)              SKIP_INFRA=true; shift;;
+      -m|--disable-metrics-collection) DISABLE_METRICS=true; shift;;
       -s|--skip-download-model)     DOWNLOAD_MODEL=false; shift ;;
       -h|--help)                    print_help; exit 0 ;;
       *)                            die "Unknown option: $1" ;;
