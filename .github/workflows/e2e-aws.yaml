@@ -234,8 +234,12 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@$INSTANCE_IP << EOF
             set -e
             cd llm-d-deployer/quickstart
-
-            ./llmd-installer-minikube.sh --provision-minikube-gpu --hf-token $HF_TOKEN | tee ~/llmd-installer.log
+            echo "Starting minikube with gpu support enabled..."
+            minikube start --driver docker --container-runtime docker --gpus all --memory no-limit
+            sleep 10
+            echo "Deploying llm-d stack..."
+            export HF_TOKEN=$HF_TOKEN
+            ./llmd-installer-minikube.sh | tee ~/llmd-installer.log
           EOF
 
       - name: Wait for pods to be in ready state.
