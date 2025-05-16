@@ -58,7 +58,7 @@ data:
                 - containerPort: 8000
                   protocol: TCP
               restartPolicy: Always
-              imagePullPolicy: Always
+              imagePullPolicy: imagePullPolicy: {{ .Values.modelservice.routingProxy.image.imagePullPolicy }}
           containers:
             - name: vllm
               image: {{ include "modelservice.vllmImage" . }}

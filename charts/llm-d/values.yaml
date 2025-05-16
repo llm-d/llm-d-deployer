@@ -681,11 +681,6 @@ modelservice:
       containerSecurityContext:
           allowPrivilegeEscalation: false
 
-      # -- Log level to run VLLM with
-      # <br /> VLLM supports standard python log-levels, see: https://docs.python.org/3/library/logging.html#logging-levels
-      # <br /> Options: "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"
-      logLevel: "INFO"
-
   # -- Decode options
   # @default -- See below
   decode:
@@ -794,6 +789,11 @@ modelservice:
 
       # -- Enable metrics scraping from prefill & decode services
       enabled: true
+
+    # -- Log level to run VLLM with
+    # <br /> VLLM supports standard python log-levels, see: https://docs.python.org/3/library/logging.html#logging-levels
+    # <br /> Options: "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"
+    logLevel: "INFO"
 
   # -- Routing proxy container options
   # @default -- See below

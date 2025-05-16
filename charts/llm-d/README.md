@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart
 
-![Version: 1.0.3](https://img.shields.io/badge/Version-1.0.3-informational?style=flat-square)
+![Version: 1.0.4](https://img.shields.io/badge/Version-1.0.4-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 llm-d is a High-Performance Distributed Inferencing Framework for any Kubernetes, any accelerator, any inference engine, any Linux
@@ -247,9 +247,8 @@ Kubernetes: `>= 1.30.0-0`
 | modelservice.prefill.tolerations | Node tolerations for server scheduling to nodes with taints <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ | list | `[{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}]` |
 | modelservice.prefill.tolerations[0] | default NVIDIA GPU toleration | object | `{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}` |
 | modelservice.prefill.topologySpreadConstraints | Topology Spread Constraints for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints | list | `[]` |
-| modelservice.prefill.vllm | vLLM container settings | object | `{"containerSecurityContext":{"allowPrivilegeEscalation":false},"logLevel":"INFO"}` |
+| modelservice.prefill.vllm | vLLM container settings | object | `{"containerSecurityContext":{"allowPrivilegeEscalation":false}}` |
 | modelservice.prefill.vllm.containerSecurityContext | Security settings for a Container. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container | object | `{"allowPrivilegeEscalation":false}` |
-| modelservice.prefill.vllm.logLevel | Log level to run VLLM with <br /> VLLM supports standard python log-levels, see: https://docs.python.org/3/library/logging.html#logging-levels <br /> Options: "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL" | string | `"INFO"` |
 | modelservice.rbac.create | Enable the creation of RBAC resources | bool | `true` |
 | modelservice.replicas | Number of controller replicas | int | `1` |
 | modelservice.routingProxy | Routing proxy container options | object | See below |
@@ -278,6 +277,7 @@ Kubernetes: `>= 1.30.0-0`
 | modelservice.vllm.image.registry | llm-d image registry | string | `"ghcr.io"` |
 | modelservice.vllm.image.repository | llm-d image repository | string | `"llm-d/llm-d"` |
 | modelservice.vllm.image.tag | llm-d image tag | string | `"0.0.8"` |
+| modelservice.vllm.logLevel | Log level to run VLLM with <br /> VLLM supports standard python log-levels, see: https://docs.python.org/3/library/logging.html#logging-levels <br /> Options: "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL" | string | `"INFO"` |
 | modelservice.vllm.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true}` |
 | modelservice.vllm.metrics.enabled | Enable metrics scraping from prefill & decode services | bool | `true` |
 | nameOverride | String to partially override common.names.fullname | string | `""` |
