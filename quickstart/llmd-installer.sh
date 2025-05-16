@@ -23,7 +23,8 @@ DEBUG=""
 SKIP_INFRA=false
 DISABLE_METRICS=false
 MONITORING_NAMESPACE="llm-d-monitoring"
-DOWNLOAD_MODEL=true
+DOWNLOAD_MODEL=""
+DOWNLOAD_TIMEOUT="600"
 
 # Minikube-specific flags & globals
 USE_MINIKUBE=false
@@ -47,7 +48,8 @@ Options:
   -d, --debug                      Add debug mode to the helm install
   -i, --skip-infra                 Skip the infrastructure components of the installation
   -m, --disable-metrics-collection Disable metrics collection (Prometheus will not be installed)
-  -s, --skip-download-model        Skip downloading the model to PVC if modelArtifactURI is pvc based
+  -D, --download-model             Download the model to PVC from Hugging Face
+  -T, --download-timeout           Timeout for model download job
   -k, --minikube                   Deploy on an existing minikube instance with hostPath storage
   -h, --help                       Show this help and exit
 EOF
@@ -112,7 +114,8 @@ parse_args() {
       -d|--debug)                   DEBUG="--debug"; shift;;
       -i|--skip-infra)              SKIP_INFRA=true; shift;;
       -m|--disable-metrics-collection) DISABLE_METRICS=true; shift;;
-      -s|--skip-download-model)     DOWNLOAD_MODEL=false; shift ;;
+      -D|--download-model)          DOWNLOAD_MODEL="$2"; shift 2 ;;
+      -T|--download-timeout)        DOWNLOAD_TIMEOUT="$2"; shift 2 ;;
       -k|--minikube)                USE_MINIKUBE=true; shift ;;
       -h|--help)                    print_help; exit 0 ;;
       *)                            die "Unknown option: $1" ;;
@@ -250,16 +253,6 @@ create_pvc_and_download_model_if_needed() {
         log_error "No Model Artifact URI set. Please set the \`.sampleApplication.model.modelArtifactURI\` in the values file."
         exit 1
     fi
-    if [[ -z "${HF_MODEL_ID}" ]]; then
-        log_error "Error, \`modelArtifactURI\` indicates model from PVC, but no Hugging Face model is defined.
-        Please set the \`.sampleApplication.model.modelName\` in the values file."
-        exit 1
-    fi
-    # Must be in <org>/<repo> form
-    if [[ "${HF_MODEL_ID}" != */* ]]; then
-        log_error "Error, \`.sampleApplication.model.modelName\` is not in Hugging Face compliant format <org>/<repo>."
-        exit 1
-    fi
     if [[ -z "${HF_TOKEN_SECRET_NAME}" ]]; then
         log_error "Error, no HF token secret name. Please set the \`.sampleApplication.model.auth.hfToken.name\` in the values file."
         exit 1
@@ -284,10 +277,14 @@ create_pvc_and_download_model_if_needed() {
     PVC_AND_MODEL_PATH="${MODEL_ARTIFACT_URI#*://}"
     PVC_NAME="${PVC_AND_MODEL_PATH%%/*}"
     MODEL_PATH="${PVC_AND_MODEL_PATH#*/}"
-    if [[ "${DOWNLOAD_MODEL}" == "true" ]]; then
+    if [[ -n "${DOWNLOAD_MODEL}" ]]; then
       log_info "💾 Provisioning model storage…"
 
-      HF_MODEL_ID=$(cat ${VALUES_PATH} | yq .sampleApplication.model.modelName)
+    if [[ "${DOWNLOAD_MODEL}" != */* ]]; then
+        log_error "Error, --download-model ${DOWNLOAD_MODEL} is not in Hugging Face compliant format <org>/<repo>."
+        exit 1
+    fi
+
       HF_TOKEN_SECRET_NAME=$(cat ${VALUES_PATH} | yq .sampleApplication.model.auth.hfToken.name)
       HF_TOKEN_SECRET_KEY=$(cat ${VALUES_PATH} | yq .sampleApplication.model.auth.hfToken.key)
 
@@ -316,7 +313,7 @@ create_pvc_and_download_model_if_needed() {
       if [[ "${YQ_TYPE}" == "go" ]]; then
         yq eval "
         (.spec.template.spec.containers[0].env[] | select(.name == \"MODEL_PATH\")).value = \"${MODEL_PATH}\" |
-        (.spec.template.spec.containers[0].env[] | select(.name == \"HF_MODEL_ID\")).value = \"${HF_MODEL_ID}\" |
+        (.spec.template.spec.containers[0].env[] | select(.name == \"HF_MODEL_ID\")).value = \"${DOWNLOAD_MODEL}\" |
         (.spec.template.spec.containers[0].env[] | select(.name == \"HF_TOKEN\")).valueFrom.secretKeyRef.name = \"${HF_TOKEN_SECRET_NAME}\" |
         (.spec.template.spec.containers[0].env[] | select(.name == \"HF_TOKEN\")).valueFrom.secretKeyRef.key = \"${HF_TOKEN_SECRET_KEY}\" |
         (.spec.template.spec.volumes[] | select(.name == \"model-cache\")).persistentVolumeClaim.claimName = \"${PVC_NAME}\"
@@ -326,7 +323,7 @@ create_pvc_and_download_model_if_needed() {
         yq -r | \
         jq \
         --arg modelPath "${MODEL_PATH}" \
-        --arg hfModelId "${HF_MODEL_ID}" \
+        --arg hfModelId "${DOWNLOAD_MODEL}" \
         --arg hfTokenSecretName "${HF_TOKEN_SECRET_NAME}" \
         --arg hfTokenSecretKey "${HF_TOKEN_SECRET_KEY}" \
         --arg pvcName "${PVC_NAME}" \
@@ -349,8 +346,8 @@ create_pvc_and_download_model_if_needed() {
         kubectl logs job/download-model -n "${NAMESPACE}";
       }
 
-      log_info "⏳ Waiting up to 3m for model download job to complete; this may take a while depending on connection speed and model size..."
-      kubectl wait --for=condition=complete --timeout=600s job/download-model -n "${NAMESPACE}" || {
+      log_info "⏳ Waiting up to ${DOWNLOAD_TIMEOUT}s for model download job to complete; this may take a while depending on connection speed and model size..."
+      kubectl wait --for=condition=complete --timeout=${DOWNLOAD_TIMEOUT}s job/download-model -n "${NAMESPACE}" || {
         log_error "🙀 Model download job failed or timed out";
         JOB_POD=$(kubectl get pod --selector=job-name=download-model -o json | jq -r '.items[0].metadata.name')
         kubectl logs pod/${JOB_POD} -n "${NAMESPACE}";
@@ -359,7 +356,7 @@ create_pvc_and_download_model_if_needed() {
 
       log_success "✅ Model downloaded"
     else
-      log_info "⏭️ Model download to PVC skipped: \`--skip-download-model\` flag set, assuming PVC ${PVC_NAME} exists and contains model at path: \`${MODEL_PATH}\`."
+      log_info "⏭️ Model download to PVC skipped: \`--download-model\` arg not set, assuming PVC ${PVC_NAME} exists and contains model at path: \`${MODEL_PATH}\`."
     fi
     ;;
   hf)

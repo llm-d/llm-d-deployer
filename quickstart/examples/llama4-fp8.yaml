@@ -1,0 +1,65 @@
+# Tested on AWS 2 x g6e.12xlarge, OCP, and CephFS
+# ./llmd-installer.sh  --values-file examples/llama4-fp8.yaml \
+#  --storage-class ocs-storagecluster-cephfs --storage-size 500Gi \
+#  --download-model RedHatAI/Llama-4-Scout-17B-16E-Instruct-FP8-dynamic \
+# --download-timeout 2400
+
+sampleApplication:
+  baseConfigMapRefName: basic-gpu-with-nixl-and-redis-lookup-preset
+  model:
+    # Use this for HF direct download, and ephemeral storage on your cluster is not a problem
+    # modelArtifactURI: hf://RedHatAI/Llama-4-Scout-17B-16E-Instruct-FP8-dynamic
+
+    # Use this for PVC download if you have a RWX storage class
+    modelArtifactURI: pvc://model-pvc/RedHatAI/Llama-4-Scout-17B-16E-Instruct-FP8-dynamic
+    modelName: "llama4"
+  resources:
+    limits:
+      nvidia.com/gpu: 4
+    requests:
+      cpu: "16"
+      memory: 160Gi
+      nvidia.com/gpu: 4
+  prefill:
+    replicas: 1
+    extraArgs:
+      - "--tensor-parallel-size"
+      - "4"
+      - "--distributed-executor-backend"
+      - "mp"
+      - "--max-model-len"
+      - "20000"
+  decode:
+    replicas: 1
+    extraArgs:
+      - "--tensor-parallel-size"
+      - "4"
+      - "--distributed-executor-backend"
+      - "mp"
+      - "--max-model-len"
+      - "20000"
+redis:
+  enabled: true
+modelservice:
+  epp:
+    defaultEnvVarsOverride:
+      - name: ENABLE_KVCACHE_AWARE_SCORER
+        value: "true"
+      - name: ENABLE_PREFIX_AWARE_SCORER
+        value: "true"
+      - name: ENABLE_LOAD_AWARE_SCORER
+        value: "true"
+      - name: ENABLE_SESSION_AWARE_SCORER
+        value: "true"
+      - name: PD_ENABLED
+        value: "true"
+      - name: PD_PROMPT_LEN_THRESHOLD
+        value: "10"
+      - name: PREFILL_ENABLE_KVCACHE_AWARE_SCORER
+        value: "true"
+      - name: PREFILL_ENABLE_LOAD_AWARE_SCORER
+        value: "true"
+      - name: PREFILL_ENABLE_PREFIX_AWARE_SCORER
+        value: "true"
+      - name: PREFILL_ENABLE_SESSION_AWARE_SCORER
+        value: "true"
