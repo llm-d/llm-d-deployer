@@ -100,7 +100,7 @@ We start with our EPP logs. The logs are rather long here so rather than showng 
 
 > [!NOTE]:Steps 8-14 and 20 are indeed a bug, in that all scorers are disabled and yet it is running the `prefix_aware_scorer`.
 > However the values of the scorer are not honored, the bug is just that the `infrenecing-scheduler` does the irrelevant scoring work even though
-> they do not drive how requests get routed. Fix coming for this soon.
+> they do not drive how requests get routed. [Fix](https://github.com/llm-d/llm-d-inference-scheduler/pull/94) coming for this soon.
 
 ### Decode vllm
 
