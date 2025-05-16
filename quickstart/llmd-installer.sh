@@ -495,6 +495,8 @@ uninstall() {
       kubectl delete pv ${PV_NAME} --ignore-not-found
     fi
   fi
+  log_info "🗑️ Deleting ClusterRoleBinding llm-d"
+  kubectl delete clusterrolebinding -l app.kubernetes.io/instance=llm-d
   log_success "💀 Uninstallation complete"
 }
 

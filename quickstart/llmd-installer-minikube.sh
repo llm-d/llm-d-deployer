@@ -710,7 +710,7 @@ uninstall() {
   helm uninstall llm-d --ignore-not-found --namespace "${NAMESPACE}" || true
 
   log_info "🗑️ Deleting namespace ${NAMESPACE}..."
-  kubectl delete namespace "${NAMESPACE}" || true
+  kubectl delete namespace "${NAMESPACE}" --force --grace-period=0 || true
   log_info "🗑️ Deleting monitoring namespace..."
   kubectl delete namespace "${MONITORING_NAMESPACE}" --ignore-not-found || true
 
@@ -729,6 +729,8 @@ uninstall() {
     log_info "⏭️ skipping deletion of PV and PVCS..."
   fi
 
+  log_info "🗑️ Deleting ClusterRoleBinding llm-d"
+  kubectl delete clusterrolebinding -l app.kubernetes.io/instance=llm-d
   kubectl delete pvc redis-pvc -n "${NAMESPACE}" --ignore-not-found
   kubectl delete pv redis-hostpath-pv --ignore-not-found
   log_success "💀 Uninstallation complete"
