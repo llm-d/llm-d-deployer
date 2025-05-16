@@ -3,6 +3,10 @@ sampleApplication:
   model:
     modelArtifactURI: hf://meta-llama/Llama-3.2-3B-Instruct
     modelName: "meta-llama/Llama-3.2-3B-Instruct"
+  prefill:
+    replicas: 0
+  decode:
+    replicas: 1
 redis:
   enabled: false
 modelservice:
