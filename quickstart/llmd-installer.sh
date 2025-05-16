@@ -25,6 +25,13 @@ DISABLE_METRICS=false
 MONITORING_NAMESPACE="llm-d-monitoring"
 DOWNLOAD_MODEL=true
 
+# Minikube-specific flags & globals
+USE_MINIKUBE=false
+HOSTPATH_DIR=${HOSTPATH_DIR:="/mnt/data/llm-d-model-storage"}
+MODEL_PV_NAME="model-hostpath-pv"
+REDIS_PV_NAME="redis-hostpath-pv"
+REDIS_PVC_NAME="redis-data-redis-master"
+
 ### HELP & LOGGING ###
 print_help() {
   cat <<EOF
@@ -41,6 +48,7 @@ Options:
   -i, --skip-infra                 Skip the infrastructure components of the installation
   -m, --disable-metrics-collection Disable metrics collection (Prometheus will not be installed)
   -s, --skip-download-model        Skip downloading the model to PVC if modelArtifactURI is pvc based
+  -k, --minikube                   Deploy on an existing minikube instance with hostPath storage
   -h, --help                       Show this help and exit
 EOF
 }
@@ -105,6 +113,7 @@ parse_args() {
       -i|--skip-infra)              SKIP_INFRA=true; shift;;
       -m|--disable-metrics-collection) DISABLE_METRICS=true; shift;;
       -s|--skip-download-model)     DOWNLOAD_MODEL=false; shift ;;
+      -k|--minikube)                USE_MINIKUBE=true; shift ;;
       -h|--help)                    print_help; exit 0 ;;
       *)                            die "Unknown option: $1" ;;
     esac
@@ -195,6 +204,42 @@ validate_hf_token() {
   fi
 }
 
+setup_minikube_storage() {
+  log_info "📦 Setting up Minikube hostPath RWX Shared Storage..."
+  log_info "🔄 Creating PV and PVC for llama model (PVC name: ${PVC_NAME})…"
+  kubectl apply -f - <<EOF
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ${MODEL_PV_NAME}
+spec:
+  storageClassName: manual
+  capacity:
+    storage: ${STORAGE_SIZE}
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: ${HOSTPATH_DIR}
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ${PVC_NAME}
+  namespace: ${NAMESPACE}
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: ${STORAGE_SIZE}
+  volumeName: ${MODEL_PV_NAME}
+EOF
+  log_success "✅ llama model PV and PVC (${PVC_NAME}) created."
+}
+
 create_pvc_and_download_model_if_needed() {
   YQ_TYPE=$(yq --version 2>/dev/null | grep -q 'version' && echo 'go' || echo 'py')
   MODEL_ARTIFACT_URI=$(cat ${VALUES_PATH} | yq .sampleApplication.model.modelArtifactURI)
@@ -250,15 +295,22 @@ create_pvc_and_download_model_if_needed() {
 
       verify_env
 
-      log_info "Identify if storage class exists..."
-      if ! kubectl get storageclass "${STORAGE_CLASS}" &>/dev/null; then
-        log_error "Storage class \`${STORAGE_CLASS}\` not found. Please create it before attempting to pull the model."
-        exit 1
+      # If using Minikube, provision hostPath PV/PVC instead of default storage
+      if [[ "${USE_MINIKUBE}" == "true" ]]; then
+        log_info "⚙️ Minikube mode: setting up hostPath storage"
+        setup_minikube_storage
+      else
+        # verify storage class exists
+        log_info "🔍 Checking storage class \"${STORAGE_CLASS}\"..."
+        if ! kubectl get storageclass "${STORAGE_CLASS}" &>/dev/null; then
+          log_error "Storage class \`${STORAGE_CLASS}\` not found. Please create it or pass --storage-class with a valid class."
+          exit 1
+        fi
+        # apply the storage manifest
+        eval "echo \"$(cat ${REPO_ROOT}/helpers/k8s/model-storage-rwx-pvc-template.yaml)\"" \
+          | kubectl apply -n "${NAMESPACE}" -f -
+        log_success "✅ PVC \`${PVC_NAME}\` created with storageClassName ${STORAGE_CLASS} and size ${STORAGE_SIZE}"
       fi
-
-      eval "echo \"$(cat ${REPO_ROOT}/helpers/k8s/model-storage-rwx-pvc-template.yaml)\"" \
-        | kubectl apply -n "${NAMESPACE}" -f -
-      log_success "✅ PVC \`${PVC_NAME}\` created with storageClassName ${STORAGE_CLASS} and size ${STORAGE_SIZE}"
 
       log_info "🚀 Launching model download job..."
       if [[ "${YQ_TYPE}" == "go" ]]; then
@@ -484,15 +536,14 @@ uninstall() {
     kubectl delete crd servicemonitors.monitoring.coreos.com --ignore-not-found || true
   fi
 
-  if [[ "${PROTOCOL}" == "pvc" ]]; then
-    # enforce PV cleanup - PVC should go with namespace
-    if [[ -n ${PV_NAME} ]]; then
-      log_info "🗑️ Deleting Model PV..."
-      kubectl delete pv ${PV_NAME} --ignore-not-found
-    fi
+  if [[ "${USE_MINIKUBE}" == "true" ]]; then
+    log_info "🗑️ Deleting Minikube hostPath PV (${MODEL_PV_NAME})..."
+    kubectl delete pv "${MODEL_PV_NAME}" --ignore-not-found || true
   fi
+
   log_info "🗑️ Deleting ClusterRoleBinding llm-d"
   kubectl delete clusterrolebinding -l app.kubernetes.io/instance=llm-d
+
   log_success "💀 Uninstallation complete"
 }
 

@@ -93,14 +93,17 @@ minikube start \
     --memory no-limit
 ```
 
+If you want to skip straight to deploying, simply run:
+
 ```bash
-./llmd-installer-minikube.sh --provision-minikube
+export HF_TOKEN="your-token"
+./llmd-installer.sh --minikube
 ```
 
 ## llm-d Installation
 
 The llm-d-deployer contains all the helm charts necessary to deploy llm-d. To facilitate the installation of the
-helm charts, the `llmd-installer-minikube.sh` script is provided. This script will populate the necessary
+helm charts, the `llmd-installer.sh` script is provided. This script will populate the necessary
 manifests in the `manifests` directory. After this, it will apply all the manifests in order to bring up the cluster.
 
 Before proceeding with the installation, ensure you have installed the required dependencies
@@ -122,11 +125,11 @@ any code or configuration changes.
 
 ```bash
 export HF_TOKEN="your-token"
-./llmd-installer-minikube.sh
+./llmd-installer.sh --minikube
 # make some awesome change
-./llmd-installer-minikube.sh --uninstall
+./llmd-installer.sh --uninstall
 # redeploy
-./llmd-installer-minikube.sh
+./llmd-installer.sh --minikube
 ```
 
 ### Run on a Single GPU
@@ -136,7 +139,8 @@ load the example values file that is tuned to fit on the 24GB GPU memory availab
 configuration file can be customized to be however you like.
 
 ```bash
-./llmd-installer-minikube.sh --values-file examples/gpt2-e2e-tiny-minikube.yaml
+export HF_TOKEN="your-token"
+./llmd-installer.sh --minikube --values-file examples/gpt2-e2e-tiny-minikube.yaml
 ```
 
 ### Customize your deployment
@@ -148,7 +152,8 @@ chart with all the correct overrides. These examples, also show you how you can 
 prefill and decode pods.
 
 ```bash
-./llmd-installer-minikube.sh --values-file examples/<YOUR_CUSTOM_CONFIGURATION>.yaml
+export HF_TOKEN="your-token"
+./llmd-installer.sh --minikube --values-file examples/<YOUR_CUSTOM_CONFIGURATION>.yaml
 ```
 
 ### Validation
