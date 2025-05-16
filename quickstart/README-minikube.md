@@ -267,7 +267,7 @@ chart with all the correct overrides. These examples, also show you how you can 
 prefill and decode pods.
 
 ```bash
-./llmd-installer-minikube.sh --values-file models/gpt2-e2e-tiny-minikube.yaml
+./llmd-installer-minikube.sh --values-file examples/gpt2-e2e-tiny-minikube.yaml
 ```
 
 ### Metrics Collection
