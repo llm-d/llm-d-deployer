@@ -1,0 +1,40 @@
+sampleApplication:
+  baseConfigMapRefName: basic-gpu-preset
+  model:
+    modelArtifactURI: hf://meta-llama/Llama-3.2-3B-Instruct
+    modelName: "meta-llama/Llama-3.2-3B-Instruct"
+  prefill:
+    replicas: 0
+  decode:
+    replicas: 2
+redis:
+  enabled: false
+modelservice:
+  epp:
+    defaultEnvVarsOverride:
+      - name: ENABLE_PREFIX_AWARE_SCORER
+        value: "false"
+      - name: ENABLE_LOAD_AWARE_SCORER
+        value: "true"
+      - name: LOAD_AWARE_SCORER_WEIGHT
+        value: "2"
+      - name: ENABLE_SESSION_AWARE_SCORER
+        value: "true"
+      - name: SESSION_AWARE_SCORER_WEIGHT
+        value: "3"
+      # # KVCache aware scorer disabled by default
+      # - name: ENABLE_KVCACHE_AWARE_SCORER
+      #   value: "false"
+      # # P/D Configurations that are already disabled by default
+      # - name: PD_ENABLED
+      #   value: "false"
+      # - name: PD_PROMPT_LEN_THRESHOLD
+      #   value: "10"
+      # - name: PREFILL_ENABLE_KVCACHE_AWARE_SCORER
+      #   value: "false"
+      # - name: PREFILL_ENABLE_LOAD_AWARE_SCORER
+      #   value: "false"
+      # - name: PREFILL_ENABLE_PREFIX_AWARE_SCORER
+      #   value: "false"
+      # - name: PREFILL_ENABLE_SESSION_AWARE_SCORER
+      #   value: "false"
