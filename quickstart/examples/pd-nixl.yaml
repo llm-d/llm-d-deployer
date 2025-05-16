@@ -15,16 +15,16 @@ modelservice:
       - name: ENABLE_LOAD_AWARE_SCORER
         value: "true"
       - name: ENABLE_SESSION_AWARE_SCORER
-        value: "true"
+        value: "false"
       - name: PD_ENABLED
         value: "true"
       - name: PD_PROMPT_LEN_THRESHOLD
         value: "10"
       - name: PREFILL_ENABLE_KVCACHE_AWARE_SCORER
-        value: "true"
+        value: "false"
       - name: PREFILL_ENABLE_LOAD_AWARE_SCORER
         value: "true"
       - name: PREFILL_ENABLE_PREFIX_AWARE_SCORER
         value: "true"
       - name: PREFILL_ENABLE_SESSION_AWARE_SCORER
-        value: "true"
+        value: "false"
