@@ -203,7 +203,7 @@ curl -X POST http://10.109.40.169/v1/completions \
   }'
 ```
 
-You can also run the included validation script `test-requests.sh`.
+You can also run the included validation script `test-requests.sh --minikube`.
 
 ```bash
 # Default options
