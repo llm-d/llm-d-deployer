@@ -2,7 +2,7 @@
 
 Getting Started with llm-d on Kubernetes.
 
-For more information on llm-d, see the llm-d git repository [here](https://github.com/llm-d/llm-d) and website [here](https://llmd.io).
+For more information on llm-d, see the llm-d git repository [here](https://github.com/llm-d/llm-d) and website [here](https://llm-d.ai).
 
 ## Overview
 
