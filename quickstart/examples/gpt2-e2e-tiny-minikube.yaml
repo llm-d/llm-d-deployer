@@ -1,5 +1,6 @@
 # Validated to run with minikube on a single Nvidia L4 with 32G of RAM. EC2 type: g6.2xlarge
 sampleApplication:
+  baseConfigMapRefName: basic-gpu-preset
   enabled: true
   model:
     modelArtifactURI: pvc://model-pvc/models/openai-community/gpt2

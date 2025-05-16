@@ -11,7 +11,6 @@ $ helm get all {{ .Release.Name }}
 
 Following presets are available to your users:
 
-
 {{ $nameWidth := 65 }}
 {{ $descriptionWidth := 95 }}
 {{ include "tableRowPrinter" ( dict "nameWidth" $nameWidth "descriptionWidth" $descriptionWidth "name" "Name" "description" "Description" ) }}
@@ -20,8 +19,6 @@ Following presets are available to your users:
 {{ include "tableRowPrinter" ( dict "nameWidth" $nameWidth "descriptionWidth" $descriptionWidth "name" "basic-gpu-with-nixl-preset" "description" "GPU inference with NIXL P/D KV transfer and cache offloading" ) }}
 {{ include "tableRowPrinter" ( dict "nameWidth" $nameWidth "descriptionWidth" $descriptionWidth "name" "basic-gpu-with-nixl-and-redis-lookup-preset" "description" "GPU inference with NIXL P/D KV transfer, cache offloading and Redis lookup server" ) }}
 {{ include "tableRowPrinter" ( dict "nameWidth" $nameWidth "descriptionWidth" $descriptionWidth "name" "basic-sim-preset" "description" "Basic simulation" ) }}
-
-
 
 {{ if not .Values.sampleApplication.enabled -}}
 To provision a `ModelService`, create a new CR:

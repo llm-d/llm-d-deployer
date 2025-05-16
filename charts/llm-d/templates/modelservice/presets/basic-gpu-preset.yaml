@@ -76,7 +76,7 @@ data:
               env:
                 - name: HOME
                   value: /home
-                {{ if .Values.modelservice.vllm.logLevel }}
+                {{- if .Values.modelservice.vllm.logLevel }}
                 - name: VLLM_LOGGING_LEVEL
                   value: {{ .Values.modelservice.vllm.logLevel }}
                 {{- end }}
