@@ -13,15 +13,11 @@ modelservice:
   epp:
     defaultEnvVarsOverride:
       - name: ENABLE_PREFIX_AWARE_SCORER
-        value: "false"
+        value: "true"
       - name: ENABLE_LOAD_AWARE_SCORER
         value: "true"
-      - name: LOAD_AWARE_SCORER_WEIGHT
-        value: "2"
       - name: ENABLE_SESSION_AWARE_SCORER
-        value: "true"
-      - name: SESSION_AWARE_SCORER_WEIGHT
-        value: "3"
+        value: "false"
       # # KVCache aware scorer disabled by default
       # - name: ENABLE_KVCACHE_AWARE_SCORER
       #   value: "false"
