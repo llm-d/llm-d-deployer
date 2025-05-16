@@ -5,10 +5,7 @@ set -euo pipefail
 
 ### GLOBALS ###
 NAMESPACE="llm-d"
-PROVISION_MINIKUBE=false
-PROVISION_MINIKUBE_GPU=false
 STORAGE_SIZE="15Gi"
-DELETE_MINIKUBE=false
 ACTION="install"
 HF_TOKEN_CLI=""
 AUTH_FILE_CLI=""
@@ -39,8 +36,6 @@ Usage: $(basename "$0") [OPTIONS]
 Options:
   -t, --hf-token TOKEN               Hugging Face token (or set HF_TOKEN env var)
   -a, --auth-file PATH               Path to containers auth.json
-  -g, --provision-minikube           Provision a local Minikube cluster with GPU support
-  -x, --delete-minikube              Delete the minikube cluster and exit
   -z, --storage-size SIZE            Size of storage volume (default: 15Gi)
   -n, --namespace NAME               K8s namespace (default: llm-d)
   -f, --values-file PATH             Path to Helm values.yaml file (default: values.yaml)
@@ -131,9 +126,6 @@ parse_args() {
     case "$1" in
       -t|--hf-token)                   HF_TOKEN_CLI="$2"; shift 2 ;;
       -a|--auth-file)                  AUTH_FILE_CLI="$2"; shift 2 ;;
-      -p|--provision-minikube)         PROVISION_MINIKUBE=true; shift ;;
-      -g|--provision-minikube-gpu)     PROVISION_MINIKUBE_GPU=true; shift ;;
-      -x|--delete-minikube)            DELETE_MINIKUBE=true; shift ;;
       -z|--storage-size)               STORAGE_SIZE="$2"; shift 2 ;;
       -n|--namespace)                  NAMESPACE="$2"; shift 2 ;;
       -f|--values-file)                VALUES_FILE="$2"; shift 2 ;;
@@ -270,23 +262,6 @@ validate_hf_token() {
     [[ -n "$HF_TOKEN" ]] || die "HF_TOKEN not set."
     log_success "✅ HF_TOKEN validated"
   fi
-}
-
-### MINIKUBE HANDLERS ###
-provision_minikube() {
-  log_info "🌱 Provisioning Minikube cluster..."
-  minikube start
-  log_success "🚀 Minikube started."
-}
-
-provision_minikube_gpu() {
-  log_info "🌱 Provisioning Minikube GPU cluster…"
-  minikube start \
-    --driver docker \
-    --container-runtime docker \
-    --gpus all \
-    --memory no-limit
-  log_success "🚀 Minikube GPU cluster started."
 }
 
 install_prometheus_grafana() {
@@ -762,40 +737,13 @@ uninstall() {
 main() {
   parse_args "$@"
 
-  # If only deleting Minikube, do that and exit immediately
-  if [[ "$DELETE_MINIKUBE" == true ]]; then
-    check_cmd minikube
-    delete_minikube
-    exit 0
-  fi
-
   setup_env
   check_dependencies
-
-  # only check kubectl if not provisioning Minikube
-  if [[ "$PROVISION_MINIKUBE" != "true" && "$PROVISION_MINIKUBE_GPU" != "true" ]]; then
-    check_cluster_reachability
-  fi
 
   locate_auth_file
   validate_hf_token
 
   if [[ "$ACTION" == "install" ]]; then
-    if [[ "$PROVISION_MINIKUBE_GPU" == "true" ]]; then
-      provision_minikube_gpu
-      if [[ "${DISABLE_METRICS}" == "false" ]]; then
-        install_prometheus_grafana
-      else
-        log_info "ℹ️ Metrics collection disabled by user request"
-      fi
-    elif [[ "$PROVISION_MINIKUBE" == "true" ]]; then
-      provision_minikube
-      if [[ "${DISABLE_METRICS}" == "false" ]]; then
-        install_prometheus_grafana
-      else
-        log_info "ℹ️ Metrics collection disabled by user request"
-      fi
-    fi
     if [[ "${DISABLE_METRICS}" == "false" ]]; then
       install_prometheus_grafana
     else

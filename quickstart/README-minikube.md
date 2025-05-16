@@ -17,7 +17,7 @@ Following prerequisite are required for the installer to work.
 - [Kustomize – official install docs](https://kubectl.docs.kubernetes.io/installation/kustomize/)
 - [kubectl – install & setup](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
-You can use the installer script that installs all the required dependencies.
+You can use the installer script that installs all the required dependencies. This does not install CUDA components.
 
 ```bash
 ./install-deps.sh
@@ -68,9 +68,11 @@ If you planned to deploy local minikube cluster, these dependencies need to be i
 
 For GPU support, see the Minikube documentation as there are a couple of commands that may need to be run [Using NVIDIA GPUs with minikube](https://minikube.sigs.k8s.io/docs/tutorials/nvidia/).
 
-This can be run on a minimum ec2 node type [g6e.12xlarge](https://aws.amazon.com/ec2/instance-types/g6e/) (4xL40S 48GB but only 2 are used by default) to infer the model meta-llama/Llama-3.2-3B-Instruct that will get spun up.
-
-> ⚠️ If your cluster has no available GPUs, the **prefill** and **decode** pods will remain in **Pending** state.
+- This can be run on a minimum ec2 node type [g6e.12xlarge](https://aws.amazon.com/ec2/instance-types/g6e/) (4xL40S 48GB but only 2 are used by default) to
+infer the model `meta-llama/Llama-3.2-3B-Instruct` that will get spun up.
+- You can also be run on a small [g6e.2xlarge](https://aws.amazon.com/ec2/instance-types/g6e/) with 1xL4 with a small model where both the prefill and
+decode pods share the single GPU. This is useful for a quick deployment to familiarize yourself with the project or
+for development/CI purposes.
 
 Verify you have properly installed the container toolkit with the runtime of your choice.
 
@@ -81,7 +83,15 @@ podman run --rm --security-opt=label=disable --device=nvidia.com/gpu=all ubuntu 
 sudo docker run --rm --runtime=nvidia --gpus all ubuntu nvidia-smi
 ```
 
-To Provision a Minikube cluster run the `llmd-installer-minikube.sh` script.
+## Start your Minikube Cluster
+
+```bash
+minikube start \
+    --driver docker \
+    --container-runtime docker \
+    --gpus all \
+    --memory no-limit
+```
 
 ```bash
 ./llmd-installer-minikube.sh --provision-minikube
@@ -89,7 +99,9 @@ To Provision a Minikube cluster run the `llmd-installer-minikube.sh` script.
 
 ## llm-d Installation
 
-The llm-d-deployer contains all the helm charts necessary to deploy llm-d. To facilitate the installation of the helm charts, the `llmd-installer-minikube.sh` script is provided. This script will populate the necessary manifests in the `manifests` directory. After this, it will apply all the manifests in order to bring up the cluster.
+The llm-d-deployer contains all the helm charts necessary to deploy llm-d. To facilitate the installation of the
+helm charts, the `llmd-installer-minikube.sh` script is provided. This script will populate the necessary
+manifests in the `manifests` directory. After this, it will apply all the manifests in order to bring up the cluster.
 
 Before proceeding with the installation, ensure you have installed the required dependencies
 
@@ -97,78 +109,46 @@ Before proceeding with the installation, ensure you have installed the required 
 
 The installer needs to be run from the `llm-d-deployer/quickstart` directory.
 
-```bash
-./llmd-installer-minikube.sh [OPTIONS]
-```
-
-### Flags
-
-| Flag                           | Description                                                                                             | Example                                                   |
-|--------------------------------|---------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
-| `--hf-token TOKEN`             | HuggingFace API token (or set `HF_TOKEN` env var)                                                       | `./llmd-installer-minikube.sh --hf-token "abc123"`                        |
-| `--auth-file PATH`             | Path to your registry auth file ig not in one of the two listed files in the auth section of the readme | `./llmd-installer-minikube.sh --auth-file ~/.config/containers/auth.json` |
-| `--storage-size SIZE`          | Size of storage volume (default: 7Gi)                                                                   | `./llmd-installer-minikube.sh --storage-size 15Gi`                        |
-| `--skip-download-model`        | Skip downloading the model to PVC if modelArtifactURI is pvc based                                      | `./llmd-installer.sh --skip-download-model`                      |
-| `--storage-class CLASS`        | Storage class to use (default: standard)                                                                | `./llmd-installer-minikube.sh --storage-class standard`                  |
-| `--namespace NAME`             | Kubernetes namespace to use (default: `llm-d`)                                                          | `./llmd-installer-minikube.sh --namespace foo`                            |
-| `--values NAME`                | Absolute path to a Helm values.yaml file (default: llm-d-deployer/charts/llm-d/values.yaml)             | `./llmd-installer-minikube.sh --values /path/to/values.yaml`              |
-| `--uninstall`                  | Uninstall llm-d and cleanup resources                                                                   | `./llmd-installer-minikube.sh --uninstall`                                |
-| `--disable-metrics-collection` | Disable metrics collection (Prometheus will not be installed)                                       | `./llmd-installer-minikube.sh --disable-metrics-collection`               |
-| `-h`, `--help`                 | Show help and exit                                                                                      | `./llmd-installer-minikube.sh --help`                                     |
-
 ## Examples
 
 For additional information regarding Minikube support with GPUs see [Using NVIDIA GPUs with minikube](https://minikube.sigs.k8s.io/docs/tutorials/nvidia/).
 
-### Provision Minikube cluster with GPU support and install llm-d
+### Deploy llm-d on Minikube
 
 A hugging-face token is required either exported in your environment or passed via the `--hf-token` flag.
-You will need to run `--provision-minikube` at least once to provision the minikube container. After that,
-a common workflow might be to make some change to your code, run `--uninstall` to reset the minikube cluster to default
-and then run the installer again without the `--provision-minikube` flag.
-
-```bash
-export HF_TOKEN="your-token"
-./llmd-installer-minikube.sh --provision-minikube
-```
-
-### Install on an existing llm-d minikube cluster
-
-- If you have already installed a minikube cluster and don't want to reinstall the cluster, simply rerun the installer
-with no flags. Note: you should run `llmd-installer-minikube.sh --uninstall` prior to reinstalling to reset the cluster
-to avoid any conflicts with existing deployments.
+You will need to have a running minikube instance. After that, a common workflow might be to make some change
+to your code, run `--uninstall` to reset the minikube cluster to default and then run the installer again to test
+any code or configuration changes.
 
 ```bash
 export HF_TOKEN="your-token"
 ./llmd-installer-minikube.sh
+# make some awesome change
+./llmd-installer-minikube.sh --uninstall
+# redeploy
+./llmd-installer-minikube.sh
 ```
 
-### Manual minikube operations
+### Run on a Single GPU
 
-If you prefer to start the minikube cluster manually simply run:
+If you want to run on a single GPU such as [g6e.2xlarge](https://aws.amazon.com/ec2/instance-types/g6e/) with a 1xL4,
+load the example values file that is tuned to fit on the 24GB GPU memory available. The models and vLLM flags in the
+configuration file can be customized to be however you like.
 
 ```bash
-minikube start --driver docker --container-runtime docker --gpus all
+./llmd-installer-minikube.sh --values-file examples/gpt2-e2e-tiny-minikube.yaml
 ```
 
-## Model Service
+### Customize your deployment
 
-### Customizing the ModelService
+To make swapping in your own model even easier, we include a ready-to-use values files in[`quickstart/models/`](examples).
 
-The ModelService looks like:
-
-```yaml
-kind: ModelService
-metadata:
-spec:
-```
-
-### Creating a New Model Service
-
-To create a new model service, you can edit the ModelService custom resource for your needs. Examples have been included.
+Simply run the installer with the path to the included values file (or your own custom one) deploy the llm-d
+chart with all the correct overrides. These examples, also show you how you can pass custom arguments to vLLM
+prefill and decode pods.
 
 ```bash
-kubectl apply -f modelservice.yaml
+./llmd-installer-minikube.sh --values-file examples/<YOUR_CUSTOM_CONFIGURATION>.yaml
 ```
 
 ### Validation
@@ -223,52 +203,20 @@ curl -X POST http://10.109.40.169/v1/completions \
   }'
 ```
 
-### Bring Your Own Model
-
-There is a default sample application that by loads [`meta-llama/Llama-3.2-3B-Instruct`](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct)
-based on the sample application [values.yaml](../charts/llm-d/values.yaml) file. If you want to swap that model out with
-another [vllm compatible model](https://docs.vllm.ai/en/latest/models/supported_models.html). Simply modify the
-values file with the model you wish to run.
-
-Here is an example snippet of the default model values being replaced with
-[`meta-llama/Llama-3.2-1B-Instruct`](https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct).
-
-```yaml
-  model:
-    # -- Fully qualified pvc URI: pvc://<pvc-name>/<model-path>
-    modelArtifactURI: pvc://llama-3.2-1b-instruct-pvc/models/meta-llama/Llama-3.2-1B-Instruct
-
-    # # -- Fully qualified hf URI: pvc://<pvc-name>/<model-path>
-    # modelArtifactURI: hf://meta-llama/Llama-3.2-3B-Instruct
-
-    # -- Name of the model
-    modelName: "Llama-3.2-1B-Instruct"
-
-    # -- Aliases to the Model named vllm will serve with
-    servedModelNames: []
-
-    auth:
-      # -- HF token auth config via k8s secret.
-      hfToken:
-        # -- If the secret should be created or one already exists
-        create: true
-        # -- Name of the secret to create to store your huggingface token
-        name: llm-d-hf-token
-        # -- Value of the token. Do not set this but use `envsubst` in conjunction with the helm chart
-        key: HF_TOKEN
-```
-
-### Deploy with a Preconfigured Values File
-
-To make swapping in your own model even easier, we include a ready-to-use values files in[`quickstart/models/`](models/).
-
-Simply run the installer with the path to the included values file (or your own custom one) deploy the llm-d
-chart with all the correct overrides. These examples, also show you how you can pass custom arguments to vLLM
-prefill and decode pods.
+You can also run the included validation script `test-requests.sh`.
 
 ```bash
-./llmd-installer-minikube.sh --values-file examples/gpt2-e2e-tiny-minikube.yaml
+# Default options
+./test-request.sh --minikube
+
+# Non-default namespace/model
+./test-request.sh -n <NAMESPACE> -m <FULL_MODEL_NAME> --minikube
 ```
+
+### Bring Your Own Model
+
+If you want to swap that model out with another [vllm compatible model](https://docs.vllm.ai/en/latest/models/supported_models.html), simply modify the values file in
+the [quickstart/examples](./examples) directory with the model you wish to run.
 
 ### Metrics Collection
 
@@ -320,20 +268,9 @@ and logs of the prefill and decode pods is a good place to start.
 
 ### Uninstall
 
-This will remove llm-d resources from the cluster. This is useful, especially for test/dev if you want to
-make a change, simply uninstall and then run the installer again with any changes you make.
-
-```bash
-./llmd-installer-minikube.sh --uninstall
-```
-
 To remove the minikube cluster this simply wraps the minikube command for convenience.
 
-```bash
-./llmd-installer.sh --delete-minikube
-```
-
-To manually delete the running cluster run:
+To delete the Minikube cluster, simply run:
 
 ```bash
 minikube delete
