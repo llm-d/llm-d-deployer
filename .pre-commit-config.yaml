@@ -22,6 +22,7 @@ repos:
           - --helm-docs-compatibility-mode
           - --skip-auto-generation=required
           - --no-dependencies
+          - -o=values.schema.tmpl.json
   - repo: https://github.com/woodruffw/zizmor-pre-commit
     rev: v1.6.0
     hooks:
@@ -34,7 +35,7 @@ repos:
       - id: check-json
       - id: detect-private-key
       - id: end-of-file-fixer
-        exclude: ^.vale/
+        exclude: (^.vale/)|(values.schema.json$)
       - id: mixed-line-ending
       - id: trailing-whitespace
   - repo: https://github.com/errata-ai/vale
@@ -47,7 +48,7 @@ repos:
     rev: v1.32.0
     hooks:
       - id: typos
-        exclude: (^.vale/)|(charts/llm-d/crds/modelservice-crd.yaml)
+        exclude: (^.vale/)|(charts/llm-d/crds/modelservice-crd.yaml$)|(values.schema.json$)
   - repo: https://github.com/gruntwork-io/pre-commit
     rev: v0.1.29
     hooks:
@@ -57,3 +58,12 @@ repos:
     hooks:
       - id: markdownlint-cli2
         exclude: (charts/llm-d/README.md)|(^.vale/)
+  - repo: local
+    hooks:
+      - id: jsonschema-dereference
+        name: jsonschema-dereference
+        entry: python .pre-commit/jsonschema-dereference.py
+        additional_dependencies: [jsonref]
+        language: python
+        files: values\.(schema(\.tmpl)?\.json|yaml)$
+        types_or: [yaml, json]
