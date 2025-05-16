@@ -53,7 +53,7 @@ data:
               args:
                 - "--port=8000"
                 - "--vllm-port=8001"
-                - "--connector=nixl"
+                - "--connector=nixlv2"
               ports:
                 - containerPort: 8000
                   protocol: TCP
