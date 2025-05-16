@@ -8,7 +8,6 @@ NAMESPACE="llm-d"
 STORAGE_SIZE="7Gi"
 STORAGE_CLASS="efs-sc"
 ACTION="install"
-HF_TOKEN_CLI=""
 AUTH_FILE_CLI=""
 PULL_SECRET_NAME="llm-d-pull-secret"
 SCRIPT_DIR=""
@@ -32,7 +31,6 @@ print_help() {
 Usage: $(basename "$0") [OPTIONS]
 
 Options:
-  -t, --hf-token TOKEN             Hugging Face token (or set HF_TOKEN env var)
   -a, --auth-file PATH             Path to containers auth.json
   -z, --storage-size SIZE          Size of storage volume
   -c, --storage-class CLASS        Storage class to use (default: efs-sc)
@@ -97,7 +95,6 @@ fetch_kgateway_proxy_uid() {
 parse_args() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      -t|--hf-token)                HF_TOKEN_CLI="$2"; shift 2 ;;
       -a|--auth-file)               AUTH_FILE_CLI="$2"; shift 2 ;;
       -z|--storage-size)            STORAGE_SIZE="$2"; shift 2 ;;
       -c|--storage-class)           STORAGE_CLASS="$2"; shift 2 ;;
@@ -192,9 +189,8 @@ locate_auth_file() {
 
 validate_hf_token() {
   if [[ "$ACTION" == "install" ]]; then
-    log_info "🤖 Validating Hugging Face token..."
-    HF_TOKEN="${HF_TOKEN_CLI:-${HF_TOKEN:-}}"
-    [[ -n "$HF_TOKEN" ]] || die "HF_TOKEN not set."
+    # HF_TOKEN from the env
+    [[ -n "${HF_TOKEN:-}" ]] || die "HF_TOKEN not set."
     log_success "✅ HF_TOKEN validated"
   fi
 }
