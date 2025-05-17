@@ -2,9 +2,10 @@
 # `llm-d-deployer`
 
 This repository includes examples, Helm charts, and release assets for `llm-d`:
+
 - Quickstarts for experimenting with `llm-d` features:
   - [Try with minikube](quickstart/README-minikube.md)
-  - [Try on Kuberentes](quickstart/README.md)
+  - [Try on Kubernetes](quickstart/README.md)
 - Helm charts for deploying `llm-d`
   - See [charts/llm-d/README.md](charts/llm-d/README.md)
 - Release assets for running `llm-d`
