@@ -25,4 +25,7 @@ spec:
           kind: InferencePool
           name: "{{ include "sampleApplication.sanitizedModelName" . }}-inference-pool"
           port: {{ .Values.sampleApplication.inferencePoolPort }}
+      timeouts:
+        backendRequest: "0s"
+        request: "0s"
 {{- end }}
