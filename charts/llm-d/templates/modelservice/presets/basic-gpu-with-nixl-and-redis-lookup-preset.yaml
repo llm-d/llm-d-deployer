@@ -388,6 +388,10 @@ data:
               securityContext:
                 {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.epp.containerSecurityContext "context" $) | nindent 16 }}
               {{- end }}
+              resources:
+                requests:
+                  cpu: 256m
+                  memory: 500Mi
               livenessProbe:
                 failureThreshold: 3
                 grpc:
