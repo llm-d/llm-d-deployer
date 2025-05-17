@@ -100,6 +100,14 @@ export HF_TOKEN="your-token"
 ./llmd-installer.sh --minikube
 ```
 
+Minikube instances can be stopped and started. If you reboot the node the cluster is on, minikube will be in a
+stopped state after reboot.
+
+```bash
+minikube stop
+minikube start
+```
+
 ## llm-d Installation
 
 The llm-d-deployer contains all the helm charts necessary to deploy llm-d. To facilitate the installation of the
@@ -120,15 +128,16 @@ For additional information regarding Minikube support with GPUs see [Using NVIDI
 
 A hugging-face token is required either exported in your environment or passed via the `--hf-token` flag.
 You will need to have a running minikube instance. After that, a common workflow might be to make some change
-to your code, run `--uninstall` to reset the minikube cluster to default and then run the installer again to test
+to your code, run `llmd-installer.sh --minikube --uninstall` to reset the minikube cluster to default and then run the installer again to test
 any code or configuration changes.
 
 ```bash
 export HF_TOKEN="your-token"
+# deploy
 ./llmd-installer.sh --minikube
 # make some awesome change
-./llmd-installer.sh --uninstall
-# redeploy
+./llmd-installer.sh --minikube --uninstall
+# re-deploy
 ./llmd-installer.sh --minikube
 ```
 
@@ -271,9 +280,7 @@ When running in Minikube:
 The various images can take some time to download depending on your connectivity. Watching events
 and logs of the prefill and decode pods is a good place to start.
 
-### Uninstall
-
-To remove the minikube cluster this simply wraps the minikube command for convenience.
+### Delete the Minikube Cluster
 
 To delete the Minikube cluster, simply run:
 

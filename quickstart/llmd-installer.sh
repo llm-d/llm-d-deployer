@@ -212,6 +212,7 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: ${MODEL_PV_NAME}
+  finalizers: []
 spec:
   storageClassName: manual
   capacity:

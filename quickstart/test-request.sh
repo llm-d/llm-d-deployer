@@ -186,4 +186,4 @@ else
   validation
 fi
 
-echo "✅ All tests complete."
+echo "All tests complete."
