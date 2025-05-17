@@ -492,7 +492,8 @@ uninstall() {
     fi
   fi
   log_info "🗑️ Deleting ClusterRoleBinding llm-d"
-  kubectl delete clusterrolebinding -l app.kubernetes.io/instance=llm-d
+  kubectl delete clusterrolebinding -l app.kubernetes.io/instance=llm-d --ignore-not-found >/dev/null 2>&1
+  helm uninstall llm-d -n "${NAMESPACE}" 2>/dev/null || true
   log_success "💀 Uninstallation complete"
 }
 
