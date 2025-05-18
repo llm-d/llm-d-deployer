@@ -3,9 +3,7 @@
 This preset is for when you want to provision the infrastructure around modelservice but not actually create a `modelservice` custom resource.
 This can be particularly helpful because of how helm works - it wants to make sure that it owns and deploys all resources in its chart via labels.
 The result of this, is that if you create a sample app through the helm charts, and you want to modify or delete your `modelservice` custom resource,
-you have to uninstall the whole stack, tweak an sample values override file, or modify the
-[base values](https://github.com/llm-d/llm-d-deployer/blob/main/charts/llm-d/values.yaml) file (this is not recommended unless you know what you are doing)
-before re-installing through quickstart.
+you have to uninstall the whole stack, tweak an example values override file before re-installing through quickstart.
 
 This preset enables you to have more control over that. You can apply the "No Sample App" preset, use `helm template` to template manifests based on
 a different preset, extract the resourcess that make up the diff ([see below](./README.md#making-up-the-difference)), and then apply them by hand.
@@ -16,7 +14,7 @@ It should be noted that you can only make **some** modifications because
 [the baseConfigMap](https://github.com/llm-d/llm-d-deployer/tree/dc90005ef2fc87f1e6dbac282dfc038187efde12/charts/llm-d/templates/modelservice/presets)
 presets for `modelservice` are immutable, any desired changes there will require uninstalling and reinstalling via the quickstart install script.
 
-## Deploying
+## Deploying Infrastructure
 
 Assuming one is starting from the quickstart directory, a sample deploy might look like:
 
@@ -48,12 +46,12 @@ llm-d-modelservice-7844f89454-lcs2r        1/1     Running   0          58m
 llm-d-redis-master-8599696799-2wpv5        1/1     Running   0          58m
 ```
 
-## What This Deployment Lacks
+## Deploying the `ModelService`
 
-To see all resource templates that get created based on a "Sample App" which we will intentionally miss out on using this example, you can
+To see all resource templates that get created based on a "Sample App" which we will intentionally create manually in this example, you can
 [look here](https://github.com/llm-d/llm-d-deployer/tree/main/charts/llm-d/templates/sample-application).
 
-These templates will map into the following manifests that you will be missing based on this `no-sample-app` vs another sample app scenario:
+These templates will map into the following manifests that we will create later based on this `no-sample-app` vs another sample app scenario:
 
 1. A `modelservice` custom resource.
     - This is the biggest component of a "Sample App" and will create many other children resources, such as prefill, decode, and `endpoint-picker` deployments, services, serviceAccounts, RBAC, an `inferencepool`, an `inferencemodel`, etc.
