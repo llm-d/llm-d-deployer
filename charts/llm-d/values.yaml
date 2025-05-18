@@ -287,26 +287,6 @@ ingress:
   # -- used as part of the host dirivation if not specified from OCP cluster domain (dont edit)
   clusterRouterBase: ""
 
-# -- Route configuration
-# @default -- See below
-route:
-  # -- Deploy Openshift Route
-  enabled: false
-
-  # @schema
-  # additionalProperties: true
-  # @schema
-  # -- Additional annotations for the Route resource
-  annotations:
-    # Haproxy router timeout. DO NOT CHANGE. When testing large requests openshift routes drop them after 30 seconds by default - this ensures we can benchmark through route
-    haproxy.router.openshift.io/timeout: "1800s"
-
-  # -- Hostname to be used to expose the NodePort service to the inferencing gateway
-  host: ""
-
-  # -- Path to be used to expose the full route to access the inferencing gateway
-  path: "/"
-
 # -- Model service controller configuration
 # @default -- See below
 modelservice:

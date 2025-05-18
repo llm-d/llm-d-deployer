@@ -1,4 +1,4 @@
-{{- if and .Values.gateway.enabled .Values.ingress.enabled (eq .Values.route.enabled false) (eq .Values.gateway.serviceType "NodePort") }}
+{{- if and .Values.gateway.enabled .Values.ingress.enabled (eq .Values.gateway.serviceType "NodePort") }}
 {{- $gatewayFullname := include "gateway.fullname" . }}
 {{- $host := include "sampleApplication.ingressHost" . }}
 apiVersion: networking.k8s.io/v1
