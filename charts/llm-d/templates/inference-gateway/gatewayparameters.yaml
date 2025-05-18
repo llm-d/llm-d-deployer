@@ -28,6 +28,12 @@ spec:
         {{- end}}
         seccompProfile:
           type: RuntimeDefault
+      bootstrap:
+        componentLogLevels:
+          upstream: debug
+          http: debug
+          connection: debug
+        logLevel: info
     service:
       type: {{ .Values.gateway.serviceType | default "NodePort" | quote }}
       extraLabels:
