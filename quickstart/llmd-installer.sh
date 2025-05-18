@@ -463,6 +463,30 @@ install() {
     fi
   fi
 
+  if [[ "${USE_MINIKUBE}" == "true" ]]; then
+    if [[ "${DISABLE_METRICS}" == "false" ]]; then
+      log_info "🌱 Minikube detected; provisioning Prometheus/Grafana…"
+      install_prometheus_grafana
+    else
+      log_info "ℹ️ Metrics collection disabled by user request"
+    fi
+  fi
+
+METRICS_ARGS=()
+if [[ "${DISABLE_METRICS}" == "true" ]]; then
+  log_info "ℹ️ Metrics collection disabled by user request"
+  METRICS_ARGS=(
+    --set modelservice.metrics.enabled=false
+    --set modelservice.epp.metrics.enabled=false
+    --set modelservice.vllm.metrics.enabled=false
+  )
+else
+  log_info "ℹ️ Metrics collection enabled"
+  METRICS_ARGS=(
+    --set modelservice.metrics.enabled="${metrics_enabled}"
+  )
+fi
+
   log_info "🚚 Deploying llm-d chart with ${VALUES_PATH}..."
   helm upgrade -i llm-d . \
     ${DEBUG} \
@@ -471,7 +495,7 @@ install() {
     --set global.imagePullSecrets[0]="${PULL_SECRET_NAME}" \
     --set gateway.kGatewayParameters.proxyUID="${PROXY_UID}" \
     --set ingress.clusterRouterBase="${BASE_OCP_DOMAIN}" \
-    --set modelservice.metrics.enabled="${metrics_enabled}"
+    "${METRICS_ARGS[@]}"
   log_success "✅ llm-d deployed"
 
   log_info "🔄 Patching all ServiceAccounts with pull-secret..."

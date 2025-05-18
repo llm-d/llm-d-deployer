@@ -90,7 +90,8 @@ minikube start \
     --driver docker \
     --container-runtime docker \
     --gpus all \
-    --memory no-limit
+    --memory no-limit \
+    --cpus no-limit
 ```
 
 If you want to skip straight to deploying, simply run:
