@@ -1,0 +1,29 @@
+# benchmark-client-interactive-pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: benchmark-interactive
+  labels:
+    app: benchmark-interactive # Labels for organization
+spec:
+  containers:
+  - name: benchmark-runner
+    image: "quay.io/tms/pd-disagg-benchmark:0.0.6"
+    imagePullPolicy: Always
+    securityContext:
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+      capabilities:
+        drop:
+        - ALL
+      seccompProfile:
+        type: "RuntimeDefault"
+    env:
+      - name: HF_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: llm-d-hf-token
+            key: HF_TOKEN
+      - name: HF_HUB_CACHE
+        value: /tmp
+  restartPolicy: Never
