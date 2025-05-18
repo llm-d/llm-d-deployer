@@ -74,22 +74,23 @@ the base values file, and then passing the "no features" preset as an override v
 cd ../../../charts/llm-d/
 
 # set your namespace in your no-sample-app infra was already deployed
-NAMESPACE={$NAMESPACE:="llm-d"}
+: "${NAMESPACE:=llm-d}"
 
-helm template llm-d ./ -n ${NAMESPACE} --values values.yaml --values ../../quickstart/examples/no-features/no-features.yaml > ./tmp.yaml
+TEMP=$(mktemp)
+
+helm template llm-d ./ -n ${NAMESPACE} --values ../../quickstart/examples/no-features/no-features.yaml > $TEMP
 ```
 
 For those unfamiliar with `helm` or `helm template`, this above command will tell helm to spit out what manifests a `helm upgrade -i` or `helm install`
 would plan to create based on the merge of the two values files. It will treat the second values file with higher priority in this merge, and overwrite anything
 that appears in both with the value of the 2nd values file (in this case, our `no-features` preset we are trying to re-create).
 
-As mentioned above, that `tmp.yaml` file should include all the manifests from the `no-features` example, but if you remember we already applied our `no-sample-app` preset, so many of these manifests will already exist in our cluster.
+As mentioned above, that `$TEMP` file should include all the manifests from the `no-features` example, but if you remember we already applied our `no-sample-app` preset, so many of these manifests will already exist in our cluster.
 
 We want to grab just the `modelservice` CR, the `httpRoute`, and `clusterRoleBindigng` for EPP metrics. You can do this by hand, but based on the `no-features` preset were re-creating, you can automate it with the following (this yq):
 
 ```bash
-# Ran from the `charts/llm-d` directory after the helm template documented above above
-yq eval-all '
+yq -i eval-all '
   select(
     (.kind == "ModelService")
     or (.kind == "HTTPRoute")
@@ -97,7 +98,9 @@ yq eval-all '
   )
   | del(.metadata.labels["helm.sh/chart"])
   | del(.metadata.labels["app.kubernetes.io/managed-by"])
-' tmp.yaml > ../../quickstart/examples/no-sample-app/sample-app-template-manifests.yaml
+' $TEMP
+
+kubectl apply -f $TEMP
 ```
 
 > [!NOTE]
@@ -107,11 +110,7 @@ yq eval-all '
 > This command depends on the `mikefarah` version of `yq` v4 or greater
 
 In addition to grabbing those resources, the above script will filter out the helm labels that would otherwise get templated into the manifests,
-allowing us to create and manage these resources by hand. Finally lets apply the file and watch our `no-feature` comparative "Sample App" gets created:
-
-```bash
-kubectl create -f ../../quickstart/examples/no-sample-app/sample-app-template-manifests.yaml
-```
+allowing us to create and manage these resources by hand.
 
 Now our pods should reflect that of the `no-feature` example with our new `epp` and single `decode` pods:
 
