@@ -19,3 +19,6 @@ ct-previous-revision*
 *.tmp
 *.orig
 *~
+
+# Quickstart example specific files
+quickstart/examples/no-sample-app/sample-app-template-manifests.yaml
