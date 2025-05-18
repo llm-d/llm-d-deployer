@@ -1524,6 +1524,48 @@
       "description": "Bitnami/Redis chart configuration",
       "required": []
     },
+    "route": {
+      "additionalProperties": false,
+      "default": "See below",
+      "description": "Route configuration",
+      "properties": {
+        "annotations": {
+          "additionalProperties": true,
+          "description": "Additional annotations for the Route resource",
+          "properties": {
+            "haproxy.router.openshift.io/timeout": {
+              "default": "1800s",
+              "description": "Haproxy router timeout. DO NOT CHANGE. When testing large requests openshift routes drop them after 30 seconds by default - this ensures we can benchmark through route",
+              "required": [],
+              "title": "haproxy.router.openshift.io/timeout",
+              "type": "string"
+            }
+          },
+          "required": [],
+          "title": "annotations"
+        },
+        "enabled": {
+          "default": "false",
+          "description": "Deploy Openshift Route",
+          "required": [],
+          "title": "enabled"
+        },
+        "host": {
+          "default": "",
+          "description": "Hostname to be used to expose the NodePort service to the inferencing gateway",
+          "required": [],
+          "title": "host"
+        },
+        "path": {
+          "default": "/",
+          "description": "Path to be used to expose the full route to access the inferencing gateway",
+          "required": [],
+          "title": "path"
+        }
+      },
+      "required": [],
+      "title": "route"
+    },
     "sampleApplication": {
       "additionalProperties": false,
       "default": "See below",

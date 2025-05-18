@@ -1,4 +1,4 @@
-{{- if and .Values.gateway.enabled .Values.ingress.enabled (eq .Values.gateway.serviceType "NodePort") }}
+{{- if and .Values.gateway.enabled .Values.ingress.enabled (eq .Values.route.enabled false) (eq .Values.gateway.serviceType "NodePort") }}
 {{- $gatewayFullname := include "gateway.fullname" . }}
 {{- $host := include "sampleApplication.ingressHost" . }}
 apiVersion: networking.k8s.io/v1
@@ -18,7 +18,6 @@ metadata:
     {{- if .Values.ingress.annotations }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.ingress.annotations "context" $) | nindent 4 }}
     {{- end }}
-    haproxy.router.openshift.io/timeout: "600s"
 spec:
   {{- if $.Values.ingress.ingressClassName }}
   ingressClassName: {{ $.Values.ingress.ingressClassName }}

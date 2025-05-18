@@ -282,6 +282,11 @@ Kubernetes: `>= 1.30.0-0`
 | modelservice.vllm.metrics.enabled | Enable metrics scraping from prefill & decode services | bool | `true` |
 | nameOverride | String to partially override common.names.fullname | string | `""` |
 | redis | Bitnami/Redis chart configuration | object | Use sane defaults for minimal Redis deployment |
+| route | Route configuration | object | See below |
+| route.annotations | Additional annotations for the Route resource | object | `{"haproxy.router.openshift.io/timeout":"1800s"}` |
+| route.enabled | Deploy Openshift Route | bool | `false` |
+| route.host | Hostname to be used to expose the NodePort service to the inferencing gateway | string | `""` |
+| route.path | Path to be used to expose the full route to access the inferencing gateway | string | `"/"` |
 | sampleApplication | Sample application deploying a p-d pair of specific model | object | See below |
 | sampleApplication.baseConfigMapRefName | Name of the base configMapRef to use <br /> For the available presets see: `templates/modelservice/presets/` | string | `"basic-gpu-with-nixl-and-redis-lookup-preset"` |
 | sampleApplication.decode.extraArgs | args to add to the decode deployment | list | `[]` |
