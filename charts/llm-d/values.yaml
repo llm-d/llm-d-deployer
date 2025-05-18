@@ -440,10 +440,10 @@ modelservice:
       registry: ghcr.io
 
       # -- Endpoint picker image repository
-      repository: llm-d/llm-d-inference-scheduler-dev
+      repository: llm-d/llm-d-inference-scheduler
 
       # -- Endpoint picker image tag
-      tag: 0.0.5
+      tag: 0.0.4
 
     # -- Specify a imagePullPolicy
       imagePullPolicy: "Always"
