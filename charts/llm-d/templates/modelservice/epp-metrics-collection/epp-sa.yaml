@@ -1,4 +1,4 @@
-{{- if and .Values.sampleApplication.enabled .Values.modelservice.epp.metrics.enabled }}
+{{- if and .Values.sampleApplication.enabled .Values.modelservice.enabled .Values.modelservice.epp.metrics.enabled }}
 ---
 apiVersion: v1
 kind: ServiceAccount

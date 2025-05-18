@@ -9,6 +9,7 @@ $ helm status {{ .Release.Name }}
 $ helm get all {{ .Release.Name }}
 ```
 
+{{ if .Values.modelservice.enabled }}
 Following presets are available to your users:
 
 {{ $nameWidth := 65 }}
@@ -20,7 +21,7 @@ Following presets are available to your users:
 {{ include "tableRowPrinter" ( dict "nameWidth" $nameWidth "descriptionWidth" $descriptionWidth "name" "basic-gpu-with-nixl-and-redis-lookup-preset" "description" "GPU inference with NIXL P/D KV transfer, cache offloading and Redis lookup server" ) }}
 {{ include "tableRowPrinter" ( dict "nameWidth" $nameWidth "descriptionWidth" $descriptionWidth "name" "basic-sim-preset" "description" "Basic simulation" ) }}
 
-{{ if not .Values.sampleApplication.enabled -}}
+{{ if not .Values.sampleApplication.enabled  -}}
 To provision a `ModelService`, create a new CR:
 
 ```yaml
@@ -51,4 +52,5 @@ spec:
       - "--model"
       - <model_name>
 ```
+{{- end }}
 {{- end }}
