@@ -187,10 +187,10 @@ locate_auth_file() {
     echo "Please authenticate with either:"
     echo
     echo "# Docker"
-    echo "docker --config ~/.config/containers/ login quay.io"
+    echo "docker --config ~/.config/containers/ login ghcr.io"
     echo
     echo "# Podman"
-    echo "podman login quay.io  --authfile ~/.config/containers/auth.json"
+    echo "podman login ghcr.io  --authfile ~/.config/containers/auth.json"
     exit 1
   fi
   log_success "✅ Auth file: ${AUTH_FILE}"
@@ -199,7 +199,7 @@ locate_auth_file() {
 validate_hf_token() {
   if [[ "$ACTION" == "install" ]]; then
     # HF_TOKEN from the env
-    [[ -n "${HF_TOKEN:-}" ]] || die "HF_TOKEN not set."
+    [[ -n "${HF_TOKEN:-}" ]] || die "HF_TOKEN not set. Run: export HF_TOKEN=<your_token>"
     log_success "✅ HF_TOKEN validated"
   fi
 }

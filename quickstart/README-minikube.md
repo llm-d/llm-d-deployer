@@ -181,9 +181,8 @@ retries, and metrics. All calls to `/v1/models` and `/v1/completions` flow throu
 # 1) Grab the Minikube VM IP and the NodePort that the gateway is listening on
 MINIKUBE_IP=$(minikube ip)
 NODEPORT=$(kubectl get svc llm-d-inference-gateway -n llm-d -o jsonpath='{.spec.ports[0].nodePort}')
-
+MODEL_ID=<INSERT_MODEL_NAME e.g. meta-llama/Llama-3.2-3B-Instruct, openai-community/gpt2, etc>
 # 2) Curl the same completion endpoint on that high-numbered port:
-MODEL_ID=meta-llama/Llama-3.2-3B-Instruct
 curl -X POST http://$MINIKUBE_IP:$NODEPORT/v1/completions \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
@@ -226,6 +225,7 @@ You can also run the included validation script `test-requests.sh --minikube`.
 
 # Non-default namespace/model
 ./test-request.sh -n <NAMESPACE> -m <FULL_MODEL_NAME> --minikube
+# example: ./test-request.sh --minikube -m openai-community/gpt2 -n some-namespace
 ```
 
 ### Bring Your Own Model
@@ -279,7 +279,31 @@ When running in Minikube:
 ### Troubleshooting
 
 The various images can take some time to download depending on your connectivity. Watching events
-and logs of the prefill and decode pods is a good place to start.
+and logs of the pods, decode and prefill (if running prefill) is a good place to start to get an indication of
+any issues.
+
+```bash
+# View the status of the pods in the default llm-d namespace. Replace "llm-d" if you used a custom namespace on install
+kubectl get pods -n llm-d
+
+# Describe all prefill pods:
+kubectl describe pods -l llm-d.ai/role=prefill -n llm-d
+
+# Fetch logs from each prefill pod:
+kubectl logs -l llm-d.ai/role=prefill --all-containers=true -n llm-d --tail=200
+
+# Describe all decode pods:
+kubectl describe pods -l llm-d.ai/role=decode -n llm-d
+
+# Fetch logs from each decode pod:
+kubectl logs -l llm-d.ai/role=decode --all-containers=true -n llm-d --tail=200
+
+# Describe all endpoint-picker pods:
+kubectl describe pod -n llm-d -l llm-d.ai/epp
+
+# Fetch logs from each endpoint-picker pod:
+kubectl logs -n llm-d -l llm-d.ai/epp --all-containers=true --tail=200
+```
 
 ### Delete the Minikube Cluster
 
