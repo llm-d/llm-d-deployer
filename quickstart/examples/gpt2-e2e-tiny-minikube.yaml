@@ -3,7 +3,7 @@ sampleApplication:
   baseConfigMapRefName: basic-gpu-preset
   enabled: true
   model:
-    modelArtifactURI: pvc://model-pvc/models/openai-community/gpt2
+    modelArtifactURI: hf://openai-community/gpt2
     modelName: "openai-community/gpt2"
     servedModelNames: []
     auth:

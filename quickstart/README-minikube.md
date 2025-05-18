@@ -146,11 +146,12 @@ export HF_TOKEN="your-token"
 
 If you want to run on a single GPU such as [g6e.2xlarge](https://aws.amazon.com/ec2/instance-types/g6e/) with a 1xL4,
 load the example values file that is tuned to fit on the 24GB GPU memory available. The models and vLLM flags in the
-configuration file can be customized to be however you like.
+configuration files can be customized to be however you like. The following loads the base configuration with
+[Qwen/Qwen3-0.6B](https://huggingface.co/Qwen/Qwen3-0.6B).
 
 ```bash
 export HF_TOKEN="your-token"
-./llmd-installer.sh --minikube --values-file examples/gpt2-e2e-tiny-minikube.yaml
+./llmd-installer.sh --minikube --values-file examples/base/base-slim.yaml
 ```
 
 ### Customize your deployment

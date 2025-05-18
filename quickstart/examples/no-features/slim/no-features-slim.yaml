@@ -1,0 +1,36 @@
+# Validated to run with minikube on a single Nvidia L4 with 32G of RAM. EC2 type: g6.2xlarge
+sampleApplication:
+  baseConfigMapRefName: basic-gpu-preset
+  enabled: true
+  model:
+    modelArtifactURI: hf://Qwen/Qwen3-0.6B
+    modelName: "Qwen/Qwen3-0.6B"
+  prefill:
+    replicas: 0
+  decode:
+    replicas: 1
+redis:
+  enabled: false
+modelservice:
+  epp:
+    defaultEnvVarsOverride:
+      - name: ENABLE_KVCACHE_AWARE_SCORER
+        value: "false"
+      - name: ENABLE_PREFIX_AWARE_SCORER
+        value: "false"
+      - name: ENABLE_LOAD_AWARE_SCORER
+        value: "false"
+      - name: ENABLE_SESSION_AWARE_SCORER
+        value: "false"
+      - name: PD_ENABLED
+        value: "false"
+      - name: PD_PROMPT_LEN_THRESHOLD
+        value: "10"
+      - name: PREFILL_ENABLE_KVCACHE_AWARE_SCORER
+        value: "false"
+      - name: PREFILL_ENABLE_LOAD_AWARE_SCORER
+        value: "false"
+      - name: PREFILL_ENABLE_PREFIX_AWARE_SCORER
+        value: "false"
+      - name: PREFILL_ENABLE_SESSION_AWARE_SCORER
+        value: "false"
