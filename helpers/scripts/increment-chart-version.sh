@@ -24,9 +24,10 @@ EOF
 BUMP_TYPE="$1"
 
 if [[ -z "${BUMP_TYPE}" ]]; then
+  echo -e "Error: no \$bump_type passed as \$1.\n"
   usage
 elif [[ "${BUMP_TYPE}" != "major" ]] && [[ "${BUMP_TYPE}" != "minor" ]] && [[ "${BUMP_TYPE}" != "patch" ]]; then
-  echo "Error: \$bump_type ${BUMP_TYPE} not recognized.\n\n"
+  echo -e "Error: \$bump_type \"${BUMP_TYPE}\" not recognized.\n"
   usage
 fi
 
