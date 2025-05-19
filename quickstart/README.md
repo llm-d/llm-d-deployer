@@ -76,6 +76,12 @@ podman login ghcr.io --authfile ~/.config/containers/auth.json
 
 ### Target Platforms
 
+Since the llm-d-deployer is based on helm cahrts, llm-d can be deployed on a variety of Kubernets platforms. As more platforms are supported, the installer will be updated to support them.
+
+Documentation for example cluster setups are provided in the [infra](./infra) directory.
+
+- [OpenShift on AWS](./infra/openshift-aws.md)
+
 #### Minikube
 
 This can be run on a minimum ec2 node type [g6e.12xlarge](https://aws.amazon.com/ec2/instance-types/g6e/) (4xL40S 48GB but only 2 are used by default) to infer the model meta-llama/Llama-3.2-3B-Instruct that will get spun up.
