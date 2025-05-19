@@ -443,7 +443,7 @@ modelservice:
       repository: llm-d/llm-d-inference-scheduler
 
       # -- Endpoint picker image tag
-      tag: 0.0.4
+      tag: 0.0.3
 
     # -- Specify a imagePullPolicy
       imagePullPolicy: "Always"

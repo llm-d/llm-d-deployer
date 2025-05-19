@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart
 
-![Version: 1.0.13](https://img.shields.io/badge/Version-1.0.13-informational?style=flat-square)
+![Version: 1.0.14](https://img.shields.io/badge/Version-1.0.14-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 llm-d is a Kubernetes-native high-performance distributed LLM inference framework
@@ -194,7 +194,7 @@ Kubernetes: `>= 1.30.0-0`
 | modelservice.epp.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
 | modelservice.epp.image.registry | Endpoint picker image registry | string | `"ghcr.io"` |
 | modelservice.epp.image.repository | Endpoint picker image repository | string | `"llm-d/llm-d-inference-scheduler"` |
-| modelservice.epp.image.tag | Endpoint picker image tag | string | `"0.0.4"` |
+| modelservice.epp.image.tag | Endpoint picker image tag | string | `"0.0.3"` |
 | modelservice.epp.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true,"serviceMonitor":{"annotations":{},"interval":"10s","labels":{},"namespaceSelector":{"any":false,"matchNames":[]},"path":"/metrics","port":"metrics","selector":{"matchLabels":{}}}}` |
 | modelservice.epp.metrics.enabled | Enable metrics scraping from endpoint picker service | bool | `true` |
 | modelservice.epp.metrics.serviceMonitor | Prometheus ServiceMonitor configuration <br /> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md | object | See below |

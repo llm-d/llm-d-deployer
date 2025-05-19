@@ -4025,7 +4025,7 @@
                                     "title": "repository"
                                 },
                                 "tag": {
-                                    "default": "0.0.4",
+                                    "default": "0.0.3",
                                     "description": "Endpoint picker image tag",
                                     "required": [],
                                     "title": "tag"
