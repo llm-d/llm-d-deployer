@@ -106,6 +106,8 @@ sudo docker run --rm --runtime=nvidia --gpus all ubuntu nvidia-smi
 
 ## llm-d Installation
 
+Only a single installation of llm-d on a cluster is currently supported.  In the future, multiple model services will be supported.  Until then, [uninstall llm-d](#uninstall) before reinstalling.
+
 The llm-d-deployer contains all the helm charts necessary to deploy llm-d. To facilitate the installation of the helm charts, the `llmd-installer.sh` script is provided. This script will populate the necessary manifests in the `manifests` directory.
 After this, it will apply all the manifests in order to bring up the cluster.
 
