@@ -10,6 +10,20 @@ This guide will walk you through the steps to install and deploy llm-d on a Kube
 
 ## Client Configuration
 
+### Get the code
+
+Clone the llm-d-deployer repository.
+
+```bash
+git clone https://github.com/llm-d/llm-d-deployer.git
+```
+
+Navigate to the quickstart directory
+
+```bash
+cd llm-d-deployer/quickstart
+```
+
 ### Required tools
 
 Following prerequisite are required for the installer to work.
@@ -79,9 +93,10 @@ sudo docker run --rm --runtime=nvidia --gpus all ubuntu nvidia-smi
 
 #### OpenShift
 
-- OpenShift - This quickstart was tested on OpenShift 4.18. Older versions may work but have not been tested.
+- OpenShift - This quickstart was tested on OpenShift 4.17. Older versions may work but have not been tested.
 - NVIDIA GPU Operator and NFD Operator - The installation instructions can be found [here](https://docs.nvidia.com/datacenter/cloud-native/openshift/latest/steps-overview.html).
 - NO Service Mesh or Istio installation as Istio CRDs will conflict with the gateway
+- Cluster administrator privileges are required to install the llm-d cluster scoped resources
 
 ## llm-d Installation
 
@@ -99,11 +114,11 @@ The llmd-installer.sh script aims to simplify the installation of llm-d using th
 
 It also supports uninstalling the llm-d infrastructure and the sample app.
 
-Before proceeding with the installation, ensure you have completed the prerequisites and are able to issue kubectl commands to your cluster by configuring your `~/.kube/config` file or by using the `oc login` command.
+Before proceeding with the installation, ensure you have completed the prerequisites and are able to issue `kubectl` or `oc` commands to your cluster by configuring your `~/.kube/config` file or by using the `oc login` command.
 
 ### Usage
 
-The installer needs to be run from the `llm-d-deployer/quickstart` directory.
+The installer needs to be run from the `llm-d-deployer/quickstart` directory as a cluster admin with CLI access to the cluster.
 
 ```bash
 ./llmd-installer.sh [OPTIONS]
@@ -136,7 +151,7 @@ export HF_TOKEN="your-token"
 
 ### Install on OpenShift
 
-Before running the installer, ensure you have logged into the cluster.  For example:
+Before running the installer, ensure you have logged into the cluster as a cluster administrator.  For example:
 
 ```bash
 oc login --token=sha256~yourtoken --server=https://api.yourcluster.com:6443
@@ -155,26 +170,6 @@ gatewayClassName, and sits in front of your inference pods to handle path-based 
 and metrics. This example validates that the gateway itself is routing your completion requests correctly.
 You can execute the [`test-request.sh`](test-request.sh) script to test on the cluster.
 
-In addition, if you're using an OpenShift Cluster or have created an ingress, you can test the endpoint from an external location.
-
-```bash
-INGRESS_ADDRESS=$(kubectl get ingress -n "$NAMESPACE" | tail -n1 | awk '{print $3}')
-
-curl -sS -X GET "http://${INGRESS_ADDRESS}/v1/models" \
-    -H 'accept: application/json' \
-    -H 'Content-Type: application/json'
-
-MODEL_ID=meta-llama/Llama-3.2-3B-Instruct
-
-curl -sS -X POST "http://${INGRESS_ADDRESS}/v1/completions" \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "model":"'"$MODEL_ID"'",
-    "prompt": "You are a helpful AI assistant. Please introduce yourself in one sentence.",
-  }'
-```
-
 > If you receive an error indicating PodSecurity "restricted" violations when running the smoke-test script, you
 > need to remove the restrictive PodSecurity labels from the namespace. Once these labels are removed, re-run the
 > script and it should proceed without PodSecurity errors.
@@ -188,39 +183,70 @@ kubectl label namespace <NAMESPACE> \
   pod-security.kubernetes.io/audit-version-
 ```
 
-### Bring Your Own Model
+### Customizing your deployment
 
-There is a default sample application that by loads [`meta-llama/Llama-3.2-3B-Instruct`](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct)
-based on the sample application [values.yaml](../charts/llm-d/values.yaml) file. If you want to swap that model out with
-another [vllm compatible model](https://docs.vllm.ai/en/latest/models/supported_models.html). Simply modify the
-values file with the model you wish to run.
+The helm charts can be customized by modifying the [values.yaml](../charts/llm-d/values.yaml) file.  However, it is recommended to override values in the `values.yaml` by creating a custom yaml file and passing it to the installer using the `--values-file` flag.
+Several examples are provided in the [examples](./examples) directory.  You would invoke the installer with the following command:
 
-Here is an example snippet of the default model values being replaced with
-[`meta-llama/Llama-3.2-1B-Instruct`](https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct).
+```bash
+./llmd-installer.sh --values-file ./examples/base.yaml
+```
+
+These files are designed to be used as a starting point to customize your deployment.  Refer to the [values.yaml](../charts/llm-d/values.yaml) file for all the possible options.
+
+#### Sample Application and Model Configuration
+
+Some of the more common options for changing the sample application model are:
+
+- `sampleApplication.model.modelArtifactURI` - The URI of the model to use.  This is the path to the model either to Hugging Face (`hf://meta-llama/Llama-3.2-3B-Instruct`) or a persistent volume claim (PVC) (`pvc://model-pvc/meta-llama/Llama-3.2-1B-Instruct`).  Using a PVC can be paired with the `--download-model` flag to download the model to PVC.
+- `sampleApplication.model.modelName` - The name of the model to use.  This will be used in the naming of deployed resources and also the model ID when using the API.
+- `sampleApplication.baseConfigMapRefName` - The name of the preset base configuration to use.  This will depend on the features you want to enable.
+- `sampleApplication.prefill.replicas` - The number of prefill replicas to deploy.
+- `sampleApplication.decode.replicas` - The number of decode replicas to deploy.
 
 ```yaml
+sampleApplication:
   model:
-    # -- Fully qualified pvc URI: pvc://<pvc-name>/<model-path>
-    modelArtifactURI: pvc://llama-3.2-1b-instruct-pvc/models/meta-llama/Llama-3.2-1B-Instruct
+    modelArtifactURI: hf://meta-llama/Llama-3.2-1B-Instruct
+    modelName: "llama3-1B"
+  baseConfigMapRefName: basic-gpu-with-nixl-and-redis-lookup-preset
+  prefill:
+    replicas: 1
+  decode:
+    replicas: 1
+```
 
-    # # -- Fully qualified hf URI: pvc://<pvc-name>/<model-path>
-    # modelArtifactURI: hf://meta-llama/Llama-3.2-3B-Instruct
+#### Feature Flags
 
-    # -- Name of the model
-    modelName: "Llama-3.2-1B-Instruct"
+`redis.enabled` - Whether to enable Redis needed to enable the KV Cache Aware Scorer
+`modelservice.epp.defaultEnvVarsOverride` - The environment variables to override for the model service.  For each feature flag, you can set the value to `true` or `false` to enable or disable the feature.
 
-    # -- Aliases to the Model named vllm will serve with
-    servedModelNames: []
-
-    auth:
-      # -- HF token auth config via k8s secret. Required if using hf:// URI or not using pvc:// URI with `--skip-download-model` in quickstart
-      hfToken:
-        # -- If the secret should be created or one already exists
-        create: true
-        # -- Name of the secret to create to store your huggingface token
-        name: llm-d-hf-token
-        # -- Value of the token. Do not set this but use `envsubst` in conjunction with the helm chart
-        key: HF_TOKEN
+```yaml
+redis:
+  enabled: true
+modelservice:
+  epp:
+    defaultEnvVarsOverride:
+      - name: ENABLE_KVCACHE_AWARE_SCORER
+        value: "false"
+      - name: ENABLE_PREFIX_AWARE_SCORER
+        value: "true"
+      - name: ENABLE_LOAD_AWARE_SCORER
+        value: "true"
+      - name: ENABLE_SESSION_AWARE_SCORER
+        value: "false"
+      - name: PD_ENABLED
+        value: "false"
+      - name: PD_PROMPT_LEN_THRESHOLD
+        value: "10"
+      - name: PREFILL_ENABLE_KVCACHE_AWARE_SCORER
+        value: "false"
+      - name: PREFILL_ENABLE_LOAD_AWARE_SCORER
+        value: "false"
+      - name: PREFILL_ENABLE_PREFIX_AWARE_SCORER
+        value: "false"
+      - name: PREFILL_ENABLE_SESSION_AWARE_SCORER
+        value: "false"
 ```
 
 ### Metrics Collection
