@@ -1,6 +1,6 @@
 # llm-d Quick Start
 
-Getting Started with llm-d on Kubernetes.
+Getting Started with llm-d on Kubernetes.  For specific instructions on how to install llm-d on minikube, see the [README-minikube.md](README-minikube.md) instructions.
 
 For more information on llm-d, see the llm-d git repository [here](https://github.com/llm-d/llm-d) and website [here](https://llm-d.ai).
 
@@ -76,7 +76,7 @@ podman login ghcr.io --authfile ~/.config/containers/auth.json
 
 ### Target Platforms
 
-#### Kubernetes
+#### Minikube
 
 This can be run on a minimum ec2 node type [g6e.12xlarge](https://aws.amazon.com/ec2/instance-types/g6e/) (4xL40S 48GB but only 2 are used by default) to infer the model meta-llama/Llama-3.2-3B-Instruct that will get spun up.
 

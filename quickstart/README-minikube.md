@@ -1,8 +1,8 @@
-# llm-d Quick Start
+# llm-d Quick Start - Minikube
 
-Getting Started with llm-d on Kubernetes.
+Getting Started with llm-d on minikube.
 
-This guide will walk you through the steps to install and deploy llm-d on a Kubernetes cluster, using an opinionated flow in order to get up and running as quickly as possible.
+This guide will walk you through the steps to install and deploy llm-d on a minikube cluster, using an opinionated flow in order to get up and running as quickly as possible.
 
 ## Client Configuration
 
