@@ -244,67 +244,44 @@ modelservice:
 ### Metrics Collection
 
 llm-d includes built-in support for metrics collection using Prometheus and Grafana. This feature is enabled by default but can be disabled using the
-`--disable-metrics-collection` flag during installation. In OpenShift, llm-d applies ServiceMonitors for llm-d components that trigger Prometheus
-scrape targets for the built-in user workload monitoring Prometheus stack.
+`--disable-metrics-collection` flag during installation. llm-d applies ServiceMonitors for vLLM and inference-gateway services to trigger Prometheus
+scrape targets. In OpenShift, the built-in user workload monitoring Prometheus stack can be utilized. In Kubernetes, Prometheus and Grafana are installed from the
+prometheus-community [kube-prometheus-stack helm charts](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack).
+The [llm-d metrics overview](./metrics-overview.md) lists the metrics scraped with a default llm-d install.
 
 #### Accessing the Metrics UIs
 
-If running in OpenShift, skip to [Option 3: OpenShift](#option-3-openshift).
+If running on OpenShift, skip to [OpenShift and Grafana](#openshift-and-grafana).
 
-##### Option 1: Port Forwarding (Default)
+#### Port Forwarding
 
-Once installed, you can access the metrics UIs through port-forwarding:
-
-- Prometheus UI (port 9090):
+- Prometheus (port 9090):
 
 ```bash
 kubectl port-forward -n llm-d-monitoring --address 0.0.0.0 svc/prometheus-kube-prometheus-prometheus 9090:9090
 ```
 
-- Grafana UI (port 3000):
+- Grafana (port 3000):
 
 ```bash
 kubectl port-forward -n llm-d-monitoring --address 0.0.0.0 svc/prometheus-grafana 3000:80
 ```
 
-Access the UIs at:
+Access the User Interfaces at:
 
 - Prometheus: <http://YOUR_IP:9090>
 - Grafana: <http://YOUR_IP:3000> (default credentials: admin/admin)
 
-##### Option 2: Ingress (Optional)
+#### Grafana Dashboards
 
-For production environments, you can configure ingress for both Prometheus and Grafana. Add the following to your values.yaml:
+Import the [llm-d dashboard](./grafana/dashboards/llm-d-dashboard.json) from the Grafana UI. Go to `Dashboards -> New -> Import`.
+Similarly, import the [inference-gateway dashboard](https://github.com/kubernetes-sigs/gateway-api-inference-extension/blob/main/tools/dashboards/inference_gateway.json)
+from the gateway-api-inference-extension repository. Or, if the Grafana Operator is installed in your environment, you might follow the [Grafana setup guide](./grafana-setup.md)
+to install the dashboards as `GrafanaDashboard` custom resources.
 
-```yaml
-prometheus:
-  ingress:
-    enabled: true
-    annotations:
-      kubernetes.io/ingress.class: nginx
-    hosts:
-      - prometheus.your-domain.com
-    tls:
-      - secretName: prometheus-tls
-        hosts:
-          - prometheus.your-domain.com
+#### OpenShift and Grafana
 
-grafana:
-  ingress:
-    enabled: true
-    annotations:
-      kubernetes.io/ingress.class: nginx
-    hosts:
-      - grafana.your-domain.com
-    tls:
-      - secretName: grafana-tls
-        hosts:
-          - grafana.your-domain.com
-```
-
-##### Option 3: OpenShift
-
-If you're using OpenShift with user workload monitoring enabled, you can access the metrics through the OpenShift console:
+If running on OpenShift with user workload monitoring enabled, you can access the metrics through the OpenShift console:
 
 1. Navigate to the OpenShift console
 2. In the left navigation bar, click on "Observe"
@@ -312,25 +289,15 @@ If you're using OpenShift with user workload monitoring enabled, you can access 
    - Metrics: Click on "Metrics" to view and query metrics using the built-in Prometheus UI
    - Targets: Click on "Targets" to see all monitored endpoints and their status
 
-The metrics are automatically integrated into the OpenShift monitoring stack, providing a seamless experience for viewing and analyzing your llm-d metrics.
-The llm-d-deployer does not install Grafana in OpenShift, but it's recommended that users install Grafana to view metrics and import dashboards.
+The metrics are automatically integrated into the OpenShift monitoring stack. The llm-d-deployer does not install Grafana on OpenShift,
+but it's recommended that users install Grafana to view metrics and import dashboards.
 
-Follow the [OpenShift Grafana setup guide](https://github.com/llm-d/llm-d/blob/main/observability/openshift/README.md#step-2-set-up-grafana-optional)
+Follow the [Grafana setup guide](./grafana-setup.md).
 The guide includes manifests to install the following:
 
 - Grafana instance
 - Grafana Prometheus datasource from user workload monitoring stack
 - Grafana llm-d dashboard
-
-#### Available Metrics
-
-The metrics collection includes:
-
-- Model inference performance metrics
-- Request latency and throughput
-- Resource utilization (CPU, memory, GPU)
-- Cache hit/miss rates
-- Error rates and types
 
 #### Security Note
 

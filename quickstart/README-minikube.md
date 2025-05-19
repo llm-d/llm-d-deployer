@@ -224,18 +224,18 @@ the [quickstart/examples](./examples) directory with the model you wish to run.
 ### Metrics Collection
 
 llm-d includes built-in support for metrics collection using Prometheus and Grafana. This feature is enabled by default but can be disabled using the `--disable-metrics-collection` flag during installation.
+Prometheus and Grafana are installed from the prometheus-community [kube-prometheus-stack helm charts](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack).
+The [llm-d metrics overview](./metrics-overview.md) lists the metrics scraped with a default llm-d install.
 
 #### Accessing the Metrics UIs
 
-Once installed, you can access the metrics UIs through port-forwarding:
-
-1. Prometheus UI (port 9090):
+- Prometheus User Interface (port 9090):
 
 ```bash
 kubectl port-forward -n llm-d-monitoring --address 0.0.0.0 svc/prometheus-kube-prometheus-prometheus 9090:9090
 ```
 
-1. Grafana UI (port 3000):
+- Grafana User Interface (port 3000):
 
 ```bash
 kubectl port-forward -n llm-d-monitoring --address 0.0.0.0 svc/prometheus-grafana 3000:80
@@ -246,15 +246,11 @@ Access the UIs at:
 - Prometheus: <http://localhost:9090>
 - Grafana: <http://localhost:3000> (default credentials: admin/admin)
 
-#### Available Metrics
+#### Grafana Dashboards
 
-The metrics collection includes:
-
-- Model inference performance metrics
-- Request latency and throughput
-- Resource utilization (CPU, memory, GPU)
-- Cache hit/miss rates
-- Error rates and types
+Import the [llm-d dashboard](./grafana/dashboards/llm-d-dashboard.json) from the Grafana UI. Go to `Dashboards -> New -> Import`.
+Similarly, import the [inference-gateway dashboard](https://github.com/kubernetes-sigs/gateway-api-inference-extension/blob/main/tools/dashboards/inference_gateway.json)
+from the gateway-api-inference-extension repository.
 
 #### Local Development Note
 
