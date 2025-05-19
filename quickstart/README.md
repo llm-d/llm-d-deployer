@@ -126,19 +126,20 @@ The installer needs to be run from the `llm-d-deployer/quickstart` directory as 
 
 ### Flags
 
-| Flag                                | Description                                                                                             | Example                                                          |
-|-------------------------------------|---------------------------------------------------------------------------------------------------------|------------------------------------------------------------------|
-| `-a`, `--auth-file PATH`             | Path to containers auth.json                                                                             | `./llmd-installer.sh --auth-file ~/.config/containers/auth.json` |
-| `-z`, `--storage-size SIZE`          | Size of storage volume                                                                                   | `./llmd-installer.sh --storage-size 15Gi`                        |
-| `-c`, `--storage-class CLASS`        | Storage class to use (default: efs-sc)                                                                  | `./llmd-installer.sh --storage-class ocs-storagecluster-cephfs`  |
-| `-n`, `--namespace NAME`             | K8s namespace (default: llm-d)                                                                          | `./llmd-installer.sh --namespace foo`                            |
-| `-f`, `--values-file PATH`           | Path to Helm values.yaml file (default: values.yaml)                                                     | `./llmd-installer.sh --values-file /path/to/values.yaml`         |
-| `-u`, `--uninstall`                  | Uninstall the llm-d components from the current cluster                                                 | `./llmd-installer.sh --uninstall`                                |
-| `-d`, `--debug`                      | Add debug mode to the helm install                                                                      | `./llmd-installer.sh --debug`                                    |
-| `-i`, `--skip-infra`                 | Skip the infrastructure components of the installation                                                  | `./llmd-installer.sh --skip-infra`                               |
-| `-m`, `--disable-metrics-collection` | Disable metrics collection (Prometheus will not be installed)                                           | `./llmd-installer.sh --disable-metrics-collection`               |
-| `-s`, `--skip-download-model`        | Skip downloading the model to PVC if modelArtifactURI is pvc based                                      | `./llmd-installer.sh --skip-download-model`                      |
-| `-h`, `--help`                       | Show this help and exit                                                                                 | `./llmd-installer.sh --help`                                     |
+| Flag                                 | Description                                                   | Example                                                          |
+|--------------------------------------|---------------------------------------------------------------|------------------------------------------------------------------|
+| `-a`, `--auth-file PATH`             | Path to containers auth.json                                  | `./llmd-installer.sh --auth-file ~/.config/containers/auth.json` |
+| `-z`, `--storage-size SIZE`          | Size of storage volume                                        | `./llmd-installer.sh --storage-size 15Gi`                        |
+| `-c`, `--storage-class CLASS`        | Storage class to use (default: efs-sc)                        | `./llmd-installer.sh --storage-class ocs-storagecluster-cephfs`  |
+| `-n`, `--namespace NAME`             | K8s namespace (default: llm-d)                                | `./llmd-installer.sh --namespace foo`                            |
+| `-f`, `--values-file PATH`           | Path to Helm values.yaml file (default: values.yaml)          | `./llmd-installer.sh --values-file /path/to/values.yaml`         |
+| `-u`, `--uninstall`                  | Uninstall the llm-d components from the current cluster       | `./llmd-installer.sh --uninstall`                                |
+| `-d`, `--debug`                      | Add debug mode to the helm install                            | `./llmd-installer.sh --debug`                                    |
+| `-i`, `--skip-infra`                 | Skip the infrastructure components of the installation        | `./llmd-installer.sh --skip-infra`                               |
+| `-t`, `--download-timeout`           | Timeout for model download job                                | `./llmd-installer.sh --download-timeout`                         |
+| `-D`, `--download-model`             | Download the model to PVC from Hugging Face                   | `./llmd-installer.sh --download-model`                           |
+| `-m`, `--disable-metrics-collection` | Disable metrics collection (Prometheus will not be installed) | `./llmd-installer.sh --disable-metrics-collection`               |
+| `-h`, `--help`                       | Show this help and exit                                       | `./llmd-installer.sh --help`                                     |
 
 ## Examples
 
@@ -353,7 +354,33 @@ When running in a cloud environment (like EC2), make sure to:
 ### Troubleshooting
 
 The various images can take some time to download depending on your connectivity. Watching events
-and logs of the prefill and decode pods is a good place to start.
+and logs of the prefill and decode pods is a good place to start. Here are some examples to help
+you get started.
+
+```bash
+# View the status of the pods in the default llm-d namespace. Replace "llm-d" if you used a custom namespace on install
+kubectl get pods -n llm-d
+
+# Describe all prefill pods:
+kubectl describe pods -l llm-d.ai/role=prefill -n llm-d
+
+# Fetch logs from each prefill pod:
+kubectl logs -l llm-d.ai/role=prefill --all-containers=true -n llm-d --tail=200
+
+# Describe all decode pods:
+kubectl describe pods -l llm-d.ai/role=decode -n llm-d
+
+# Fetch logs from each decode pod:
+kubectl logs -l llm-d.ai/role=decode --all-containers=true -n llm-d --tail=200
+
+# Describe all endpoint-picker pods:
+kubectl describe pod -n llm-d -l llm-d.ai/epp
+
+# Fetch logs from each endpoint-picker pod:
+kubectl logs -n llm-d -l llm-d.ai/epp --all-containers=true --tail=200
+```
+
+More examples of debugging logs can be found [here](examples/no-features/README.md).
 
 ### Uninstall
 

@@ -72,7 +72,9 @@ For GPU support, see the Minikube documentation as there are a couple of command
 infer the model `meta-llama/Llama-3.2-3B-Instruct` that will get spun up.
 - You can also be run on a small [g6e.2xlarge](https://aws.amazon.com/ec2/instance-types/g6e/) with 1xL4 with a small model where both the prefill and
 decode pods share the single GPU. This is useful for a quick deployment to familiarize yourself with the project or
-for development/CI purposes.
+for development/CI purposes. See the [Run on a Single GPU](#run-on-a-single-gpu) section for deploying.
+
+#### Confirm GPU Access in Containers
 
 Verify you have properly installed the container toolkit with the runtime of your choice.
 
@@ -152,6 +154,14 @@ configuration files can be customized to be however you like. The following load
 ```bash
 export HF_TOKEN="your-token"
 ./llmd-installer.sh --minikube --values-file examples/base/base-slim.yaml
+```
+
+If you want to run both prefill and decode pods, use the following values file that will spin up both pods
+on a 1xL4 (g6e.2xlarge) node on your minikube cluster.
+
+```bash
+export HF_TOKEN="your-token"
+./llmd-installer.sh --minikube --values-file examples/gpt2-e2e-tiny-minikube.yaml
 ```
 
 ### Customize your deployment

@@ -49,7 +49,7 @@ Options:
   -i, --skip-infra                 Skip the infrastructure components of the installation
   -m, --disable-metrics-collection Disable metrics collection (Prometheus will not be installed)
   -D, --download-model             Download the model to PVC from Hugging Face
-  -T, --download-timeout           Timeout for model download job
+  -t, --download-timeout           Timeout for model download job
   -k, --minikube                   Deploy on an existing minikube instance with hostPath storage
   -h, --help                       Show this help and exit
 EOF
@@ -115,7 +115,7 @@ parse_args() {
       -i|--skip-infra)              SKIP_INFRA=true; shift;;
       -m|--disable-metrics-collection) DISABLE_METRICS=true; shift;;
       -D|--download-model)          DOWNLOAD_MODEL="$2"; shift 2 ;;
-      -T|--download-timeout)        DOWNLOAD_TIMEOUT="$2"; shift 2 ;;
+      -t|--download-timeout)        DOWNLOAD_TIMEOUT="$2"; shift 2 ;;
       -k|--minikube)                USE_MINIKUBE=true; shift ;;
       -h|--help)                    print_help; exit 0 ;;
       *)                            die "Unknown option: $1" ;;
