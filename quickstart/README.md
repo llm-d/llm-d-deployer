@@ -52,7 +52,7 @@ You can use the installer script that installs all the required dependencies.  C
 
 ### Target Platforms
 
-Since the llm-d-deployer is based on helm cahrts, llm-d can be deployed on a variety of Kubernetes platforms. As more platforms are supported, the installer will be updated to support them.
+Since the llm-d-deployer is based on helm charts, llm-d can be deployed on a variety of Kubernetes platforms. As more platforms are supported, the installer will be updated to support them.
 
 Documentation for example cluster setups are provided in the [infra](./infra) directory.
 
