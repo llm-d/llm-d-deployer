@@ -52,9 +52,25 @@ Options:
 EOF
 }
 
-log_info()      { echo -e "$*"; }
-log_success() { echo -e "$*"; }
-log_error()   { echo -e "❌ $*" >&2; }
+# ANSI colour helpers and functions
+COLOR_RESET=$'\e[0m'
+COLOR_GREEN=$'\e[32m'
+COLOR_YELLOW=$'\e[33m'
+COLOR_RED=$'\e[31m'
+COLOR_BLUE=$'\e[34m'
+
+log_info() {
+  echo "${COLOR_BLUE}ℹ️  $*${COLOR_RESET}"
+}
+
+log_success() {
+  echo "${COLOR_GREEN}✅ $*${COLOR_RESET}"
+}
+
+log_error() {
+  echo "${COLOR_RED}❌ $*${COLOR_RESET}" >&2
+}
+
 die()         { log_error "$*"; exit 1; }
 
 ### UTILITIES ###
@@ -177,7 +193,7 @@ validate_hf_token() {
   if [[ "$ACTION" == "install" ]]; then
     # HF_TOKEN from the env
     [[ -n "${HF_TOKEN:-}" ]] || die "HF_TOKEN not set; Run: export HF_TOKEN=<your_token>"
-    log_success "✅ HF_TOKEN validated"
+    log_success "HF_TOKEN validated"
   fi
 }
 
@@ -215,7 +231,7 @@ spec:
       storage: ${STORAGE_SIZE}
   volumeName: ${MODEL_PV_NAME}
 EOF
-  log_success "✅ llama model PV and PVC (${PVC_NAME}) created."
+  log_success "llama model PV and PVC (${PVC_NAME}) created."
 }
 
 create_pvc_and_download_model_if_needed() {
@@ -281,7 +297,7 @@ create_pvc_and_download_model_if_needed() {
         # apply the storage manifest
         eval "echo \"$(cat ${REPO_ROOT}/helpers/k8s/model-storage-rwx-pvc-template.yaml)\"" \
           | kubectl apply -n "${NAMESPACE}" -f -
-        log_success "✅ PVC \`${PVC_NAME}\` created with storageClassName ${STORAGE_CLASS} and size ${STORAGE_SIZE}"
+        log_success "PVC \`${PVC_NAME}\` created with storageClassName ${STORAGE_CLASS} and size ${STORAGE_SIZE}"
       fi
 
       log_info "🚀 Launching model download job..."
@@ -329,7 +345,7 @@ create_pvc_and_download_model_if_needed() {
         exit 1;
       }
 
-      log_success "✅ Model downloaded"
+      log_success "Model downloaded"
     else
       log_info "⏭️ Model download to PVC skipped: \`--download-model\` arg not set, assuming PVC ${PVC_NAME} exists and contains model at path: \`${MODEL_PATH}\`."
     fi
@@ -349,7 +365,7 @@ install() {
   if [[ "${SKIP_INFRA}" == "false" ]]; then
     log_info "🏗️ Installing GAIE Kubernetes infrastructure…"
     bash ../chart-dependencies/ci-deps.sh
-    log_success "✅ GAIE infra applied"
+    log_success "GAIE infra applied"
   fi
 
   if kubectl get namespace "${MONITORING_NAMESPACE}" &>/dev/null; then
@@ -360,7 +376,7 @@ install() {
   log_info "📦 Creating namespace ${NAMESPACE}..."
   kubectl create namespace "${NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
   kubectl config set-context --current --namespace="${NAMESPACE}"
-  log_success "✅ Namespace ready"
+  log_success "Namespace ready"
 
   cd "${CHART_DIR}"
   resolve_values
@@ -372,21 +388,21 @@ install() {
   kubectl create secret generic "${HF_NAME}" \
     --from-literal="${HF_KEY}=${HF_TOKEN}" \
     --dry-run=client -o yaml | kubectl apply -f -
-  log_success "✅ HF token secret created"
+  log_success "HF token secret created"
 
   # can be fetched non-invasily if using kgateway or not
   fetch_kgateway_proxy_uid
 
   log_info "📜 Applying modelservice CRD..."
   kubectl apply -f crds/modelservice-crd.yaml
-  log_success "✅ ModelService CRD applied"
+  log_success "ModelService CRD applied"
 
   create_pvc_and_download_model_if_needed
 
   helm repo add bitnami  https://charts.bitnami.com/bitnami
   log_info "🛠️ Building Helm chart dependencies..."
   helm dependency build .
-  log_success "✅ Dependencies built"
+  log_success "Dependencies built"
 
   if is_openshift; then
     BASE_OCP_DOMAIN=$(kubectl get ingresscontroller default -n openshift-ingress-operator -o jsonpath='{.status.domain}')
@@ -401,7 +417,7 @@ install() {
   local metrics_enabled="true"
   if [[ "${DISABLE_METRICS}" == "true" ]]; then
     metrics_enabled="false"
-    log_info "ℹ️ Metrics collection disabled by user request"
+    log_info "Metrics collection disabled by user request"
   elif ! check_servicemonitor_crd; then
     log_info "⚠️ ServiceMonitor CRD (monitoring.coreos.com) not found"
   fi
@@ -410,7 +426,7 @@ install() {
     if ! check_openshift_monitoring; then
       log_info "⚠️ Metrics collection may not work properly in OpenShift without user workload monitoring enabled"
     fi
-    log_info "ℹ️ Using OpenShift's built-in monitoring stack"
+    log_info "Using OpenShift's built-in monitoring stack"
     DISABLE_METRICS=true # don't install prometheus if in OpenShift
     metrics_enabled="true"
   fi
@@ -420,7 +436,7 @@ install() {
     if ! check_servicemonitor_crd; then
       install_prometheus_grafana
     else
-      log_info "ℹ️ Skipping Prometheus installation as ServiceMonitor CRD already exists"
+      log_info "Skipping Prometheus installation as ServiceMonitor CRD already exists"
     fi
   fi
 
@@ -429,20 +445,20 @@ install() {
       log_info "🌱 Minikube detected; provisioning Prometheus/Grafana…"
       install_prometheus_grafana
     else
-      log_info "ℹ️ Metrics collection disabled by user request"
+      log_info "Metrics collection disabled by user request"
     fi
   fi
 
 METRICS_ARGS=()
 if [[ "${DISABLE_METRICS}" == "true" ]]; then
-  log_info "ℹ️ Metrics collection disabled by user request"
+  log_info "Metrics collection disabled by user request"
   METRICS_ARGS=(
     --set modelservice.metrics.enabled=false
     --set modelservice.epp.metrics.enabled=false
     --set modelservice.vllm.metrics.enabled=false
   )
 else
-  log_info "ℹ️ Metrics collection enabled"
+  log_info "Metrics collection enabled"
   METRICS_ARGS=(
     --set modelservice.metrics.enabled="${metrics_enabled}"
   )
@@ -457,7 +473,7 @@ fi
     --set gateway.kGatewayParameters.proxyUID="${PROXY_UID}" \
     --set ingress.clusterRouterBase="${BASE_OCP_DOMAIN}" \
     "${METRICS_ARGS[@]}"
-  log_success "✅ llm-d deployed"
+  log_success "llm-d deployed"
 
   post_install
 
@@ -539,7 +555,7 @@ check_servicemonitor_crd() {
   fi
 
   if [[ "$API_VERSION" == "v1" ]]; then
-    log_success "✅ ServiceMonitor CRD (monitoring.coreos.com/v1) found"
+    log_success "ServiceMonitor CRD (monitoring.coreos.com/v1) found"
     return 0
   else
     log_info "⚠️ Found ServiceMonitor CRD but with unexpected API version: ${API_VERSION}"
@@ -571,7 +587,7 @@ check_openshift_monitoring() {
     return 1
   fi
 
-  log_success "✅ OpenShift user workload monitoring is properly configured"
+  log_success "OpenShift user workload monitoring is properly configured"
   return 0
 }
 

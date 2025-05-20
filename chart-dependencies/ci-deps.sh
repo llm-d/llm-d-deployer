@@ -13,6 +13,13 @@ if [ -z "$(command -v kubectl)" ] || [ -z "$(command -v helm)" ]; then
     exit 1
 fi
 
+# Logging functions and ASCII colour helpers.
+COLOR_RESET=$'\e[0m'
+COLOR_GREEN=$'\e[32m'
+log_success() {
+  echo "${COLOR_GREEN}✅ $*${COLOR_RESET}"
+}
+
 CWD=$( dirname -- "$( readlink -f -- "$0"; )"; )
 
 ## Populate manifests
@@ -25,16 +32,15 @@ else
 fi
 
 ### Base CRDs
-echo -e "\e[32m📜 Base CRDs: ${LOG_ACTION_NAME}...\e[0m"
+log_success "📜 Base CRDs: ${LOG_ACTION_NAME}..."
 kubectl $MODE -k https://github.com/llm-d/llm-d-inference-scheduler/deploy/components/crds-gateway-api || true
 
 ### GAIE CRDs
-echo -e "\e[32m🚪 GAIE CRDs: ${LOG_ACTION_NAME}...\e[0m"
+log_success "🚪 GAIE CRDs: ${LOG_ACTION_NAME}..."
 kubectl $MODE -k https://github.com/llm-d/llm-d-inference-scheduler/deploy/components/crds-gie || true
 
 ### Install Gateway provider
 backend=$(helm show values $CWD/../charts/llm-d --jsonpath '{.gateway.gatewayClassName}')
-
-echo -e "\e[32m🎒 Gateway provider \e[0m '\e[34m$backend\e[0m'\e[32m: ${LOG_ACTION_NAME}...\e[0m"
+log_success "🎒 Gateway provider '${COLOR_BLUE}${backend}${COLOR_RESET}${COLOR_GREEN}': ${LOG_ACTION_NAME}...${COLOR_RESET}"
 
 $CWD/$backend/install.sh $MODE
