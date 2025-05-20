@@ -222,6 +222,8 @@ the [quickstart/examples](./examples) directory with the model you wish to run.
 ### Metrics Collection
 
 llm-d includes built-in support for metrics collection using Prometheus and Grafana. This feature is enabled by default but can be disabled using the `--disable-metrics-collection` flag during installation.
+Prometheus and Grafana are installed from the prometheus-community [kube-prometheus-stack helm charts](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack).
+The [llm-d metrics overview](./metrics-overview.md) lists the metrics scraped with a default llm-d install.
 
 #### Accessing the Metrics UIs
 
@@ -243,16 +245,6 @@ Access the UIs at:
 
 - Prometheus: <http://localhost:9090>
 - Grafana: <http://localhost:3000> (default credentials: admin/admin)
-
-#### Available Metrics
-
-The metrics collection includes:
-
-- Model inference performance metrics
-- Request latency and throughput
-- Resource utilization (CPU, memory, GPU)
-- Cache hit/miss rates
-- Error rates and types
 
 #### Local Development Note
 
