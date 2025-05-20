@@ -231,12 +231,11 @@ curl -X POST http://10.109.40.169/v1/completions \
 You can also run the included validation script `test-requests.sh --minikube`.
 
 ```bash
-# Default options
+# Default options (the model id will be discovered via /v1/models)
 ./test-request.sh --minikube
 
 # Non-default namespace/model
 ./test-request.sh -n <NAMESPACE> -m <FULL_MODEL_NAME> --minikube
-# example: ./test-request.sh --minikube -m openai-community/gpt2 -n some-namespace
 ```
 
 ### Bring Your Own Model
