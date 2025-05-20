@@ -199,6 +199,36 @@ locate_auth_file() {
   log_success "✅ Auth file: ${AUTH_FILE}"
 }
 
+setup_git_credentials_from_AUTH_FILE() {
+  log_info "🔄 Setting up Git credentials using container auth..."
+  if [[ -z "$AUTH_FILE" || ! -f "$AUTH_FILE" ]]; then
+    log_error "❌ Auth file not found."
+    return 1
+  fi
+
+  GH_AUTH=$(jq -r '.auths["ghcr.io"].auth // empty' "$AUTH_FILE" | base64 --decode)
+  if [[ -z "$GH_AUTH" ]]; then
+    log_error "❌ No GitHub Container Registry auth found in $AUTH_FILE"
+    return 1
+  fi
+
+  GITHUB_USER="${GH_AUTH%%:*}"
+  GITHUB_TOKEN="${GH_AUTH#*:}"
+
+  if [[ -z "$GITHUB_USER" || -z "$GITHUB_TOKEN" ]]; then
+    log_error "❌ Failed to parse GitHub credentials"
+    return 1
+  fi
+
+  # Set up Git credentials
+  mkdir -p ~/.config/git
+  echo "https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com" > ~/.git-credentials
+  git config --global credential.helper store
+
+  log_success "✅ Git credentials configured from container auth"
+}
+
+
 validate_hf_token() {
   if [[ "$ACTION" == "install" ]]; then
     # HF_TOKEN from the env
@@ -698,6 +728,7 @@ main() {
   check_cluster_reachability
 
   locate_auth_file
+  setup_git_credentials_from_AUTH_FILE
   validate_hf_token
 
   if [[ "$ACTION" == "install" ]]; then

@@ -24,13 +24,38 @@ else
     LOG_ACTION_NAME="Deleting"
 fi
 
-### Base CRDs
-echo -e "\e[32m📜 Base CRDs: ${LOG_ACTION_NAME}...\e[0m"
-kubectl $MODE -k https://github.com/llm-d/llm-d-inference-scheduler/deploy/components/crds-gateway-api?ref=dev || true
+### Clone and apply CRDs from GitHub (SSH or HTTPS fallback)
+apply_crds_from_repo() {
+  local BRANCH="dev"
+  local REPO_SSH="git@github.com:llm-d/llm-d-inference-scheduler.git"
+  local REPO_HTTPS="https://github.com/llm-d/llm-d-inference-scheduler.git"
+  local TMP_DIR=$(mktemp -d)
+  local REPO_USED=""
 
-### GAIE CRDs
-echo -e "\e[32m🚪 GAIE CRDs: ${LOG_ACTION_NAME}...\e[0m"
-kubectl $MODE -k https://github.com/llm-d/llm-d-inference-scheduler/deploy/components/crds-gie?ref=dev || true
+  echo -e "\e[36m🔍 Cloning CRD repo (branch: $BRANCH)...\e[0m"
+
+  if git clone --depth 1 --branch "$BRANCH" "$REPO_SSH" "$TMP_DIR" 2>/dev/null; then
+    REPO_USED="SSH"
+  elif git clone --depth 1 --branch "$BRANCH" "$REPO_HTTPS" "$TMP_DIR"; then
+    REPO_USED="HTTPS"
+  else
+    echo -e "\e[31m❌ Failed to clone repository using both SSH and HTTPS.\e[0m"
+    exit 1
+  fi
+
+  echo -e "\e[32m✅ Repo cloned via $REPO_USED\e[0m"
+
+  echo -e "\e[32m📜 Base CRDs: ${LOG_ACTION_NAME}...\e[0m"
+  kubectl $MODE -k "$TMP_DIR/deploy/components/crds-gateway-api" || true
+
+  echo -e "\e[32m🚪 GAIE CRDs: ${LOG_ACTION_NAME}...\e[0m"
+  kubectl $MODE -k "$TMP_DIR/deploy/components/crds-gie" || true
+
+  rm -rf "$TMP_DIR"
+}
+
+# Run CRD installer
+apply_crds_from_repo
 
 ### Install Gateway provider
 backend=$(helm show values $CWD/../charts/llm-d --jsonpath '{.gateway.gatewayClassName}')
