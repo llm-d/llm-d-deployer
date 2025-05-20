@@ -161,7 +161,7 @@ on a 1xL4 (g6e.2xlarge) node on your minikube cluster.
 
 ```bash
 export HF_TOKEN="your-token"
-./llmd-installer.sh --minikube --values-file examples/gpt2-e2e-tiny-minikube.yaml
+./llmd-installer.sh --minikube --values-file examples/single-gpu-dev/gpt2-e2e-tiny-minikube.yaml
 ```
 
 ### Customize your deployment
