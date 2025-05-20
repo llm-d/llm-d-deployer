@@ -635,24 +635,48 @@ check_openshift_monitoring() {
   log_info "🔍 Checking OpenShift user workload monitoring configuration..."
 
   # Check if user workload monitoring is enabled
-  if ! kubectl get configmap cluster-monitoring-config -n openshift-monitoring -o yaml | grep -q "enableUserWorkload: true"; then
-    log_info "⚠️ OpenShift user workload monitoring is not enabled"
-    log_info "⚠️ To enable metrics collection in OpenShift, please enable user workload monitoring:"
-    log_info "   oc create -f - <<EOF"
-    log_info "   apiVersion: v1"
-    log_info "   kind: ConfigMap"
-    log_info "   metadata:"
-    log_info "     name: cluster-monitoring-config"
-    log_info "     namespace: openshift-monitoring"
-    log_info "   data:"
-    log_info "     config.yaml: |"
-    log_info "       enableUserWorkload: true"
-    log_info "   EOF"
-    return 1
+  if kubectl get configmap cluster-monitoring-config -n openshift-monitoring -o yaml 2>/dev/null | grep -q "enableUserWorkload: true"; then
+    log_success "✅ OpenShift user workload monitoring is properly configured"
+    return 0
   fi
 
-  log_success "✅ OpenShift user workload monitoring is properly configured"
-  return 0
+  log_info "⚠️ OpenShift user workload monitoring is not enabled"
+  log_info "ℹ️ Enabling user workload monitoring allows metrics collection for the llm-d chart."
+
+  local monitoring_yaml=$(cat <<EOF
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    enableUserWorkload: true
+EOF
+)
+
+  # Prompt the user
+  log_info "📜 The following ConfigMap will be applied to enable user workload monitoring:"
+  echo "$monitoring_yaml"
+  read -p "Would you like to apply this ConfigMap to enable user workload monitoring? (y/N): " response
+  case "$response" in
+    [yY][eE][sS]|[yY])
+      log_info "🚀 Applying ConfigMap to enable user workload monitoring..."
+      echo "$monitoring_yaml" | oc create -f -
+      if [[ $? -eq 0 ]]; then
+        log_success "✅ OpenShift user workload monitoring enabled"
+        return 0
+      else
+        log_error "❌ Failed to apply ConfigMap. Metrics collection may not work."
+        return 1
+      fi
+      ;;
+    *)
+      log_info "⚠️ User chose not to enable user workload monitoring."
+      log_info "⚠️ Metrics collection may not work properly in OpenShift without user workload monitoring enabled."
+      return 1
+      ;;
+  esac
 }
 
 is_openshift() {
