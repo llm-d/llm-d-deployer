@@ -179,6 +179,14 @@ gatewayClassName, and sits in front of your inference pods to handle path-based 
 and metrics. This example validates that the gateway itself is routing your completion requests correctly.
 You can execute the [`test-request.sh`](test-request.sh) script to test on the cluster.
 
+```bash
+# Default options (the model id will be discovered via /v1/models)
+./test-request.sh
+
+# Non-default namespace/model
+./test-request.sh -n <NAMESPACE> -m <FULL_MODEL_NAME> --minikube
+```
+
 > If you receive an error indicating PodSecurity "restricted" violations when running the smoke-test script, you
 > need to remove the restrictive PodSecurity labels from the namespace. Once these labels are removed, re-run the
 > script and it should proceed without PodSecurity errors.
