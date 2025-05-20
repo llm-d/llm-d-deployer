@@ -26,31 +26,7 @@ You can use the installer script that installs all the required dependencies. Th
 ### Required credentials and configuration
 
 - [llm-d-deployer GitHub repo – clone here](https://github.com/llm-d/llm-d-deployer.git)
-- [ghcr.io Registry – credentials](https://github.com/settings/tokens) You must have a GitHub account and a "classic" personal access token with `read:packages` access to the llm-d-deployer repository.
-- [Red Hat Registry – terms & access](https://access.redhat.com/registry/)
 - [HuggingFace HF_TOKEN](https://huggingface.co/docs/hub/en/security-tokens)
-
-Registry Authentication: The installer looks for an auth file in:
-
-```bash
-~/.config/containers/auth.json
-# or
-~/.config/containers/config.json
-```
-
-If not found, you can create one with the following commands:
-
-Create with Docker:
-
-```bash
-docker --config ~/.config/containers/ login ghcr.io
-```
-
-Create with Podman:
-
-```bash
-podman login ghcr.io --authfile ~/.config/containers/auth.json
-```
 
 > ⚠️ You may need to visit Hugging Face [meta-llama/Llama-3.2-3B-Instruct](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct) and
 > accept the usage terms to pull this with your HF token if you have not already done so.

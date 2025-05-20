@@ -8,8 +8,6 @@ NAMESPACE="llm-d"
 STORAGE_SIZE="7Gi"
 STORAGE_CLASS="efs-sc"
 ACTION="install"
-AUTH_FILE_CLI=""
-PULL_SECRET_NAME="llm-d-pull-secret"
 SCRIPT_DIR=""
 REPO_ROOT=""
 INSTALL_DIR=""
@@ -17,7 +15,6 @@ CHART_DIR=""
 HF_NAME=""
 HF_KEY=""
 PROXY_UID=""
-AUTH_FILE=""
 VALUES_FILE="values.yaml"
 DEBUG=""
 SKIP_INFRA=false
@@ -105,20 +102,19 @@ fetch_kgateway_proxy_uid() {
 parse_args() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      -a|--auth-file)               AUTH_FILE_CLI="$2"; shift 2 ;;
-      -z|--storage-size)            STORAGE_SIZE="$2"; shift 2 ;;
-      -c|--storage-class)           STORAGE_CLASS="$2"; shift 2 ;;
-      -n|--namespace)               NAMESPACE="$2"; shift 2 ;;
-      -f|--values-file)             VALUES_FILE="$2"; shift 2 ;;
-      -u|--uninstall)               ACTION="uninstall"; shift ;;
-      -d|--debug)                   DEBUG="--debug"; shift;;
-      -i|--skip-infra)              SKIP_INFRA=true; shift;;
+      -z|--storage-size)               STORAGE_SIZE="$2"; shift 2 ;;
+      -c|--storage-class)              STORAGE_CLASS="$2"; shift 2 ;;
+      -n|--namespace)                  NAMESPACE="$2"; shift 2 ;;
+      -f|--values-file)                VALUES_FILE="$2"; shift 2 ;;
+      -u|--uninstall)                  ACTION="uninstall"; shift ;;
+      -d|--debug)                      DEBUG="--debug"; shift;;
+      -i|--skip-infra)                 SKIP_INFRA=true; shift;;
       -m|--disable-metrics-collection) DISABLE_METRICS=true; shift;;
-      -D|--download-model)          DOWNLOAD_MODEL="$2"; shift 2 ;;
-      -t|--download-timeout)        DOWNLOAD_TIMEOUT="$2"; shift 2 ;;
-      -k|--minikube)                USE_MINIKUBE=true; shift ;;
-      -h|--help)                    print_help; exit 0 ;;
-      *)                            die "Unknown option: $1" ;;
+      -D|--download-model)             DOWNLOAD_MODEL="$2"; shift 2 ;;
+      -t|--download-timeout)           DOWNLOAD_TIMEOUT="$2"; shift 2 ;;
+      -k|--minikube)                   USE_MINIKUBE=true; shift ;;
+      -h|--help)                       print_help; exit 0 ;;
+      *)                               die "Unknown option: $1" ;;
     esac
   done
 }
@@ -177,32 +173,10 @@ setup_env() {
   fi
 }
 
-locate_auth_file() {
-  log_info "🔑 Locating container auth file..."
-  if [[ -n "$AUTH_FILE_CLI" && -f "$AUTH_FILE_CLI" ]]; then
-    AUTH_FILE="$AUTH_FILE_CLI"
-  elif [[ -f "$HOME/.config/containers/auth.json" ]]; then
-    AUTH_FILE="$HOME/.config/containers/auth.json"
-  elif [[ -f "$HOME/.config/containers/config.json" ]]; then
-    AUTH_FILE="$HOME/.config/containers/config.json"
-  else
-    echo "No auth file found in ~/.config/containers/"
-    echo "Please authenticate with either:"
-    echo
-    echo "# Docker"
-    echo "docker --config ~/.config/containers/ login ghcr.io"
-    echo
-    echo "# Podman"
-    echo "podman login ghcr.io  --authfile ~/.config/containers/auth.json"
-    exit 1
-  fi
-  log_success "✅ Auth file: ${AUTH_FILE}"
-}
-
 validate_hf_token() {
   if [[ "$ACTION" == "install" ]]; then
     # HF_TOKEN from the env
-    [[ -n "${HF_TOKEN:-}" ]] || die "HF_TOKEN not set. Run: export HF_TOKEN=<your_token>"
+    [[ -n "${HF_TOKEN:-}" ]] || die "HF_TOKEN not set; Run: export HF_TOKEN=<your_token>"
     log_success "✅ HF_TOKEN validated"
   fi
 }
@@ -388,21 +362,6 @@ install() {
   kubectl config set-context --current --namespace="${NAMESPACE}"
   log_success "✅ Namespace ready"
 
-  log_info "🔐 Creating pull secret ${PULL_SECRET_NAME}..."
-  kubectl create secret generic "${PULL_SECRET_NAME}" \
-    -n "${NAMESPACE}" \
-    --from-file=.dockerconfigjson="${AUTH_FILE}" \
-    --type=kubernetes.io/dockerconfigjson \
-    --dry-run=client -o yaml | kubectl apply -f -
-  log_success "✅ Pull secret created"
-
-  log_info "🔧 Patching default ServiceAccount..."
-  kubectl patch serviceaccount default \
-    -n "${NAMESPACE}" \
-    --type merge \
-    --patch '{"imagePullSecrets":[{"name":"'"${PULL_SECRET_NAME}"'"}]}'
-  log_success "✅ ServiceAccount patched"
-
   cd "${CHART_DIR}"
   resolve_values
 
@@ -495,19 +454,10 @@ fi
     --namespace "${NAMESPACE}" \
     "${VALUES_ARGS[@]}" \
     "${OCP_DISABLE_INGRESS_ARGS[@]}" \
-    --set global.imagePullSecrets[0]="${PULL_SECRET_NAME}" \
     --set gateway.kGatewayParameters.proxyUID="${PROXY_UID}" \
     --set ingress.clusterRouterBase="${BASE_OCP_DOMAIN}" \
     "${METRICS_ARGS[@]}"
   log_success "✅ llm-d deployed"
-
-  log_info "🔄 Patching all ServiceAccounts with pull-secret..."
-  patch='{"imagePullSecrets":[{"name":"'"${PULL_SECRET_NAME}"'"}]}'
-  kubectl get deployments -n "${NAMESPACE}" -o jsonpath='{.items[*].spec.template.spec.serviceAccountName}' |
-    tr ' ' '\n' | sort -u |
-    xargs -I{} kubectl patch serviceaccount {} --namespace="${NAMESPACE}" --type merge --patch "${patch}"
-  kubectl patch serviceaccount default --namespace="${NAMESPACE}" --type merge --patch "${patch}"
-  log_success "✅ ServiceAccounts patched"
 
   post_install
 
@@ -697,7 +647,6 @@ main() {
   # Check cluster reachability as a pre-requisite
   check_cluster_reachability
 
-  locate_auth_file
   validate_hf_token
 
   if [[ "$ACTION" == "install" ]]; then

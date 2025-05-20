@@ -45,34 +45,10 @@ You can use the installer script that installs all the required dependencies.  C
 ### Required credentials and configuration
 
 - [llm-d-deployer GitHub repo – clone here](https://github.com/llm-d/llm-d-deployer.git)
-- [ghcr.io Registry – credentials](https://github.com/settings/tokens) You must have a GitHub account and a "classic" personal access token with `read:packages` access to the llm-d-deployer repository.
-- [Red Hat Registry – terms & access](https://access.redhat.com/registry/)
 - [HuggingFace HF_TOKEN](https://huggingface.co/docs/hub/en/security-tokens) with download access for the model you want to use.  By default the sample application will use [meta-llama/Llama-3.2-3B-Instruct](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct).
 
 > ⚠️ Your Hugging Face account must have access to the model you want to use.  You may need to visit Hugging Face [meta-llama/Llama-3.2-3B-Instruct](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct) and
 > accept the usage terms if you have not already done so.
-
-Registry Authentication: The installer looks for an auth file in:
-
-```bash
-~/.config/containers/auth.json
-# or
-~/.config/containers/config.json
-```
-
-If not found, you can create one with the following commands:
-
-Create with Docker:
-
-```bash
-docker --config ~/.config/containers/ login ghcr.io
-```
-
-Create with Podman:
-
-```bash
-podman login ghcr.io --authfile ~/.config/containers/auth.json
-```
 
 ### Target Platforms
 
@@ -136,7 +112,6 @@ The installer needs to be run from the `llm-d-deployer/quickstart` directory as 
 
 | Flag                                 | Description                                                   | Example                                                          |
 |--------------------------------------|---------------------------------------------------------------|------------------------------------------------------------------|
-| `-a`, `--auth-file PATH`             | Path to containers auth.json                                  | `./llmd-installer.sh --auth-file ~/.config/containers/auth.json` |
 | `-z`, `--storage-size SIZE`          | Size of storage volume                                        | `./llmd-installer.sh --storage-size 15Gi`                        |
 | `-c`, `--storage-class CLASS`        | Storage class to use (default: efs-sc)                        | `./llmd-installer.sh --storage-class ocs-storagecluster-cephfs`  |
 | `-n`, `--namespace NAME`             | K8s namespace (default: llm-d)                                | `./llmd-installer.sh --namespace foo`                            |
