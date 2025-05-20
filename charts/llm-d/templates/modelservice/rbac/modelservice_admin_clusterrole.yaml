@@ -1,5 +1,5 @@
 {{- if and .Values.modelservice.enabled .Values.modelservice.rbac.create }}
-# Ref: https://github.com/llm-d/llm-d-model-service/blob/dev/config/rbac/modelservice_admin_role.yaml
+# Ref: https://github.com/llm-d/llm-d-model-service/blob/main/config/rbac/modelservice_admin_role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
