@@ -269,34 +269,9 @@ jobs:
           set -x
           ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@$INSTANCE_IP << EOF
             set -ex
-            echo "Sending curl request to inference gateway"
-            MINIKUBE_IP=\$(minikube ip)
-            NODEPORT=\$(kubectl get svc llm-d-inference-gateway -n llm-d -o jsonpath='{.spec.ports[0].nodePort}')
-            curl -X GET http://\$MINIKUBE_IP:\$NODEPORT/v1/models
-
-            echo "Sending curl request to decode service"
-            POD_IP=\$(kubectl get pods -n llm-d -o wide | awk '/decode/ { print \$6; exit }')
-
-            if [[ -z "\$POD_IP" ]]; then
-              echo "Error: Failed to find pod IP for decode service."
-              exit 1
-            fi
-
-            # Perform inference test
-            kubectl run --rm -i curl-temp --image=curlimages/curl --restart=Never -- \
-              curl -X POST http://\$POD_IP:8000/v1/chat/completions \
-                -H 'accept: application/json' \
-                -H 'Content-Type: application/json' \
-                -d '{
-                  "model": "Llama-3.2-3B-Instruct",
-                  "messages": [
-                    {
-                      "content": "Who won the World Series in 1986?",
-                      "role": "user"
-                    }
-                  ],
-                  "stream": false
-                }'
+            cd llm-d-deployer/.github/scripts/e2e/
+            export MODEL_ID="Llama-3.2-3B-Instruct"
+            ./e2e-validate.sh
           EOF
 
       - name: Collect and upload Kubernetes pod logs
