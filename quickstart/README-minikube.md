@@ -72,6 +72,8 @@ minikube start \
     --cpus no-limit
 ```
 
+> Note: if you only have a single GPU, jump to the [Run on a Single GPU](#run-on-a-single-gpu) section.
+
 If you want to skip straight to deploying, simply run:
 
 ```bash
@@ -129,7 +131,7 @@ configuration files can be customized to be however you like. The following load
 
 ```bash
 export HF_TOKEN="your-token"
-./llmd-installer.sh --minikube --values-file examples/base/base-slim.yaml
+./llmd-installer.sh --minikube --values-file examples/base/slim/base-slim.yaml
 ```
 
 If you want to run both prefill and decode pods, use the following values file that will spin up both pods
