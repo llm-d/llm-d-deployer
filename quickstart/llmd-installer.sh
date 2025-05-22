@@ -469,7 +469,7 @@ fi
     ${DEBUG} \
     --namespace "${NAMESPACE}" \
     "${VALUES_ARGS[@]}" \
-    "${OCP_DISABLE_INGRESS_ARGS[@]}" \
+    "${OCP_DISABLE_INGRESS_ARGS[@]+"${OCP_DISABLE_INGRESS_ARGS[@]}"}" \
     --set gateway.kGatewayParameters.proxyUID="${PROXY_UID}" \
     --set ingress.clusterRouterBase="${BASE_OCP_DOMAIN}" \
     "${METRICS_ARGS[@]}"
