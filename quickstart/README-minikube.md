@@ -109,15 +109,15 @@ For additional information regarding Minikube support with GPUs see [Using NVIDI
 
 A hugging-face token is required either exported in your environment or passed via the `--hf-token` flag.
 You will need to have a running minikube instance. After that, a common workflow might be to make some change
-to your code, run `llmd-installer.sh --minikube --uninstall` to reset the minikube cluster to default and then run the installer again to test
+to your code, run `llmd-installer.sh --uninstall` to reset the minikube cluster to default and then run the installer again to test
 any code or configuration changes.
 
 ```bash
 export HF_TOKEN="your-token"
 # deploy
 ./llmd-installer.sh --minikube
-# make some awesome change
-./llmd-installer.sh --minikube --uninstall
+# make some awesome change (if you are not using the default minikube context pass --minikube to uninstall)
+./llmd-installer.sh --uninstall
 # re-deploy
 ./llmd-installer.sh --minikube
 ```
