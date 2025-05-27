@@ -3,49 +3,90 @@
 
 set -euo pipefail
 
-# Detect package manager
-if command -v apt &> /dev/null; then
-  PKG_INSTALL="sudo apt-get install -y"
-elif command -v dnf &> /dev/null; then
-  PKG_INSTALL="sudo dnf install -y"
-elif command -v yum &> /dev/null; then
-  PKG_INSTALL="sudo yum install -y"
-else
-  echo "Unsupported Linux distribution (no apt, dnf, or yum found)."
-  exit 1
-fi
+# Determine OS and architecture
+OS=$(uname | tr '[:upper:]' '[:lower:]')
+ARCH=$(uname -m)
+case "$ARCH" in
+  arm64|aarch64) ARCH="arm64" ;;
+  x86_64) ARCH="amd64" ;;
+  *) echo "Unsupported architecture: $ARCH"; exit 1 ;;
+esac
 
-# Install base packages
-$PKG_INSTALL git jq make curl tar wget
+# Helper: install via package manager or brew if available
+install_pkg() {
+  PKG="$1"
+  if [[ "$OS" == "linux" ]]; then
+    if command -v apt &> /dev/null; then
+      sudo apt-get install -y "$PKG"
+    elif command -v dnf &> /dev/null; then
+      sudo dnf install -y "$PKG"
+    elif command -v yum &> /dev/null; then
+      sudo yum install -y "$PKG"
+    else
+      echo "Unsupported Linux distro (no apt, dnf, or yum).";
+      exit 1
+    fi
+  elif [[ "$OS" == "darwin" ]]; then
+    if command -v brew &> /dev/null; then
+      brew install "$PKG"
+    else
+      echo "Homebrew not found. Please install Homebrew or add manual install logic.";
+      exit 1
+    fi
+  else
+    echo "Unsupported OS: $OS";
+    exit 1
+  fi
+}
+
+# Install base utilities
+for pkg in git jq make curl tar wget; do
+  if ! command -v "$pkg" &> /dev/null; then
+    install_pkg "$pkg"
+  fi
+done
 
 # Install yq (v4+)
 if ! command -v yq &> /dev/null; then
   echo "Installing yq..."
-  sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+  if [[ "$OS" == "linux" ]]; then
+    sudo wget -qO /usr/local/bin/yq \
+      https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${ARCH}
+  else  # macOS
+    sudo wget -qO /usr/local/bin/yq \
+      https://github.com/mikefarah/yq/releases/latest/download/yq_darwin_${ARCH}
+  fi
   sudo chmod +x /usr/local/bin/yq
 fi
 
 # Install kubectl
 if ! command -v kubectl &> /dev/null; then
   echo "Installing kubectl..."
-  curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+  K8S_URL="https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)"
+  curl -LO "${K8S_URL}/bin/${OS}/${ARCH}/kubectl"
   sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
   rm kubectl
 fi
 
-# Install helm
+# Install Helm
 if ! command -v helm &> /dev/null; then
   echo "Installing Helm..."
-  wget https://get.helm.sh/helm-v3.17.3-linux-amd64.tar.gz
-  tar -zxvf helm-v3.17.3-linux-amd64.tar.gz
-  sudo mv linux-amd64/helm /usr/local/bin/helm
+  HELM_VER="v3.17.3"
+  TARBALL="helm-${HELM_VER}-${OS}-${ARCH}.tar.gz"
+  wget "https://get.helm.sh/${TARBALL}"
+  tar -zxvf "${TARBALL}"
+  sudo mv "${OS}-${ARCH}/helm" /usr/local/bin/helm
+  rm -rf "${OS}-${ARCH}" "${TARBALL}"
 fi
 
 # Install kustomize
 if ! command -v kustomize &> /dev/null; then
   echo "Installing Kustomize..."
-  KUSTOMIZE_VERSION=$(curl -s https://api.github.com/repos/kubernetes-sigs/kustomize/releases/latest | jq -r '.tag_name')
-  curl -sLo kustomize.tar.gz "https://github.com/kubernetes-sigs/kustomize/releases/download/${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION#kustomize/}_linux_amd64.tar.gz"
+  KUSTOMIZE_TAG=$(curl -s https://api.github.com/repos/kubernetes-sigs/kustomize/releases/latest | jq -r '.tag_name')
+  VERSION_NUM=${KUSTOMIZE_TAG#kustomize/}
+  ARCHIVE="kustomize_${VERSION_NUM}_${OS}_${ARCH}.tar.gz"
+  curl -sLo kustomize.tar.gz \
+    "https://github.com/kubernetes-sigs/kustomize/releases/download/${KUSTOMIZE_TAG}/${ARCHIVE}"
   tar -xzf kustomize.tar.gz
   sudo mv kustomize /usr/local/bin/
   rm kustomize.tar.gz

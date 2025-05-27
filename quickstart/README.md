@@ -35,10 +35,9 @@ Following prerequisite are required for the installer to work.
 - [Kustomize – official install docs](https://kubectl.docs.kubernetes.io/installation/kustomize/)
 - [kubectl – install & setup](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
-You can use the installer script that installs all the required dependencies.  Currently only Linux is supported.
+You can use the installer script that installs all the required dependencies.
 
 ```bash
-# Currently Linux only
 ./install-deps.sh
 ```
 
