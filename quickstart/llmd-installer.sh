@@ -18,6 +18,7 @@ PROXY_UID=""
 VALUES_FILE="values.yaml"
 DEBUG=""
 SKIP_INFRA=false
+INFRA_ONLY=false
 DISABLE_METRICS=false
 MONITORING_NAMESPACE="llm-d-monitoring"
 DOWNLOAD_MODEL=""
@@ -44,6 +45,7 @@ Options:
   -u, --uninstall                  Uninstall the llm-d components from the current cluster
   -d, --debug                      Add debug mode to the helm install
   -i, --skip-infra                 Skip the infrastructure components of the installation
+  -e, --infra-only                 Only deploy infrastructure components
   -m, --disable-metrics-collection Disable metrics collection (Prometheus will not be installed)
   -D, --download-model             Download the model to PVC from Hugging Face
   -t, --download-timeout           Timeout for model download job
@@ -125,6 +127,7 @@ parse_args() {
       -u|--uninstall)                  ACTION="uninstall"; shift ;;
       -d|--debug)                      DEBUG="--debug"; shift;;
       -i|--skip-infra)                 SKIP_INFRA=true; shift;;
+      -e|--infra-only)                 INFRA_ONLY=true; shift;;
       -m|--disable-metrics-collection) DISABLE_METRICS=true; shift;;
       -D|--download-model)             DOWNLOAD_MODEL="$2"; shift 2 ;;
       -t|--download-timeout)           DOWNLOAD_TIMEOUT="$2"; shift 2 ;;
@@ -366,6 +369,11 @@ install() {
     log_info "🏗️ Installing GAIE Kubernetes infrastructure…"
     bash ../chart-dependencies/ci-deps.sh
     log_success "GAIE infra applied"
+  fi
+
+  if [[ "${INFRA_ONLY}" == "true" ]]; then
+    log_info "Option \"-e/--infra-only\" specified, will end execution"
+    return 0
   fi
 
   if kubectl get namespace "${MONITORING_NAMESPACE}" &>/dev/null; then
