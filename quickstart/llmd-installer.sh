@@ -47,7 +47,7 @@ Options:
   -d, --debug                      Add debug mode to the helm install
   -i, --skip-infra                 Skip the infrastructure components of the installation
   -e, --infra-only                 Only deploy infrastructure components
-  -b, --download-only              Only download model to a PVC
+  -b, --download-pvc-only          Only download model to a PVC
   -m, --disable-metrics-collection Disable metrics collection (Prometheus will not be installed)
   -D, --download-model             Download the model to PVC from Hugging Face
   -t, --download-timeout           Timeout for model download job
@@ -130,7 +130,7 @@ parse_args() {
       -d|--debug)                      DEBUG="--debug"; shift;;
       -i|--skip-infra)                 SKIP_INFRA=true; shift;;
       -e|--infra-only)                 INFRA_ONLY=true; shift;;
-      -b|--download-only)              DOWNLOAD_ONLY=true; shift;;
+      -b|--download-pvc-only)          DOWNLOAD_ONLY=true; shift;;
       -m|--disable-metrics-collection) DISABLE_METRICS=true; shift;;
       -D|--download-model)             DOWNLOAD_MODEL="$2"; shift 2 ;;
       -t|--download-timeout)           DOWNLOAD_TIMEOUT="$2"; shift 2 ;;
@@ -410,7 +410,7 @@ install() {
 
   create_pvc_and_download_model_if_needed
   if [[ "${DOWNLOAD_ONLY}" == "true" ]]; then
-    log_info "Option \"-b/--download-only)\" specified, will end execution"
+    log_info "Option \"-b/--download-pvc-only\" specified, will end execution"
     return 0
   fi
 
