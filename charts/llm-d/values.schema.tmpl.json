@@ -1538,6 +1538,14 @@
         "decode": {
           "additionalProperties": false,
           "properties": {
+            "env": {
+              "description": "environment variables injected into each decode vLLM container",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "env"
+            },
             "extraArgs": {
               "description": "args to add to the decode deployment",
               "items": {
@@ -1646,6 +1654,14 @@
         "prefill": {
           "additionalProperties": false,
           "properties": {
+            "env": {
+              "description": "environment variables injected into each decode vLLM container",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "env"
+            },
             "extraArgs": {
               "description": "args to add to the prefill deployment",
               "items": {
