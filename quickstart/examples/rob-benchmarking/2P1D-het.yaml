@@ -1,0 +1,697 @@
+# yaml-language-server: $schema=values.schema.json
+
+# Default values for the llm-d chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Global parameters
+# Global Docker image parameters
+# Please, note that this will override the image parameters, including dependencies, configured to use the global value
+# Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+# @default -- See below
+global:
+    # -- Global Docker image registry
+    imageRegistry: ""
+
+    # @schema
+    # items:
+    #   type: string
+    # @schema
+    # -- Global Docker registry secret names as an array
+    # </br> E.g. `imagePullSecrets: [myRegistryKeySecretName]`
+    imagePullSecrets: []
+
+    security:
+        allowInsecureImages: true
+
+# @schema
+# additionalProperties: true
+# @schema
+# -- Parameters for bitnami.common dependency
+common: {}
+
+# -- Common parameters
+# -- Override Kubernetes version
+kubeVersion: ""
+
+# -- String to partially override common.names.fullname
+nameOverride: ""
+
+# -- String to fully override common.names.fullname
+fullnameOverride: ""
+
+# -- Default Kubernetes cluster domain
+clusterDomain: cluster.local
+
+# @schema
+# additionalProperties: true
+# @schema
+# -- Labels to add to all deployed objects
+commonLabels: {}
+
+# @schema
+# additionalProperties: true
+# @schema
+# -- Annotations to add to all deployed objects
+commonAnnotations: {}
+
+# @schema
+# items:
+#   type: [string, object]
+# @schema
+# -- Array of extra objects to deploy with the release
+extraDeploy: []
+
+# -- Helm tests
+test:
+    # -- Enable rendering of helm test resources
+    enabled: false
+
+    # @default -- See below
+    image:
+        # -- Test connection pod image registry
+        registry: quay.io
+
+        # -- Test connection pod image repository. Note that the image needs to have both the `sh` and `curl` binaries in it.
+        repository: curl/curl
+
+        # -- Test connection pod image tag. Note that the image needs to have both the `sh` and `curl` binaries in it.
+        tag: latest
+
+        # -- Specify a imagePullPolicy
+        imagePullPolicy: "Always"
+
+        # @schema
+        # items:
+        #   type: string
+        # @schema
+        # -- Optionally specify an array of imagePullSecrets (evaluated as templates)
+        pullSecrets: []
+
+# -- Sample application deploying a p-d pair of specific model
+# @default -- See below
+sampleApplication:
+    baseConfigMapRefName: basic-gpu-with-nixl-preset
+
+    # -- Enable rendering of sample application resources
+    enabled: true
+
+    model:
+        # -- Fully qualified pvc URI: pvc://<pvc-name>/<model-path>
+        modelArtifactURI: hf://RedHatAI/Llama-4-Scout-17B-16E-Instruct-FP8-dynamic
+
+        # -- Name of the model
+        modelName: "RedHatAI/Llama-4-Scout-17B-16E-Instruct-FP8-dynamic"
+
+        # -- Aliases to the Model named vllm will serve with
+        servedModelNames: []
+
+        auth:
+            # -- HF token auth config via k8s secret.
+            hfToken:
+                # -- Name of the secret to create to store your huggingface token
+                name: llm-d-hf-token
+                # -- Value of the token. Do not set this but use `envsubst` in conjunction with the helm chart
+                key: HF_TOKEN
+
+    # -- InferencePool port configuration
+    inferencePoolPort: 8000
+
+    prefill:
+        # -- number of desired prefill replicas
+        replicas: 2
+
+        # @schema
+        # items:
+        #   type: string
+        # @schema
+        # -- args to add to the prefill deployment
+        extraArgs:
+            - "--tensor-parallel-size"
+            - "1"
+            - "--disable-log-requests"
+            - "--max-model-len"
+            - "32768"
+            - "--distributed-executor-backend"
+            - "mp"
+            - "--block-size"
+            - "128"
+            - "--max-num-batched-tokens"
+            - "32768"
+
+    decode:
+        # -- number of desired decode replicas
+        replicas: 1
+
+        # @schema
+        # items:
+        #   type: string
+        # @schema
+        # -- args to add to the decode deployment
+        extraArgs:
+            - "--tensor-parallel-size"
+            - "4"
+            - "--disable-log-requests"
+            - "--max-model-len"
+            - "32768"
+            - "--distributed-executor-backend"
+            - "mp"
+            - "--block-size"
+            - "128"
+
+# -- Gateway configuration
+# @default -- See below
+gateway:
+    # -- Deploy resources related to Gateway
+    enabled: true
+
+    # --  String to fully override gateway.fullname
+    fullnameOverride: ""
+
+    # -- String to partially override gateway.fullname
+    nameOverride: ""
+
+    # -- Gateway class that determines the backend used
+    # Currently supported values: "kgateway" or "istio"
+    gatewayClassName: kgateway
+
+    # @schema
+    # additionalProperties: true
+    # @schema
+    # -- Additional annotations provided to the Gateway resource
+    annotations: {}
+
+    # Special parameters applied to kGateway via GatewayParameters resource
+    kGatewayParameters:
+        # @schema
+        # type: [number, boolean]
+        # @schema
+        proxyUID: false
+
+    # @schema
+    # items:
+    #  type: object
+    #  properties:
+    #    name:
+    #      description: Name is the name of the Listener. This name MUST be unique within a Gateway
+    #      type: string
+    #    path:
+    #      description: Path to expose via Ingress
+    #      type: string
+    #    port:
+    #      description: Port is the network port. Multiple listeners may use the same port, subject to the Listener compatibility rules
+    #      type: integer
+    #      minimum: 1
+    #      maximum: 65535
+    #    protocol:
+    #      description: Protocol specifies the network protocol this listener expects to receive
+    #      type: string
+    # @schema
+    # Set of listeners exposed via the Gateway, also propagated to the Ingress if enabled
+    listeners:
+        - name: default
+          path: /
+          port: 80
+          protocol: HTTP
+
+    # -- Gateway's service type. Ingress is only available if the service type is set to NodePort. Accepted values: ["LoadBalancer", "NodePort"]
+    serviceType: NodePort
+
+# -- Ingress configuration
+# @default -- See below
+ingress:
+    # -- Deploy Ingress
+    enabled: true
+
+    # -- Name of the IngressClass cluster resource which defines which controller will implement the resource (e.g nginx)
+    ingressClassName: ""
+
+    # @schema
+    # additionalProperties: true
+    # @schema
+    # -- Additional annotations for the Ingress resource
+    annotations: {}
+
+    # -- Hostname to be used to expose the NodePort service to the inferencing gateway
+    host: ""
+
+    # -- List of additional hostnames to be covered with this ingress record (e.g. a CNAME)
+    # <!-- E.g.
+    # extraHosts:
+    #   - name: llm-d.env.example.com
+    #     path: / (Optional)
+    #     pathType: Prefix (Optional)
+    #     port: 7007 (Optional) -->
+    extraHosts: []
+
+    # -- Path to be used to expose the full route to access the inferencing gateway
+    path: "/"
+
+    # -- Ingress TLS parameters
+    tls:
+        # -- Enable TLS configuration for the host defined at `ingress.host` parameter
+        enabled: false
+
+        # -- The name to which the TLS Secret will be called
+        secretName: ""
+
+    # @schema
+    # items:
+    #   $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.networking.v1.IngressTLS
+    # @schema
+    # -- The TLS configuration for additional hostnames to be covered with this ingress record.
+    # <br /> Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+    # <!-- E.g.
+    # extraTls:
+    #   - hosts:
+    #     - llm-d.env.example.com
+    #     secretName: llm-d-env -->
+    extraTls: []
+
+    # -- used as part of the host dirivation if not specified from OCP cluster domain (dont edit)
+    clusterRouterBase: ""
+
+# -- Model service controller configuration
+# @default -- See below
+modelservice:
+    # -- Toggle to deploy modelservice controller related resources
+    enabled: true
+
+    # -- Enable metrics gathering via podMonitor / ServiceMonitor
+    metrics:
+        # -- Enable metrics scraping from prefill and decode services, see `model
+        enabled: true
+
+        # -- Prometheus ServiceMonitor configuration
+        # <br /> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md
+        # @default -- See below
+        serviceMonitor:
+            # @schema
+            # additionalProperties: true
+            # @schema
+            # -- Additional annotations provided to the ServiceMonitor
+            annotations: {}
+
+            # @schema
+            # additionalProperties: true
+            # @schema
+            # -- Additional labels provided to the ServiceMonitor
+            labels: {}
+
+            # -- ServiceMonitor endpoint port
+            port: "vllm"
+
+            # -- ServiceMonitor endpoint path
+            path: "/metrics"
+
+            # -- ServiceMonitor endpoint interval at which metrics should be scraped
+            interval: "15s"
+
+            # -- ServiceMonitor namespace selector
+            namespaceSelector:
+                any: false
+
+                # @schema
+                # items:
+                #   type: string
+                # @schema
+                matchNames: []
+
+            # -- ServiceMonitor selector matchLabels
+            # </br> matchLabels must match labels on modelservice Services
+            selector:
+                # @schema
+                # $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector
+                # @schema
+                matchLabels: {}
+
+    # --  String to fully override modelservice.fullname
+    fullnameOverride: ""
+
+    # --  String to partially override modelservice.fullname
+    nameOverride: ""
+
+    # -- Number of controller replicas
+    replicas: 1
+
+    # -- Modelservice controller image, please change only if appropriate adjustments to the CRD are being made
+    # @default -- See below
+    image:
+        # -- Model Service controller image registry
+        registry: ghcr.io
+
+        # -- Model Service controller image repository
+        repository: llm-d/llm-d-model-service
+
+        # -- Model Service controller image tag
+        tag: "0.0.10"
+
+        # -- Specify a imagePullPolicy
+        imagePullPolicy: "Always"
+
+        # @schema
+        # items:
+        #   type: string
+        # @schema
+        # -- Optionally specify an array of imagePullSecrets (evaluated as templates)
+        pullSecrets: []
+
+    # -- Endpoint picker configuration
+    # @default -- See below
+    epp:
+        # -- Endpoint picker image used in ModelService CR presets
+        # @default -- See below
+        image:
+            # -- Endpoint picker image registry
+            registry: ghcr.io
+
+            # -- Endpoint picker image repository
+            repository: llm-d/llm-d-inference-scheduler
+
+            # -- Endpoint picker image tag
+            tag: 0.0.2
+
+            # -- Specify a imagePullPolicy
+            imagePullPolicy: "Always"
+
+            # @schema
+            # items:
+            #   type: string
+            # @schema
+            # -- Optionally specify an array of imagePullSecrets (evaluated as templates)
+            pullSecrets: []
+
+        # -- Enable metrics gathering via podMonitor / ServiceMonitor
+        metrics:
+            # -- Enable metrics scraping from endpoint picker service
+            enabled: true
+
+            # -- Prometheus ServiceMonitor configuration
+            # <br /> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md
+            # @default -- See below
+            serviceMonitor:
+                # @schema
+                # additionalProperties: true
+                # @schema
+                # -- Additional annotations provided to the ServiceMonitor
+                annotations: {}
+
+                # @schema
+                # additionalProperties: true
+                # @schema
+                # -- Additional labels provided to the ServiceMonitor
+                labels: {}
+
+                # -- ServiceMonitor endpoint port
+                port: "metrics"
+
+                # -- ServiceMonitor endpoint path
+                path: "/metrics"
+
+                # -- ServiceMonitor endpoint interval at which metrics should be scraped
+                interval: "10s"
+
+                # -- ServiceMonitor namespace selector
+                namespaceSelector:
+                    any: false
+
+                    # @schema
+                    # items:
+                    #   type: string
+                    # @schema
+                    matchNames: []
+
+                # -- ServiceMonitor selector matchLabels
+                # </br> matchLabels must match labels on modelservice Services
+                selector:
+                    # @schema
+                    # $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector
+                    # @schema
+                    matchLabels: {}
+
+        # -- Default environment variables for endpoint picker, use `extraEnvVars` to override default behavior by defining the same variable again.
+        # Ref: https://github.com/llm-d/llm-d-inference-scheduler/blob/main/docs/architecture.md#scorers--configuration
+        defaultEnvVars:
+            - name: ENABLE_KVCACHE_AWARE_SCORER
+              value: "false"
+            - name: KVCACHE_AWARE_SCORER_WEIGHT
+              value: "1"
+            - name: KVCACHE_INDEXER_REDIS_ADDR
+              value: '{{ if .Values.redis.enabled }}{{ include "redis.master.service.fullurl" . }}{{ end }}'
+            - name: ENABLE_PREFIX_AWARE_SCORER
+              value: "true"
+            - name: PREFIX_AWARE_SCORER_WEIGHT
+              value: "2"
+            - name: ENABLE_LOAD_AWARE_SCORER
+              value: "true"
+            - name: LOAD_AWARE_SCORER_WEIGHT
+              value: "1"
+            - name: ENABLE_SESSION_AWARE_SCORER
+              value: "false"
+            - name: SESSION_AWARE_SCORER_WEIGHT
+              value: "1"
+            - name: PD_ENABLED
+              value: "true"
+            - name: PD_PROMPT_LEN_THRESHOLD
+              value: "512"
+            - name: PREFILL_ENABLE_KVCACHE_AWARE_SCORER
+              value: "false"
+            - name: PREFILL_KVCACHE_AWARE_SCORER_WEIGHT
+              value: "1"
+            - name: PREFILL_ENABLE_LOAD_AWARE_SCORER
+              value: "true"
+            - name: PREFILL_LOAD_AWARE_SCORER_WEIGHT
+              value: "1"
+            - name: PREFILL_ENABLE_PREFIX_AWARE_SCORER
+              value: "true"
+            - name: PREFILL_PREFIX_AWARE_SCORER_WEIGHT
+              value: "2"
+            - name: PREFILL_ENABLE_SESSION_AWARE_SCORER
+              value: "false"
+            - name: PREFILL_SESSION_AWARE_SCORER_WEIGHT
+              value: "1"
+            - name: DECODE_ENABLE_KVCACHE_AWARE_SCORER
+              value: "false"
+            - name: DECODE_KVCACHE_AWARE_SCORER_WEIGHT
+              value: "1"
+            - name: DECODE_ENABLE_LOAD_AWARE_SCORER
+              value: "true"
+            - name: DECODE_LOAD_AWARE_SCORER_WEIGHT
+              value: "1"
+            - name: DECODE_ENABLE_PREFIX_AWARE_SCORER
+              value: "true"
+            - name: DECODE_PREFIX_AWARE_SCORER_WEIGHT
+              value: "2"
+            - name: DECODE_ENABLE_SESSION_AWARE_SCORER
+              value: "false"
+            - name: DECODE_SESSION_AWARE_SCORER_WEIGHT
+              value: "1"
+
+        # @schema
+        # items:
+        #   $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar
+        # @schema
+        # -- Additional environment variables for endpoint picker
+        defaultEnvVarsOverride: []
+
+    # -- Prefill options
+    # @default -- See below
+    prefill:
+        # @schema
+        # items:
+        #   $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration
+        # @schema
+        # -- Tolerations configuration to deploy prefill pods to tainted nodes
+        # @default -- See below
+        tolerations:
+            # -- default NVIDIA GPU toleration
+            - key: nvidia.com/gpu
+              operator: Exists
+              effect: NoSchedule
+
+    # -- Decode options
+    # @default -- See below
+    decode:
+        # @schema
+        # items:
+        #   $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration
+        # @schema
+        # -- Tolerations configuration to deploy decode pods to tainted nodes
+        # @default -- See below
+        tolerations:
+            # -- default NVIDIA GPU toleration
+            - key: nvidia.com/gpu
+              operator: Exists
+              effect: NoSchedule
+
+    # -- vLLM container options
+    # @default -- See below
+    vllm:
+        # -- vLLM image used in ModelService CR presets
+        # @default -- See below
+        image:
+            # -- llm-d image registry
+            registry: ghcr.io
+
+            # -- llm-d image repository
+            repository: llm-d/llm-d-dev
+
+            # -- llm-d image tag
+            tag: 0.0.10
+
+            # -- Specify a imagePullPolicy
+            imagePullPolicy: "IfNotPresent"
+
+            # @schema
+            # items:
+            #   type: string
+            # @schema
+            # -- Optionally specify an array of imagePullSecrets (evaluated as templates)
+            pullSecrets: []
+
+        # -- Enable metrics gathering via podMonitor / ServiceMonitor
+        metrics:
+            # -- Enable metrics scraping from prefill & decode services
+            enabled: true
+
+    # -- Routing proxy container options
+    # @default -- See below
+    routingProxy:
+        # -- Routing proxy image used in ModelService CR presets
+        image:
+            # -- Routing proxy image registry
+            registry: ghcr.io
+
+            # -- Routing proxy image repository
+            repository: llm-d/llm-d-routing-sidecar
+
+            # -- Routing proxy image tag
+            tag: "0.0.6"
+
+            # -- Specify a imagePullPolicy
+            imagePullPolicy: "IfNotPresent"
+
+            # @schema
+            # items:
+            #   type: string
+            # @schema
+            # -- Optionally specify an array of imagePullSecrets (evaluated as templates)
+            pullSecrets: []
+
+    # -- llm-d inference simulator container options
+    # @default -- See below
+    inferenceSimulator:
+        # -- llm-d inference simulator image used in ModelService CR presets
+        # @default -- See below
+        image:
+            # -- llm-d inference simulator image registry
+            registry: ghcr.io
+
+            # -- llm-d inference simulator image repository
+            repository: llm-d/llm-d-inference-sim
+
+            # -- llm-d inference simulator image tag
+            tag: "0.0.4"
+
+            # -- Specify a imagePullPolicy
+            imagePullPolicy: "IfNotPresent"
+
+            # @schema
+            # items:
+            #   type: string
+            # @schema
+            # -- Optionally specify an array of imagePullSecrets (evaluated as templates)
+            pullSecrets: []
+
+    # @schema
+    # additionalProperties: true
+    # @schema
+    # -- Annotations to add to all modelservice resources
+    annotations: {}
+
+    # @schema
+    # additionalProperties: true
+    # @schema
+    # -- Pod annotations for modelservice
+    podAnnotations: {}
+
+    # @schema
+    # additionalProperties: true
+    # @schema
+    # -- Pod labels for modelservice
+    podLabels: {}
+
+    # Model service controller settings
+    service:
+        # -- Toggle to deploy a Service resource for Model service controller
+        enabled: true
+
+        # -- Port number exposed from Model Service controller
+        port: 8443
+
+        # -- Service type
+        type: ClusterIP
+
+    # -- Service Account Configuration
+    # @default -- See below
+    serviceAccount:
+        # -- Enable the creation of a ServiceAccount for Modelservice pods
+        create: true
+
+        # --  String to fully override modelservice.serviceAccountName, defaults to modelservice.fullname
+        fullnameOverride: ""
+
+        # --  String to partially override modelservice.serviceAccountName, defaults to modelservice.fullname
+        nameOverride: ""
+
+        # @schema
+        # additionalProperties: true
+        # @schema
+        # -- Additional custom labels to the service ServiceAccount.
+        labels: {}
+
+        # @schema
+        # additionalProperties: true
+        # @schema
+        # -- Additional custom annotations for the ServiceAccount.
+        annotations: {}
+
+    rbac:
+        # -- Enable the creation of RBAC resources
+        create: true
+
+# @schema
+# $ref: https://raw.githubusercontent.com/bitnami/charts/refs/tags/redis/20.13.4/bitnami/redis/values.schema.json
+# @schema
+# -- Bitnami/Redis chart configuration
+# @default -- Use sane defaults for minimal Redis deployment
+redis:
+    enabled: false
+    auth:
+        enabled: false
+        existingSecretPasswordKey: ""
+        existingSecret: ""
+    architecture: standalone
+    image:
+        registry: quay.io
+        repository: sclorg/redis-7-c9s
+        tag: c9s
+    master:
+        kind: Deployment
+        resources:
+            limits:
+                memory: "256Mi"
+                cpu: "250m"
+            requests:
+                memory: "128Mi"
+                cpu: "100m"
+        persistence:
+            enabled: true
+            size: "5Gi"
+        pdb:
+            create: false
+        service:
+            ports:
+                redis: 8100
+    networkPolicy:
+        enabled: false

@@ -30,7 +30,7 @@ spec:
       {{- range .Values.sampleApplication.decode.extraArgs }}
       - {{ include "common.tplvalues.render" ( dict "value" . "context" $) | quote }}
       {{- end }}
-      resources: {{ .Values.sampleApplication.resources | toYaml | nindent 8 }}
+      resources: {{ .Values.sampleApplication.decode.resources | toYaml | nindent 8 }}
       env:
       {{- if eq (include "sampleApplication.modelArtifactType" . ) "hf" }}
       - name: HF_TOKEN
@@ -49,7 +49,7 @@ spec:
       {{- range .Values.sampleApplication.prefill.extraArgs }}
       - {{ include "common.tplvalues.render" ( dict "value" . "context" $) | quote }}
       {{- end }}
-      resources: {{ .Values.sampleApplication.resources | toYaml | nindent 8 }}
+      resources: {{ .Values.sampleApplication.decode.resources | toYaml | nindent 8 }}
       env:
       {{- if eq (include "sampleApplication.modelArtifactType" . ) "hf" }}
       - name: HF_TOKEN

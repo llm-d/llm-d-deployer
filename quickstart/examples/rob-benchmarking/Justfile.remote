@@ -1,0 +1,36 @@
+# Use this Justfile within the cluster.
+
+# MODEL := "RedHatAI/Llama-4-Maverick-17B-128E-Instruct-FP8"
+MODEL := "RedHatAI/Llama-3.3-70B-Instruct-FP8-dynamic"
+BASE_URL := "http://llm-d-inference-gateway"
+
+eval:
+    lm_eval --model local-completions --tasks gsm8k \
+    --model_args model={{MODEL}},base_url={{BASE_URL}}/v1/completions,num_concurrent=50,max_retries=3,tokenized_requests=False \
+    --limit 100
+
+benchmark RR NUM_REQUESTS INPUT_LEN OUTPUT_LEN:
+    python vllm/benchmarks/benchmark_serving.py \
+        --base-url {{BASE_URL}} \
+        --model {{MODEL}} \
+        --dataset-name random \
+        --random-input-len {{INPUT_LEN}} \
+        --random-output-len {{OUTPUT_LEN}}  \
+        --request-rate {{RR}} \
+        --seed $(date +%M%H%M%S) \
+        --num-prompts {{NUM_REQUESTS}} \
+        --ignore-eos
+
+# just benchmark 4 1000 15000 5000 <-- current 1P3D setup
+#
+benchmark_no_pd POD_IP RR NUM_REQUESTS INPUT_LEN OUTPUT_LEN:
+    python vllm/benchmarks/benchmark_serving.py \
+        --base-url http://{{POD_IP}}:8000 \
+        --model {{MODEL}} \
+        --dataset-name random \
+        --random-input-len {{INPUT_LEN}} \
+        --random-output-len {{OUTPUT_LEN}}  \
+        --request-rate {{RR}} \
+        --seed $(date +%M%H%M%S) \
+        --num-prompts {{NUM_REQUESTS}} \
+        --ignore-eos
