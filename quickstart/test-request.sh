@@ -174,7 +174,7 @@ validation() {
 
 # ── Minikube gateway validation ───────────────────────────────────────────────
 minikube_validation() {
-  SVC_HOST="llm-d-inference-gateway.${NAMESPACE}.svc.cluster.local:80"
+  SVC_HOST="llm-d-inference-gateway-istio.${NAMESPACE}.svc.cluster.local:80"
   echo "Minikube validation: hitting gateway DNS at ${SVC_HOST}"
 
   # 1) GET /v1/models via DNS gateway
