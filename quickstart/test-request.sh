@@ -89,7 +89,7 @@ validation() {
   # Discover the decode pod IP
   POD_IP=$(kubectl get pods -n "$NAMESPACE" \
     -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.status.podIP}{"\n"}{end}' \
-    | grep decode | awk '{print $2}' | head -1)
+    | grep decode | awk '{print $2}')
 
   if [[ -z "$POD_IP" ]]; then
       echo "Error: no decode pod found in namespace $NAMESPACE"
