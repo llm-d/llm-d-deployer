@@ -25,6 +25,7 @@ DISABLE_METRICS=false
 MONITORING_NAMESPACE="llm-d-monitoring"
 DOWNLOAD_MODEL=""
 DOWNLOAD_TIMEOUT="600"
+GATEWAY_TOKEN_RAW=""
 
 # Minikube-specific flags & globals
 USE_MINIKUBE=false
@@ -52,6 +53,7 @@ Options:
   -m, --disable-metrics-collection Disable metrics collection (Prometheus will not be installed)
   -D, --download-model             Download the model to PVC from Hugging Face
   -t, --download-timeout           Timeout for model download job
+  -T, --gateway-api-key KEY        Raw HS256 signing key for your JWTs (hex or base64)
   -k, --minikube                   Deploy on an existing minikube instance with hostPath storage
   -g, --context                    Supply a specific Kubernetes context
   -h, --help                       Show this help and exit
@@ -136,6 +138,7 @@ parse_args() {
       -m|--disable-metrics-collection) DISABLE_METRICS=true; shift;;
       -D|--download-model)             DOWNLOAD_MODEL="$2"; shift 2 ;;
       -t|--download-timeout)           DOWNLOAD_TIMEOUT="$2"; shift 2 ;;
+      -T|--gateway-api-key)            GATEWAY_TOKEN_RAW="$2"; shift 2 ;;
       -k|--minikube)                   USE_MINIKUBE=true; shift ;;
       -g|--context)                    KUBERNETES_CONTEXT="$2"; shift 2 ;;
       -h|--help)                       print_help; exit 0 ;;
@@ -254,6 +257,56 @@ spec:
   volumeName: ${MODEL_PV_NAME}
 EOF
   log_success "llama model PV and PVC (${PVC_NAME}) created."
+}
+
+# Validate gatewayClassName if user requested a gateway API key
+check_gateway_compat() {
+  log_info "DEBUG: in check_gateway_compat, GATEWAY_TOKEN_RAW='${GATEWAY_TOKEN_RAW:-}'"
+  if [[ -n "${GATEWAY_TOKEN_RAW:-}" ]]; then
+    gc=$(yq eval '.gateway.gatewayClassName' "${VALUES_PATH}")
+    log_info "DEBUG: gateway.gatewayClassName from values is '${gc}'"
+    if [[ "$gc" != "istio" ]]; then
+      die "--gateway-api-key requires gatewayClassName=istio (found: $gc)"
+    fi
+  else
+    log_info "DEBUG: skipping check_gateway_compat because no gateway API key provided"
+  fi
+}
+
+configure_gateway_auth() {
+  # Only apply JWT auth if a gateway key was explicitly provided
+  [[ -z "${GATEWAY_TOKEN_RAW:-}" ]] && return
+
+  # ensure we’re on an Istio gateway
+  local GC
+  GC=$(yq eval '.gateway.gatewayClassName' "${VALUES_PATH}")
+  if [[ "$GC" != "istio" ]]; then
+    die "--gateway-api-key requires gatewayClassName=istio (found: $GC)"
+  fi
+
+  # base64-URL encode the raw secret
+  local BASE64URL_K
+  BASE64URL_K=$(printf '%s' "$GATEWAY_TOKEN_RAW" \
+    | openssl base64 -A \
+    | tr '+/' '-_' \
+    | tr -d '=')
+
+  log_info "🔍 Applying gateway JWT auth to namespace ${NAMESPACE}"
+
+  # render the secure-gateway-dev manifest
+  local RENDERED
+  RENDERED=$(
+    env NAMESPACE="$NAMESPACE" BASE64URL_K="$BASE64URL_K" \
+      envsubst '${NAMESPACE} ${BASE64URL_K}' \
+      < "${REPO_ROOT}/helpers/k8s/secure-gateway-dev.yaml" \
+    ) || { echo "❌ envsubst failed on API auth setup step"; exit 1; }
+
+  # apply it
+  printf '%s\n' "${RENDERED}" \
+    | kubectl apply -n "${NAMESPACE}" -f - \
+      || die "Failed to apply gateway JWT auth manifest"
+
+  log_success "✅ Applied gateway JWT auth (RequestAuthentication & AuthorizationPolicy)"
 }
 
 create_pvc_and_download_model_if_needed() {
@@ -408,6 +461,8 @@ install() {
   cd "${CHART_DIR}"
   resolve_values
 
+  check_gateway_compat
+
   log_info "🔐 Creating/updating HF token secret..."
   HF_NAME=$(yq -r .sampleApplication.model.auth.hfToken.name "${VALUES_PATH}")
   HF_KEY=$(yq -r .sampleApplication.model.auth.hfToken.key  "${VALUES_PATH}")
@@ -505,6 +560,9 @@ fi
     --set ingress.clusterRouterBase="${BASE_OCP_DOMAIN}" \
     "${METRICS_ARGS[@]}"
   log_success "llm-d deployed"
+
+  # if requested, configure gateway JWT auth
+  configure_gateway_auth
 
   post_install
 

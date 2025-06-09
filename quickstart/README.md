@@ -109,19 +109,23 @@ The installer needs to be run from the `llm-d-deployer/quickstart` directory as 
 
 ### Flags
 
-| Flag                                 | Description                                                   | Example                                                          |
-|--------------------------------------|---------------------------------------------------------------|------------------------------------------------------------------|
-| `-z`, `--storage-size SIZE`          | Size of storage volume                                        | `./llmd-installer.sh --storage-size 15Gi`                        |
-| `-c`, `--storage-class CLASS`        | Storage class to use (default: efs-sc)                        | `./llmd-installer.sh --storage-class ocs-storagecluster-cephfs`  |
-| `-n`, `--namespace NAME`             | K8s namespace (default: llm-d)                                | `./llmd-installer.sh --namespace foo`                            |
-| `-f`, `--values-file PATH`           | Path to Helm values.yaml file (default: values.yaml)          | `./llmd-installer.sh --values-file /path/to/values.yaml`         |
-| `-u`, `--uninstall`                  | Uninstall the llm-d components from the current cluster       | `./llmd-installer.sh --uninstall`                                |
-| `-d`, `--debug`                      | Add debug mode to the helm install                            | `./llmd-installer.sh --debug`                                    |
-| `-i`, `--skip-infra`                 | Skip the infrastructure components of the installation        | `./llmd-installer.sh --skip-infra`                               |
-| `-t`, `--download-timeout`           | Timeout for model download job                                | `./llmd-installer.sh --download-timeout`                         |
-| `-D`, `--download-model`             | Download the model to PVC from Hugging Face                   | `./llmd-installer.sh --download-model`                           |
-| `-m`, `--disable-metrics-collection` | Disable metrics collection (Prometheus will not be installed) | `./llmd-installer.sh --disable-metrics-collection`               |
-| `-h`, `--help`                       | Show this help and exit                                       | `./llmd-installer.sh --help`                                     |
+| Flag                                 | Description                                                   | Example                                                                       |
+|--------------------------------------|---------------------------------------------------------------|-------------------------------------------------------------------------------|
+| `-z`, `--storage-size SIZE`          | Size of storage volume                                        | `./llmd-installer.sh --storage-size 15Gi`                                     |
+| `-c`, `--storage-class CLASS`        | Storage class to use (default: efs-sc)                        | `./llmd-installer.sh --storage-class ocs-storagecluster-cephfs`               |
+| `-n`, `--namespace NAME`             | K8s namespace (default: llm-d)                                | `./llmd-installer.sh --namespace foo`                                         |
+| `-f`, `--values-file PATH`           | Path to Helm values.yaml file (default: values.yaml)          | `./llmd-installer.sh --values-file /path/to/values.yaml`                      |
+| `-u`, `--uninstall`                  | Uninstall the llm-d components from the current cluster       | `./llmd-installer.sh --uninstall`                                             |
+| `-d`, `--debug`                      | Add debug mode to the helm install                            | `./llmd-installer.sh --debug`                                                 |
+| `-i`, `--skip-infra`                 | Skip the infrastructure components of the installation        | `./llmd-installer.sh --skip-infra`                                            |
+| `-e`, `--infra-only`                 | Only deploy infrastructure components                         | `./llmd-installer.sh --infra-only`                                            |
+| `-b`, `--download-pvc-only`          | Only download model to a PVC                                  | `./llmd-installer.sh --download-pvc-only`                                     |
+| `-t`, `--download-timeout`           | Timeout for model download job                                | `./llmd-installer.sh --download-timeout`                                      |
+| `-D`, `--download-model`             | Download the model to PVC from Hugging Face                   | `./llmd-installer.sh --download-model`                                        |
+| `-m`, `--disable-metrics-collection` | Disable metrics collection (Prometheus will not be installed) | `./llmd-installer.sh --disable-metrics-collection`                            |
+| `-T`, `--gateway-api-key KEY`        | Raw HS256 signing key for your JWTs (hex or base64)           | `./llmd-installer.sh --gateway-api-key ex_a1B2c3D4e5F6g7H8i9J0KlMnOpQrStUvWx` |
+| `-k`, `--minikube`                   | Deploy on an existing minikube instance with hostPath storage | `./llmd-installer.sh --minikube`                                              |
+| `-h`, `--help`                       | Show this help and exit                                       | `./llmd-installer.sh --help`                                                  |
 
 ## Examples
 

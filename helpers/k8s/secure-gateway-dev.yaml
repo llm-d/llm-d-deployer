@@ -1,0 +1,39 @@
+---
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: llm-d-dev-jwt
+  namespace: ${NAMESPACE}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: inference-gateway
+  jwtRules:
+    - issuer: "dev"
+      jwks: |
+        {
+          "keys":[
+            {
+              "kty":"oct",
+              "kid":"dev-key",
+              "use":"sig",
+              "alg":"HS256",
+              "k":"${BASE64URL_K}"
+            }
+          ]
+        }
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: llm-d-dev-authz
+  namespace: ${NAMESPACE}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: inference-gateway
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            requestPrincipals: ["*"]

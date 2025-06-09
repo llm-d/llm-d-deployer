@@ -26,7 +26,8 @@ Quick smoke tests against your llm-d deployment.
 
 Options:
   -n, --namespace NAMESPACE   Kubernetes namespace to use (default: llm-d)
-  -m, --model MODEL_ID        Model to query (optional: served model will be discovered from model listing)
+  -m, --model MODEL_ID        Model to query (optional: served model will be discovered)
+  -t, --api-key TOKEN           Bearer JWT to include in Authorization header
   -k, --minikube              Run only Minikube DNS gateway tests
   -h, --help                  Show this help message and exit
 EOF
@@ -36,6 +37,7 @@ EOF
 # ── Parse flags ───────────────────────────────────────────────────────────────
 NAMESPACE="llm-d"
 CLI_MODEL_ID=""
+TOKEN=""
 USE_MINIKUBE=false
 
 while [[ $# -gt 0 ]]; do
@@ -46,6 +48,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     -m|--model)
       CLI_MODEL_ID="$2"
+      shift 2
+      ;;
+    -t|--api-key)
+      TOKEN="$2"
       shift 2
       ;;
     -k|--minikube)
@@ -62,13 +68,26 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+TOKEN="${TOKEN:-${LLMD_GATEWAY_API_KEY:-}}"
+
+# Build Authorization header if a token was provided
+AUTH_HEADER=()
+if [[ -n "$TOKEN" ]]; then
+  AUTH_HEADER=(-H "Authorization: Bearer $TOKEN")
+fi
+
 MODEL_ID="${CLI_MODEL_ID:-}"
 
 echo "Namespace: $NAMESPACE"
 if [[ -n "$MODEL_ID" ]]; then
   echo "Model ID:  $MODEL_ID"
 else
-  echo "Model ID:  none; will be discover from first entry in /v1/models"
+  echo "Model ID:  none; will be discovered from /v1/models"
+fi
+if [[ -n "$TOKEN" ]]; then
+  echo "Using token: yes"
+else
+  echo "Using token: no"
 fi
 echo
 
@@ -104,9 +123,9 @@ validation() {
     --image=curlimages/curl --restart=Never -- \
     curl -sS http://${POD_IP}:8000/v1/models \
       -H 'accept: application/json' \
-      -H 'Content-Type: application/json')
-  echo "$LIST_JSON"
-  echo
+      -H 'Content-Type: application/json' \
+      "${AUTH_HEADER[@]}")
+  echo "$LIST_JSON"; echo
 
   # infer or validate
   if [[ -z "$MODEL_ID" ]]; then
@@ -130,6 +149,7 @@ validation() {
     curl -sS -X POST http://${POD_IP}:8000/v1/completions \
       -H 'accept: application/json' \
       -H 'Content-Type: application/json' \
+      "${AUTH_HEADER[@]}" \
       -d '{
         "model":"'"$MODEL_ID"'",
         "prompt":"Who are you?"
@@ -145,9 +165,9 @@ validation() {
     --image=curlimages/curl --restart=Never -- \
     curl -sS http://${GATEWAY_ADDR}/v1/models \
       -H 'accept: application/json' \
-      -H 'Content-Type: application/json')
-  echo "$GW_JSON"
-  echo
+      -H 'Content-Type: application/json' \
+      "${AUTH_HEADER[@]}")
+  echo "$GW_JSON"; echo
 
   if ! grep -q "\"id\":\"$MODEL_ID\"" <<<"$GW_JSON"; then
     echo "Error: model '$MODEL_ID' not available via gateway:"
@@ -165,6 +185,7 @@ validation() {
     curl -sS -X POST http://${GATEWAY_ADDR}/v1/completions \
       -H 'accept: application/json' \
       -H 'Content-Type: application/json' \
+      "${AUTH_HEADER[@]}" \
       -d '{
         "model":"'"$MODEL_ID"'",
         "prompt":"Who are you?"
@@ -185,9 +206,9 @@ minikube_validation() {
     --image=curlimages/curl --restart=Never -- \
     curl -sS http://${SVC_HOST}/v1/models \
       -H 'accept: application/json' \
-      -H 'Content-Type: application/json')
-  echo "$LIST_JSON"
-  echo
+      -H 'Content-Type: application/json' \
+      "${AUTH_HEADER[@]}")
+  echo "$LIST_JSON"; echo
 
   # Discover or validate
   if [[ -z "$MODEL_ID" ]]; then
@@ -211,6 +232,7 @@ minikube_validation() {
     curl -sS -X POST http://${SVC_HOST}/v1/completions \
       -H 'accept: application/json' \
       -H 'Content-Type: application/json' \
+      "${AUTH_HEADER[@]}" \
       -d '{
         "model":"'"$MODEL_ID"'",
         "prompt":"You are a helpful AI assistant."
