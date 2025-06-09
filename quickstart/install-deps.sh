@@ -64,7 +64,11 @@ if ! command -v kubectl &> /dev/null; then
   echo "Installing kubectl..."
   K8S_URL="https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)"
   curl -LO "${K8S_URL}/bin/${OS}/${ARCH}/kubectl"
-  sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+  if [[ "$OS" == "darwin" ]]; then
+    sudo install -m 0755 kubectl /usr/local/bin/kubectl
+  else
+    sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+  fi
   rm kubectl
 fi
 
