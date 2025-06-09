@@ -53,7 +53,7 @@ Options:
   -D, --download-model             Download the model to PVC from Hugging Face
   -t, --download-timeout           Timeout for model download job
   -k, --minikube                   Deploy on an existing minikube instance with hostPath storage
-  -g, --context                    Supply a specific Kubernete/OpenShift context
+  -g, --context                    Supply a specific Kubernetes context
   -h, --help                       Show this help and exit
 EOF
 }
