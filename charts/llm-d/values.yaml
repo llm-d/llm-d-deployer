@@ -151,6 +151,9 @@ sampleApplication:
     # -- args to add to the prefill deployment
     extraArgs: []
 
+    # -- environment variables injected into each decode vLLM container
+    env: []
+
   decode:
     # -- number of desired decode replicas
     replicas: 1
@@ -161,6 +164,9 @@ sampleApplication:
     # @schema
     # -- args to add to the decode deployment
     extraArgs: []
+
+    # -- environment variables injected into each decode vLLM container
+    env: []
 
   endpointPicker:
 

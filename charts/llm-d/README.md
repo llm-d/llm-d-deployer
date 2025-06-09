@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart
 
-![Version: 1.0.17](https://img.shields.io/badge/Version-1.0.17-informational?style=flat-square)
+![Version: 1.0.18](https://img.shields.io/badge/Version-1.0.18-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 llm-d is a Kubernetes-native high-performance distributed LLM inference framework
@@ -284,6 +284,7 @@ Kubernetes: `>= 1.30.0-0`
 | redis | Bitnami/Redis chart configuration | object | Use sane defaults for minimal Redis deployment |
 | sampleApplication | Sample application deploying a p-d pair of specific model | object | See below |
 | sampleApplication.baseConfigMapRefName | Name of the base configMapRef to use <br /> For the available presets see: `templates/modelservice/presets/` | string | `"basic-gpu-with-nixl-and-redis-lookup-preset"` |
+| sampleApplication.decode.env | environment variables injected into each decode vLLM container | list | `[]` |
 | sampleApplication.decode.extraArgs | args to add to the decode deployment | list | `[]` |
 | sampleApplication.decode.replicas | number of desired decode replicas | int | `1` |
 | sampleApplication.enabled | Enable rendering of sample application resources | bool | `true` |
@@ -295,6 +296,7 @@ Kubernetes: `>= 1.30.0-0`
 | sampleApplication.model.modelArtifactURI | Fully qualified model artifact location URI <br /> For Hugging Face models use: `hf://<organization>/<repo>` <br /> For models located on PVC use: `pvc://<pvc_name>/<path_to_model>` | string | `"hf://meta-llama/Llama-3.2-3B-Instruct"` |
 | sampleApplication.model.modelName | Name of the model | string | `"meta-llama/Llama-3.2-3B-Instruct"` |
 | sampleApplication.model.servedModelNames | Aliases to the Model named vllm will serve with | list | `[]` |
+| sampleApplication.prefill.env | environment variables injected into each decode vLLM container | list | `[]` |
 | sampleApplication.prefill.extraArgs | args to add to the prefill deployment | list | `[]` |
 | sampleApplication.prefill.replicas | number of desired prefill replicas | int | `1` |
 | sampleApplication.resources | Resource requests/limits <br /> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-requests-and-limits-of-pod-and-container | object | `{"limits":{"nvidia.com/gpu":"1"},"requests":{"nvidia.com/gpu":"1"}}` |
