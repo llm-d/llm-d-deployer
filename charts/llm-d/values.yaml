@@ -125,22 +125,22 @@ sampleApplication:
         # -- Key within the secret under which the token is located
         key: HF_TOKEN
 
-  # @schema
-  # $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements
-  # @schema
-  # -- Modify resource limits/requests available to the pods
-  # -- Resource requests/limits
-  # <br /> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-requests-and-limits-of-pod-and-container
-  resources:
-    limits:
-      nvidia.com/gpu: "1"
-    requests:
-      nvidia.com/gpu: "1"
-
   # -- InferencePool port configuration
   inferencePoolPort: 8000
 
   prefill:
+    # @schema
+    # $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements
+    # @schema
+    # -- Modify resource limits/requests available to the pods
+    # -- Resource requests/limits
+    # <br /> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-requests-and-limits-of-pod-and-container
+    resources:
+      limits:
+        nvidia.com/gpu: "1"
+      requests:
+        nvidia.com/gpu: "1"
+
     # -- number of desired prefill replicas
     replicas: 1
 
@@ -152,6 +152,18 @@ sampleApplication:
     extraArgs: []
 
   decode:
+    # @schema
+    # $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements
+    # @schema
+    # -- Modify resource limits/requests available to the pods
+    # -- Resource requests/limits
+    # <br /> Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-requests-and-limits-of-pod-and-container
+    resources:
+      limits:
+        nvidia.com/gpu: "1"
+      requests:
+        nvidia.com/gpu: "1"
+
     # -- number of desired decode replicas
     replicas: 1
 
