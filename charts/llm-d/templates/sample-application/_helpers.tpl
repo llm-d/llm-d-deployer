@@ -8,8 +8,8 @@ Sanitize the model name into a valid k8s label.
   {{- $name = regexReplaceAll "[\\-._]+$" $name "" -}}
   {{- $name = regexReplaceAll "\\." $name "-" -}}
 
-  {{- if gt (len $name) 63 -}}
-    {{- $name = substr 0 63 $name -}}
+  {{- if gt (len $name) 45 -}}
+    {{- $name = substr 0 45 $name -}}
   {{- end -}}
 
 {{- $name -}}
