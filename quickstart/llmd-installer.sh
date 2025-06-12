@@ -25,6 +25,7 @@ DISABLE_METRICS=false
 MONITORING_NAMESPACE="llm-d-monitoring"
 DOWNLOAD_MODEL=""
 DOWNLOAD_TIMEOUT="600"
+GATEWAY_TYPE="istio"
 
 # Minikube-specific flags & globals
 USE_MINIKUBE=false
@@ -54,6 +55,7 @@ Options:
   -t, --download-timeout           Timeout for model download job
   -k, --minikube                   Deploy on an existing minikube instance with hostPath storage
   -g, --context                    Supply a specific Kubernetes context
+  -j, --gateway                    Select gateway type (istio or kgateway)
   -h, --help                       Show this help and exit
 EOF
 }
@@ -138,6 +140,7 @@ parse_args() {
       -t|--download-timeout)           DOWNLOAD_TIMEOUT="$2"; shift 2 ;;
       -k|--minikube)                   USE_MINIKUBE=true; shift ;;
       -g|--context)                    KUBERNETES_CONTEXT="$2"; shift 2 ;;
+      -j|--gateway)                    GATEWAY_TYPE="$2"; shift 2 ;;
       -h|--help)                       print_help; exit 0 ;;
       *)                               die "Unknown option: $1" ;;
     esac
@@ -386,7 +389,7 @@ create_pvc_and_download_model_if_needed() {
 install() {
   if [[ "${SKIP_INFRA}" == "false" ]]; then
     log_info "🏗️ Installing GAIE Kubernetes infrastructure…"
-    bash ../chart-dependencies/ci-deps.sh
+    bash ../chart-dependencies/ci-deps.sh apply ${GATEWAY_TYPE}
     log_success "GAIE infra applied"
   fi
 
@@ -535,7 +538,7 @@ post_install() {
 uninstall() {
   if [[ "${SKIP_INFRA}" == "false" ]]; then
     log_info "🗑️ Tearing down GAIE Kubernetes infrastructure…"
-    bash ../chart-dependencies/ci-deps.sh delete
+    bash ../chart-dependencies/ci-deps.sh delete ${GATEWAY_TYPE}
   fi
   MODEL_ARTIFACT_URI=$($KCMD get modelservice --ignore-not-found -n ${NAMESPACE} -o yaml | yq '.items[].spec.modelArtifacts.uri')
   PROTOCOL="${MODEL_ARTIFACT_URI%%://*}"

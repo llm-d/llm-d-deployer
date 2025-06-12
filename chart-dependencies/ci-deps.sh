@@ -24,7 +24,7 @@ CWD=$( dirname -- "$( readlink -f -- "$0"; )"; )
 
 ## Populate manifests
 MODE=${1:-apply} # allowed values "apply" or "delete"
-
+BACKEND=${2:-$(helm show values $CWD/../charts/llm-d --jsonpath '{.gateway.gatewayClassName}')}
 if [[ "$MODE" == "apply" ]]; then
     LOG_ACTION_NAME="Installing"
 else
@@ -40,7 +40,6 @@ log_success "🚪 GAIE CRDs: ${LOG_ACTION_NAME}..."
 kubectl $MODE -k https://github.com/llm-d/llm-d-inference-scheduler/deploy/components/crds-gie || true
 
 ### Install Gateway provider
-backend=$(helm show values $CWD/../charts/llm-d --jsonpath '{.gateway.gatewayClassName}')
 log_success "🎒 Gateway provider '${COLOR_BLUE}${backend}${COLOR_RESET}${COLOR_GREEN}': ${LOG_ACTION_NAME}...${COLOR_RESET}"
 
-$CWD/$backend/install.sh $MODE
+$CWD/$BACKEND/install.sh $MODE
