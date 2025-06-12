@@ -6839,6 +6839,100 @@
                             "required": [],
                             "title": "logLevel"
                         },
+                        "loadFormat": {
+                            "default": "",
+                            "description": "Load format for vLLM model loading <br /> When set to \"runai_streamer\", enables Run:AI Model Streamer for loading models from object storage <br /> Options: \"\", \"runai_streamer\", \"runai_streamer_sharded\"",
+                            "required": [],
+                            "title": "loadFormat"
+                        },
+                        "runaiStreamer": {
+                            "additionalProperties": false,
+                            "default": "See below",
+                            "description": "RunAI Model Streamer configuration options <br /> These options are used when loadFormat is set to \"runai_streamer\" or \"runai_streamer_sharded\"",
+                            "properties": {
+                                "concurrency": {
+                                    "default": 16,
+                                    "description": "Controls the level of concurrency and number of OS threads reading tensors <br /> Positive integer",
+                                    "minimum": 1,
+                                    "required": [],
+                                    "title": "concurrency",
+                                    "type": "integer"
+                                },
+                                "chunkBytesize": {
+                                    "default": "",
+                                    "description": "Controls the maximum size of memory each OS thread reads from the file at once <br /> Positive integer in bytes <br /> Default: 2,097,152 (2 MiB) for file system, 8,388,608 (8 MiB) for object store",
+                                    "required": [],
+                                    "title": "chunkBytesize",
+                                    "type": "string"
+                                },
+                                "memoryLimit": {
+                                    "default": -1,
+                                    "description": "Controls the size of the CPU Memory buffer to which tensors are read <br /> Integer: -1 (UNLIMITED), 0 (MIN), or positive integer in bytes",
+                                    "required": [],
+                                    "title": "memoryLimit",
+                                    "type": "integer"
+                                },
+                                "pattern": {
+                                    "default": "",
+                                    "description": "Custom naming pattern for sharded model files <br /> Used with runai_streamer_sharded load format <br /> Example: \"custom-model-rank-{rank}-part-{part}.safetensors\"",
+                                    "required": [],
+                                    "title": "pattern",
+                                    "type": "string"
+                                },
+                                "s3": {
+                                    "additionalProperties": false,
+                                    "default": "See below",
+                                    "description": "S3/Object store configuration",
+                                    "properties": {
+                                        "endpointUrl": {
+                                            "default": "",
+                                            "description": "Override url endpoint for reading from S3 compatible object store <br /> Mandatory for S3-compatible stores like GCS, Minio",
+                                            "required": [],
+                                            "title": "endpointUrl",
+                                            "type": "string"
+                                        },
+                                        "caBundlePath": {
+                                            "default": "",
+                                            "description": "Path to a certificate bundle to use for HTTPS certificate validation",
+                                            "required": [],
+                                            "title": "caBundlePath",
+                                            "type": "string"
+                                        },
+                                        "useVirtualAddressing": {
+                                            "default": true,
+                                            "description": "Controls parsing the url endpoint for reading from object store <br /> Boolean: true enables virtual addressing, false uses path-style",
+                                            "required": [],
+                                            "title": "useVirtualAddressing",
+                                            "type": "boolean"
+                                        }
+                                    },
+                                    "required": [],
+                                    "title": "s3",
+                                    "type": "object"
+                                }
+                            },
+                            "required": [],
+                            "title": "runaiStreamer",
+                            "type": "object"
+                        },
+                        "extraArgs": {
+                            "description": "Additional command line arguments for vLLM",
+                            "items": {
+                                "required": [],
+                                "type": "string"
+                            },
+                            "required": [],
+                            "title": "extraArgs"
+                        },
+                        "extraEnvVars": {
+                            "description": "Additional environment variables for vLLM containers",
+                            "items": {
+                                "required": [],
+                                "type": "object"
+                            },
+                            "required": [],
+                            "title": "extraEnvVars"
+                        },
                         "metrics": {
                             "additionalProperties": false,
                             "description": "Enable metrics gathering via podMonitor / ServiceMonitor",

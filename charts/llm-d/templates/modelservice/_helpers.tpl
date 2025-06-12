@@ -110,3 +110,51 @@ Return the proper Docker Image Registry Secret Names
   value: {{ $v }}
 {{- end }}
 {{- end }}
+
+{{/*
+Return the RunAI Streamer environment variables when loadFormat is runai_streamer
+*/}}
+{{- define "modelservice.runaiStreamer.envVars" -}}
+{{- if or (eq .Values.modelservice.vllm.loadFormat "runai_streamer") (eq .Values.modelservice.vllm.loadFormat "runai_streamer_sharded") }}
+- name: RUNAI_STREAMER_CONCURRENCY
+  value: {{ .Values.modelservice.vllm.runaiStreamer.concurrency | quote }}
+{{- if .Values.modelservice.vllm.runaiStreamer.chunkBytesize }}
+- name: RUNAI_STREAMER_CHUNK_BYTESIZE
+  value: {{ .Values.modelservice.vllm.runaiStreamer.chunkBytesize | quote }}
+{{- end }}
+- name: RUNAI_STREAMER_MEMORY_LIMIT
+  value: {{ .Values.modelservice.vllm.runaiStreamer.memoryLimit | quote }}
+{{- if .Values.modelservice.vllm.runaiStreamer.s3.endpointUrl }}
+- name: AWS_ENDPOINT_URL
+  value: {{ .Values.modelservice.vllm.runaiStreamer.s3.endpointUrl | quote }}
+{{- end }}
+{{- if .Values.modelservice.vllm.runaiStreamer.s3.caBundlePath }}
+- name: AWS_CA_BUNDLE
+  value: {{ .Values.modelservice.vllm.runaiStreamer.s3.caBundlePath | quote }}
+{{- end }}
+- name: RUNAI_STREAMER_S3_USE_VIRTUAL_ADDRESSING
+  value: {{ .Values.modelservice.vllm.runaiStreamer.s3.useVirtualAddressing | ternary "1" "0" }}
+{{- end }}
+{{- end }}
+
+{{/*
+Return the RunAI Streamer extra config args for model-loader-extra-config
+*/}}
+{{- define "modelservice.runaiStreamer.extraConfigArgs" -}}
+{{- if or (eq .Values.modelservice.vllm.loadFormat "runai_streamer") (eq .Values.modelservice.vllm.loadFormat "runai_streamer_sharded") }}
+{{- $config := dict }}
+{{- if .Values.modelservice.vllm.runaiStreamer.concurrency }}
+  {{- $_ := set $config "concurrency" .Values.modelservice.vllm.runaiStreamer.concurrency }}
+{{- end }}
+{{- if .Values.modelservice.vllm.runaiStreamer.memoryLimit }}
+  {{- $_ := set $config "memory_limit" .Values.modelservice.vllm.runaiStreamer.memoryLimit }}
+{{- end }}
+{{- if .Values.modelservice.vllm.runaiStreamer.pattern }}
+  {{- $_ := set $config "pattern" .Values.modelservice.vllm.runaiStreamer.pattern }}
+{{- end }}
+{{- if $config }}
+- "--model-loader-extra-config"
+- {{ $config | toJson | quote }}
+{{- end }}
+{{- end }}
+{{- end }}
