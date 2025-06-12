@@ -162,8 +162,8 @@ export HF_TOKEN="your-token"
 The inference-gateway serves as the HTTP ingress point for all inference requests in our deployment.
 It’s implemented as a Kubernetes Gateway (`gateway.networking.k8s.io/v1`) using whichever `gatewayClassName` you’ve
 chosen, either `kgateway` or `istio` and sits in front of your inference pods to handle path-based routing, load-balancing,
-retries, and metrics. All calls to `/v1/models` and `/v1/completions` flow through this gateway to the appropriate
-`decode` or `prefill` services.
+retries, and metrics. API requests such as `/v1/models`, `/v1/completions` and `/v1/chat/completions` are exposed via the
+gateway and routed to the appropriate `decode` or `prefill` services.
 
 ```bash
 # -------------------------------------------------------------------------

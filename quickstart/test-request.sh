@@ -122,7 +122,7 @@ validation() {
   echo
 
   # ── 2) POST /v1/completions on decode pod ──────────────────────────────────
-  echo "2 -> Sending a completion request to the decode pod at ${POD_IP}…"
+  echo "2 -> Sending a /v1/completions request to the decode pod at ${POD_IP}…"
   ID=$(gen_id)
   kubectl run --rm -i curl-"$ID" \
     --namespace "$NAMESPACE" \
@@ -136,9 +136,25 @@ validation() {
       }'
   echo
 
-  # 3) GET /v1/models via the gateway
+  # ── 3) POST /v1/chat/completions on decode pod ─────────────────────────────
+  echo "3 -> Sending a /v1/chat/completions request to the decode pod at ${POD_IP}…"
+  ID=$(gen_id)
+  kubectl run --rm -i curl-"$ID" \
+    --namespace "$NAMESPACE" \
+    --image=curlimages/curl --restart=Never -- \
+    curl -sS -X POST http://${POD_IP}:8000/v1/chat/completions \
+      -H 'accept: application/json' \
+      -H 'Content-Type: application/json' \
+      -d '{
+        "model":"'"$MODEL_ID"'",
+        "messages":[{"role":"user","content":"Who are you?"}],
+        "stream":false
+      }'
+  echo
+
+  # ── 4) GET /v1/models via the gateway ───────────────────────────────────────
   GATEWAY_ADDR=$(kubectl get gateway -n "$NAMESPACE" | tail -n1 | awk '{print $3}')
-  echo "3 -> Fetching available models via the gateway at ${GATEWAY_ADDR}…"
+  echo "4 -> Fetching available models via the gateway at ${GATEWAY_ADDR}…"
   ID=$(gen_id)
   GW_JSON=$(kubectl run --rm -i curl-"$ID" \
     --namespace "$NAMESPACE" \
@@ -156,8 +172,8 @@ validation() {
   fi
   echo
 
-  # ── 4) POST /v1/completions via gateway ────────────────────────────────────
-  echo "4 -> Sending a completion request via the gateway at ${GATEWAY_ADDR} with model '${MODEL_ID}'…"
+  # ── 5) POST /v1/completions via gateway ────────────────────────────────────
+  echo "5 -> Sending a /v1/completions request via the gateway at ${GATEWAY_ADDR} with model '${MODEL_ID}'…"
   ID=$(gen_id)
   kubectl run --rm -i curl-"$ID" \
     --namespace "$NAMESPACE" \
@@ -170,6 +186,22 @@ validation() {
         "prompt":"Who are you?"
       }'
   echo
+
+  # ── 6) POST /v1/chat/completions via gateway ──────────────────────────────
+  echo "6 -> Sending a /v1/chat/completions request via the gateway at ${GATEWAY_ADDR} with model '${MODEL_ID}'…"
+  ID=$(gen_id)
+  kubectl run --rm -i curl-"$ID" \
+    --namespace "$NAMESPACE" \
+    --image=curlimages/curl --restart=Never -- \
+    curl -sS -X POST http://${GATEWAY_ADDR}/v1/chat/completions \
+      -H 'accept: application/json' \
+      -H 'Content-Type: application/json' \
+      -d '{
+        "model":"'"$MODEL_ID"'",
+        "messages":[{"role":"user","content":"Who are you?"}],
+        "stream":false
+      }'
+  echo
 }
 
 # ── Minikube gateway validation ───────────────────────────────────────────────
@@ -178,7 +210,7 @@ minikube_validation() {
   echo "Minikube validation: hitting gateway DNS at ${SVC_HOST}"
 
   # 1) GET /v1/models via DNS gateway
-  echo "1 -> GET /v1/models via DNS at ${SVC_HOST}…"
+  echo "1 -> Sending a GET /v1/models via DNS at ${SVC_HOST}…"
   ID=$(gen_id)
   LIST_JSON=$(kubectl run --rm -i curl-"$ID" \
     --namespace "$NAMESPACE" \
@@ -203,7 +235,7 @@ minikube_validation() {
   echo
 
   # 2) POST /v1/completions via DNS gateway
-  echo "2 -> POST /v1/completions via DNS at ${SVC_HOST} with model '${MODEL_ID}'…"
+  echo "2 -> Sending a POST /v1/completions via DNS at ${SVC_HOST} with model '${MODEL_ID}'…"
   ID=$(gen_id)
   kubectl run --rm -i curl-"$ID" \
     --namespace "$NAMESPACE" \
@@ -214,6 +246,22 @@ minikube_validation() {
       -d '{
         "model":"'"$MODEL_ID"'",
         "prompt":"You are a helpful AI assistant."
+      }'
+  echo
+
+  # ── 3) POST /v1/chat/completions via DNS gateway
+  echo "3 -> Sending a POST /v1/chat/completions via DNS at ${SVC_HOST} with model '${MODEL_ID}'…"
+  ID=$(gen_id)
+  kubectl run --rm -i curl-"$ID" \
+    --namespace "$NAMESPACE" \
+    --image=curlimages/curl --restart=Never -- \
+    curl -sS -X POST http://${SVC_HOST}/v1/chat/completions \
+      -H 'accept: application/json' \
+      -H 'Content-Type: application/json' \
+      -d '{
+        "model":"'"$MODEL_ID"'",
+        "messages":[{"role":"user","content":"You are a helpful AI assistant."}],
+        "stream":false
       }'
   echo
 }
