@@ -6,16 +6,6 @@ sampleApplication:
 
 modelservice:
   enabled: false
-
-gateway:
-  enabled: false
-
-redis:
-  master:
-    persistence:
-      enabled: false
-
-modelservice:
   metrics:
     enabled: false
   vllm:
@@ -51,3 +41,11 @@ modelservice:
     tolerations: []
   decode:
     tolerations: []
+
+gateway:
+  enabled: false
+
+redis:
+  master:
+    persistence:
+      enabled: false
