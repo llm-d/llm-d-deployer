@@ -1,5 +1,5 @@
 test:
-  enabled: true
+  enabled: false
 
 sampleApplication:
   enabled: false

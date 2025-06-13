@@ -135,11 +135,33 @@ jobs:
         env:
           TARGET_BRANCH: ${{ github.event.pull_request.base.ref || 'main^' }}
         run: |
+          echo "=== DEBUG: Starting chart-testing install ==="
+          echo "Target branch: $TARGET_BRANCH"
+          echo "Chart-testing config:"
+          cat ct-install.yaml
+          echo ""
+
+          echo "=== DEBUG: Running ct install with maximum verbosity ==="
+          set -x
           ct install \
             --debug \
             --config ct-install.yaml \
             --upgrade \
-            --target-branch "$TARGET_BRANCH"
+            --target-branch "$TARGET_BRANCH" || {
+            echo ""
+            echo "=== DEBUG: Chart-testing failed, checking helm releases ==="
+            helm list --all-namespaces || true
+            echo ""
+            echo "=== DEBUG: Checking for any test namespaces ==="
+            kubectl get namespaces | grep -E "(test|chart)" || echo "No test namespaces found"
+            echo ""
+            echo "=== DEBUG: Checking for any failed pods ==="
+            kubectl get pods --all-namespaces --field-selector=status.phase=Failed || echo "No failed pods found"
+            echo ""
+            echo "=== DEBUG: Recent events ==="
+            kubectl get events --all-namespaces --sort-by='.lastTimestamp' | tail -30
+            exit 1
+          }
 
       - name: Debug cluster state after chart testing failure
         if: failure() && steps.list-changed.outputs.changed == 'true'
