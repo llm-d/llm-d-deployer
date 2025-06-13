@@ -795,6 +795,63 @@ modelservice:
     # <br /> Options: "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"
     logLevel: "INFO"
 
+    # -- Load format for vLLM model loading
+    # <br /> When set to "runai_streamer", enables Run:AI Model Streamer for loading models from object storage
+    # <br /> Options: "", "runai_streamer", "runai_streamer_sharded"
+    loadFormat: ""
+
+    # -- RunAI Model Streamer configuration options
+    # <br /> These options are used when loadFormat is set to "runai_streamer" or "runai_streamer_sharded"
+    # @default -- See below
+    runaiStreamer:
+
+      # -- Controls the level of concurrency and number of OS threads reading tensors
+      # <br /> Positive integer
+      concurrency: 16
+
+      # -- Controls the maximum size of memory each OS thread reads from the file at once
+      # <br /> Positive integer in bytes
+      # <br /> Default: 2,097,152 (2 MiB) for file system, 8,388,608 (8 MiB) for object store
+      chunkBytesize: ""
+
+      # -- Controls the size of the CPU Memory buffer to which tensors are read
+      # <br /> Integer: -1 (UNLIMITED), 0 (MIN), or positive integer in bytes
+      memoryLimit: -1
+
+      # -- Custom naming pattern for sharded model files
+      # <br /> Used with runai_streamer_sharded load format
+      # <br /> Example: "custom-model-rank-{rank}-part-{part}.safetensors"
+      pattern: ""
+
+      # -- S3/Object store configuration
+      # @default -- See below
+      s3:
+
+        # -- Override url endpoint for reading from S3 compatible object store
+        # <br /> Mandatory for S3-compatible stores like GCS, Minio
+        endpointUrl: ""
+
+        # -- Path to a certificate bundle to use for HTTPS certificate validation
+        caBundlePath: ""
+
+        # -- Controls parsing the url endpoint for reading from object store
+        # <br /> Boolean: true enables virtual addressing, false uses path-style
+        useVirtualAddressing: true
+
+    # @schema
+    # items:
+    #   type: string
+    # @schema
+    # -- Additional command line arguments for vLLM
+    extraArgs: []
+
+    # @schema
+    # items:
+    #   $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar
+    # @schema
+    # -- Additional environment variables for vLLM containers
+    extraEnvVars: []
+
   # -- Routing proxy container options
   # @default -- See below
   routingProxy:

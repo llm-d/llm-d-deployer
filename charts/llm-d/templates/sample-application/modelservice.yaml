@@ -27,6 +27,14 @@ spec:
       args:
       - "--served-model-name"
       - {{ include "sampleApplication.servedModelNames" .}}
+      {{- if .Values.modelservice.vllm.loadFormat }}
+      - "--load-format"
+      - {{ .Values.modelservice.vllm.loadFormat | quote }}
+      {{- end }}
+      {{- include "modelservice.runaiStreamer.extraConfigArgs" . | nindent 6 }}
+      {{- range .Values.modelservice.vllm.extraArgs }}
+      - {{ . | quote }}
+      {{- end }}
       {{- range .Values.sampleApplication.decode.extraArgs }}
       - {{ include "common.tplvalues.render" ( dict "value" . "context" $) | quote }}
       {{- end }}
@@ -39,6 +47,10 @@ spec:
             name: {{ .Values.sampleApplication.model.auth.hfToken.name }}
             key: {{ .Values.sampleApplication.model.auth.hfToken.key }}
       {{- end }}
+      {{- include "modelservice.runaiStreamer.envVars" . | nindent 6 }}
+      {{- range .Values.modelservice.vllm.extraEnvVars }}
+      {{- include "common.tplvalues.render" ( dict "value" . "context" $) | nindent 6 }}
+      {{- end }}
   prefill:
     replicas: {{ .Values.sampleApplication.prefill.replicas }}
     containers:
@@ -46,6 +58,14 @@ spec:
       args:
       - "--served-model-name"
       - {{ include "sampleApplication.servedModelNames" .}}
+      {{- if .Values.modelservice.vllm.loadFormat }}
+      - "--load-format"
+      - {{ .Values.modelservice.vllm.loadFormat | quote }}
+      {{- end }}
+      {{- include "modelservice.runaiStreamer.extraConfigArgs" . | nindent 6 }}
+      {{- range .Values.modelservice.vllm.extraArgs }}
+      - {{ . | quote }}
+      {{- end }}
       {{- range .Values.sampleApplication.prefill.extraArgs }}
       - {{ include "common.tplvalues.render" ( dict "value" . "context" $) | quote }}
       {{- end }}
@@ -57,6 +77,10 @@ spec:
           secretKeyRef:
             name: {{ .Values.sampleApplication.model.auth.hfToken.name }}
             key: {{ .Values.sampleApplication.model.auth.hfToken.key }}
+      {{- end }}
+      {{- include "modelservice.runaiStreamer.envVars" . | nindent 6 }}
+      {{- range .Values.modelservice.vllm.extraEnvVars }}
+      {{- include "common.tplvalues.render" ( dict "value" . "context" $) | nindent 6 }}
       {{- end }}
   endpointPicker:
     containers:

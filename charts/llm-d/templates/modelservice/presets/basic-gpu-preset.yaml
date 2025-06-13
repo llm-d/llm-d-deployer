@@ -70,10 +70,18 @@ data:
               command:
                 - vllm
                 - serve
-                - {{ `{{ default (print "/models/" .ModelPath) .HFModelName }}` }}
+                - {{ `{{ if and (ne .LoadFormat "") (eq .LoadFormat "runai_streamer") }}{{ .ModelArtifactURI }}{{ else }}{{ default (print "/models/" .ModelPath) .HFModelName }}{{ end }}` }}
               args:
                 - "--port"
                 - "8001"
+                {{- if .Values.modelservice.vllm.loadFormat }}
+                - "--load-format"
+                - {{ .Values.modelservice.vllm.loadFormat | quote }}
+                {{- end }}
+                {{- include "modelservice.runaiStreamer.extraConfigArgs" . | nindent 16 }}
+                {{- range .Values.modelservice.vllm.extraArgs }}
+                - {{ . | quote }}
+                {{- end }}
               env:
                 - name: HOME
                   value: /home
@@ -87,6 +95,10 @@ data:
                 - name: HF_HUB_CACHE
                   value: /models
                 {{ `{{- end }}` }}
+                {{- include "modelservice.runaiStreamer.envVars" . | nindent 16 }}
+                {{- range .Values.modelservice.vllm.extraEnvVars }}
+                {{- include "common.tplvalues.render" ( dict "value" . "context" $) | nindent 16 }}
+                {{- end }}
               volumeMounts:
                 - name: home
                   mountPath: /home
@@ -149,10 +161,18 @@ data:
               command:
                 - vllm
                 - serve
-                - {{ `{{ default (print "/models/" .ModelPath) .HFModelName }}` }}
+                - {{ `{{ if and (ne .LoadFormat "") (eq .LoadFormat "runai_streamer") }}{{ .ModelArtifactURI }}{{ else }}{{ default (print "/models/" .ModelPath) .HFModelName }}{{ end }}` }}
               args:
                 - "--port"
                 - "8000"
+                {{- if .Values.modelservice.vllm.loadFormat }}
+                - "--load-format"
+                - {{ .Values.modelservice.vllm.loadFormat | quote }}
+                {{- end }}
+                {{- include "modelservice.runaiStreamer.extraConfigArgs" . | nindent 16 }}
+                {{- range .Values.modelservice.vllm.extraArgs }}
+                - {{ . | quote }}
+                {{- end }}
               env:
                 - name: HOME
                   value: /home
@@ -166,6 +186,10 @@ data:
                 - name: HF_HUB_CACHE
                   value: /models
                 {{ `{{- end }}` }}
+                {{- include "modelservice.runaiStreamer.envVars" . | nindent 16 }}
+                {{- range .Values.modelservice.vllm.extraEnvVars }}
+                {{- include "common.tplvalues.render" ( dict "value" . "context" $) | nindent 16 }}
+                {{- end }}
               volumeMounts:
                 - name: home
                   mountPath: /home

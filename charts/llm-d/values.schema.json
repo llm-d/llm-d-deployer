@@ -3880,7 +3880,7 @@
                                 "description": "EnvVar represents an environment variable present in a Container.",
                                 "properties": {
                                     "name": {
-                                        "description": "Name of the environment variable. Must be a C_IDENTIFIER.",
+                                        "description": "Name of the environment variable. May consist of any printable ASCII characters except '='.",
                                         "type": "string"
                                     },
                                     "value": {
@@ -6791,6 +6791,133 @@
                     "default": "See below",
                     "description": "vLLM container options",
                     "properties": {
+                        "extraArgs": {
+                            "description": "Additional command line arguments for vLLM",
+                            "items": {
+                                "required": [],
+                                "type": "string"
+                            },
+                            "required": [],
+                            "title": "extraArgs"
+                        },
+                        "extraEnvVars": {
+                            "description": "Additional environment variables for vLLM containers",
+                            "items": {
+                                "description": "EnvVar represents an environment variable present in a Container.",
+                                "properties": {
+                                    "name": {
+                                        "description": "Name of the environment variable. May consist of any printable ASCII characters except '='.",
+                                        "type": "string"
+                                    },
+                                    "value": {
+                                        "description": "Variable references $(VAR_NAME) are expanded using the previously defined environment variables in the container and any service environment variables. If a variable cannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. \"$$(VAR_NAME)\" will produce the string literal \"$(VAR_NAME)\". Escaped references will never be expanded, regardless of whether the variable exists or not. Defaults to \"\".",
+                                        "type": "string"
+                                    },
+                                    "valueFrom": {
+                                        "description": "EnvVarSource represents a source for the value of an EnvVar.",
+                                        "properties": {
+                                            "configMapKeyRef": {
+                                                "description": "Selects a key from a ConfigMap.",
+                                                "properties": {
+                                                    "key": {
+                                                        "description": "The key to select.",
+                                                        "type": "string"
+                                                    },
+                                                    "name": {
+                                                        "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+                                                        "type": "string"
+                                                    },
+                                                    "optional": {
+                                                        "description": "Specify whether the ConfigMap or its key must be defined",
+                                                        "type": "boolean"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "key"
+                                                ],
+                                                "type": "object",
+                                                "x-kubernetes-map-type": "atomic"
+                                            },
+                                            "fieldRef": {
+                                                "description": "ObjectFieldSelector selects an APIVersioned field of an object.",
+                                                "properties": {
+                                                    "apiVersion": {
+                                                        "description": "Version of the schema the FieldPath is written in terms of, defaults to \"v1\".",
+                                                        "type": "string"
+                                                    },
+                                                    "fieldPath": {
+                                                        "description": "Path of the field to select in the specified API version.",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "fieldPath"
+                                                ],
+                                                "type": "object",
+                                                "x-kubernetes-map-type": "atomic"
+                                            },
+                                            "resourceFieldRef": {
+                                                "description": "ResourceFieldSelector represents container resources (cpu, memory) and their output format",
+                                                "properties": {
+                                                    "containerName": {
+                                                        "description": "Container name: required for volumes, optional for env vars",
+                                                        "type": "string"
+                                                    },
+                                                    "divisor": {
+                                                        "oneOf": [
+                                                            {
+                                                                "type": "string"
+                                                            },
+                                                            {
+                                                                "type": "number"
+                                                            }
+                                                        ]
+                                                    },
+                                                    "resource": {
+                                                        "description": "Required: resource to select",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "resource"
+                                                ],
+                                                "type": "object",
+                                                "x-kubernetes-map-type": "atomic"
+                                            },
+                                            "secretKeyRef": {
+                                                "description": "SecretKeySelector selects a key of a Secret.",
+                                                "properties": {
+                                                    "key": {
+                                                        "description": "The key of the secret to select from.  Must be a valid secret key.",
+                                                        "type": "string"
+                                                    },
+                                                    "name": {
+                                                        "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+                                                        "type": "string"
+                                                    },
+                                                    "optional": {
+                                                        "description": "Specify whether the Secret or its key must be defined",
+                                                        "type": "boolean"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "key"
+                                                ],
+                                                "type": "object",
+                                                "x-kubernetes-map-type": "atomic"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "required": [
+                                    "name"
+                                ],
+                                "type": "object"
+                            },
+                            "required": [],
+                            "title": "extraEnvVars"
+                        },
                         "image": {
                             "additionalProperties": false,
                             "default": "See below",
@@ -6833,6 +6960,12 @@
                             "required": [],
                             "title": "image"
                         },
+                        "loadFormat": {
+                            "default": "",
+                            "description": "Load format for vLLM model loading <br /> When set to \"runai_streamer\", enables Run:AI Model Streamer for loading models from object storage <br /> Options: \"\", \"runai_streamer\", \"runai_streamer_sharded\"",
+                            "required": [],
+                            "title": "loadFormat"
+                        },
                         "logLevel": {
                             "default": "INFO",
                             "description": "Log level to run VLLM with <br /> VLLM supports standard python log-levels, see: https://docs.python.org/3/library/logging.html#logging-levels <br /> Options: \"DEBUG\", \"INFO\", \"WARNING\", \"ERROR\", \"CRITICAL\"",
@@ -6852,6 +6985,66 @@
                             },
                             "required": [],
                             "title": "metrics"
+                        },
+                        "runaiStreamer": {
+                            "additionalProperties": false,
+                            "default": "See below",
+                            "description": "RunAI Model Streamer configuration options <br /> These options are used when loadFormat is set to \"runai_streamer\" or \"runai_streamer_sharded\"",
+                            "properties": {
+                                "chunkBytesize": {
+                                    "default": "",
+                                    "description": "Controls the maximum size of memory each OS thread reads from the file at once <br /> Positive integer in bytes <br /> Default: 2,097,152 (2 MiB) for file system, 8,388,608 (8 MiB) for object store",
+                                    "required": [],
+                                    "title": "chunkBytesize"
+                                },
+                                "concurrency": {
+                                    "default": "16",
+                                    "description": "Controls the level of concurrency and number of OS threads reading tensors <br /> Positive integer",
+                                    "required": [],
+                                    "title": "concurrency"
+                                },
+                                "memoryLimit": {
+                                    "default": "-1",
+                                    "description": "Controls the size of the CPU Memory buffer to which tensors are read <br /> Integer: -1 (UNLIMITED), 0 (MIN), or positive integer in bytes",
+                                    "required": [],
+                                    "title": "memoryLimit"
+                                },
+                                "pattern": {
+                                    "default": "",
+                                    "description": "Custom naming pattern for sharded model files <br /> Used with runai_streamer_sharded load format <br /> Example: \"custom-model-rank-{rank}-part-{part}.safetensors\"",
+                                    "required": [],
+                                    "title": "pattern"
+                                },
+                                "s3": {
+                                    "additionalProperties": false,
+                                    "default": "See below",
+                                    "description": "S3/Object store configuration",
+                                    "properties": {
+                                        "caBundlePath": {
+                                            "default": "",
+                                            "description": "Path to a certificate bundle to use for HTTPS certificate validation",
+                                            "required": [],
+                                            "title": "caBundlePath"
+                                        },
+                                        "endpointUrl": {
+                                            "default": "",
+                                            "description": "Override url endpoint for reading from S3 compatible object store <br /> Mandatory for S3-compatible stores like GCS, Minio",
+                                            "required": [],
+                                            "title": "endpointUrl"
+                                        },
+                                        "useVirtualAddressing": {
+                                            "default": "true",
+                                            "description": "Controls parsing the url endpoint for reading from object store <br /> Boolean: true enables virtual addressing, false uses path-style",
+                                            "required": [],
+                                            "title": "useVirtualAddressing"
+                                        }
+                                    },
+                                    "required": [],
+                                    "title": "s3"
+                                }
+                            },
+                            "required": [],
+                            "title": "runaiStreamer"
                         }
                     },
                     "required": [],
@@ -10492,7 +10685,7 @@
                                 "description": "EnvVar represents an environment variable present in a Container.",
                                 "properties": {
                                     "name": {
-                                        "description": "Name of the environment variable. Must be a C_IDENTIFIER.",
+                                        "description": "Name of the environment variable. May consist of any printable ASCII characters except '='.",
                                         "type": "string"
                                     },
                                     "value": {

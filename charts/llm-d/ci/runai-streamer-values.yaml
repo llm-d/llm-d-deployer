@@ -1,0 +1,51 @@
+test:
+  enabled: false
+
+sampleApplication:
+  enabled: false
+
+modelservice:
+  enabled: false
+  metrics:
+    enabled: false
+  vllm:
+    # Test loadFormat configuration
+    loadFormat: "runai_streamer"
+    # Test runai_streamer specific configurations
+    runaiStreamer:
+      concurrency: 32
+      chunkBytesize: "4194304"  # 4 MiB
+      memoryLimit: 1073741824   # 1 GiB
+      pattern: "custom-model-rank-{rank}-part-{part}.safetensors"
+      s3:
+        endpointUrl: "https://test-s3.example.com"
+        caBundlePath: "/etc/ssl/certs/ca-bundle.crt"
+        useVirtualAddressing: false
+    # Test extra args and env vars
+    extraArgs:
+      - "--custom-arg1"
+      - "value1"
+      - "--custom-arg2"
+    extraEnvVars:
+      - name: TEST_ENV_VAR
+        value: "test-value"
+      - name: ANOTHER_TEST_VAR
+        value: "another-value"
+  epp:
+    defaultEnvVarsOverride:
+    - name: PD_ENABLED
+      value: 'false'
+    - name: ENABLE_KVCACHE_AWARE_SCORER
+      value: "false"
+  prefill:
+    tolerations: []
+  decode:
+    tolerations: []
+
+gateway:
+  enabled: false
+
+redis:
+  master:
+    persistence:
+      enabled: false

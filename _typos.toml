@@ -1,0 +1,6 @@
+# Configuration for typos spell checker
+# Allow specific sequences that appear in base64 encoded SVG icons
+[default.extend-words]
+# These are valid base64 sequences, not typos
+"OT" = "OT"
+"Ba" = "Ba"
