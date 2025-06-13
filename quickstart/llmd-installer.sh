@@ -495,6 +495,17 @@ else
   )
 fi
 
+# Override model configuration if --download-model is specified
+MODEL_OVERRIDE_ARGS=()
+if [[ -n "${DOWNLOAD_MODEL}" ]]; then
+  log_info "Overriding model configuration with user-specified model: ${DOWNLOAD_MODEL}"
+  MODEL_OVERRIDE_ARGS=(
+    --set sampleApplication.model.modelName="${DOWNLOAD_MODEL}"
+    --set sampleApplication.model.modelArtifactURI="pvc://model-pvc/${DOWNLOAD_MODEL}"
+  )
+  log_success "Model will be overridden: ${DOWNLOAD_MODEL}"
+fi
+
   log_info "🚚 Deploying llm-d chart with ${VALUES_PATH}..."
   $HCMD upgrade -i llm-d . \
     ${DEBUG} \
@@ -503,7 +514,8 @@ fi
     "${OCP_DISABLE_INGRESS_ARGS[@]+"${OCP_DISABLE_INGRESS_ARGS[@]}"}" \
     --set gateway.kGatewayParameters.proxyUID="${PROXY_UID}" \
     --set ingress.clusterRouterBase="${BASE_OCP_DOMAIN}" \
-    "${METRICS_ARGS[@]}"
+    "${METRICS_ARGS[@]}" \
+    "${MODEL_OVERRIDE_ARGS[@]}"
   log_success "llm-d deployed"
 
   post_install
