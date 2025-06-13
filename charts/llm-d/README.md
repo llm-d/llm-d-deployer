@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart
 
-![Version: 1.0.18](https://img.shields.io/badge/Version-1.0.18-informational?style=flat-square)
+![Version: 1.0.19](https://img.shields.io/badge/Version-1.0.19-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 llm-d is a Kubernetes-native high-performance distributed LLM inference framework
@@ -271,15 +271,27 @@ Kubernetes: `>= 1.30.0-0`
 | modelservice.tolerations | Node tolerations for server scheduling to nodes with taints <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ | list | `[]` |
 | modelservice.topologySpreadConstraints | Topology Spread Constraints for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints | list | `[]` |
 | modelservice.vllm | vLLM container options | object | See below |
+| modelservice.vllm.extraArgs | Additional command line arguments for vLLM | list | `[]` |
+| modelservice.vllm.extraEnvVars | Additional environment variables for vLLM containers | list | `[]` |
 | modelservice.vllm.image | vLLM image used in ModelService CR presets | object | See below |
 | modelservice.vllm.image.imagePullPolicy | Specify a imagePullPolicy | string | `"IfNotPresent"` |
 | modelservice.vllm.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
 | modelservice.vllm.image.registry | llm-d image registry | string | `"ghcr.io"` |
 | modelservice.vllm.image.repository | llm-d image repository | string | `"llm-d/llm-d"` |
 | modelservice.vllm.image.tag | llm-d image tag | string | `"0.0.8"` |
+| modelservice.vllm.loadFormat | Load format for vLLM model loading <br /> When set to "runai_streamer", enables Run:AI Model Streamer for loading models from object storage <br /> Options: "", "runai_streamer", "runai_streamer_sharded" | string | `""` |
 | modelservice.vllm.logLevel | Log level to run VLLM with <br /> VLLM supports standard python log-levels, see: https://docs.python.org/3/library/logging.html#logging-levels <br /> Options: "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL" | string | `"INFO"` |
 | modelservice.vllm.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true}` |
 | modelservice.vllm.metrics.enabled | Enable metrics scraping from prefill & decode services | bool | `true` |
+| modelservice.vllm.runaiStreamer | RunAI Model Streamer configuration options <br /> These options are used when loadFormat is set to "runai_streamer" or "runai_streamer_sharded" | object | See below |
+| modelservice.vllm.runaiStreamer.chunkBytesize | Controls the maximum size of memory each OS thread reads from the file at once <br /> Positive integer in bytes <br /> Default: 2,097,152 (2 MiB) for file system, 8,388,608 (8 MiB) for object store | string | `""` |
+| modelservice.vllm.runaiStreamer.concurrency | Controls the level of concurrency and number of OS threads reading tensors <br /> Positive integer | int | `16` |
+| modelservice.vllm.runaiStreamer.memoryLimit | Controls the size of the CPU Memory buffer to which tensors are read <br /> Integer: -1 (UNLIMITED), 0 (MIN), or positive integer in bytes | int | `-1` |
+| modelservice.vllm.runaiStreamer.pattern | Custom naming pattern for sharded model files <br /> Used with runai_streamer_sharded load format <br /> Example: "custom-model-rank-{rank}-part-{part}.safetensors" | string | `""` |
+| modelservice.vllm.runaiStreamer.s3 | S3/Object store configuration | object | See below |
+| modelservice.vllm.runaiStreamer.s3.caBundlePath | Path to a certificate bundle to use for HTTPS certificate validation | string | `""` |
+| modelservice.vllm.runaiStreamer.s3.endpointUrl | Override url endpoint for reading from S3 compatible object store <br /> Mandatory for S3-compatible stores like GCS, Minio | string | `""` |
+| modelservice.vllm.runaiStreamer.s3.useVirtualAddressing | Controls parsing the url endpoint for reading from object store <br /> Boolean: true enables virtual addressing, false uses path-style | bool | `true` |
 | nameOverride | String to partially override common.names.fullname | string | `""` |
 | redis | Bitnami/Redis chart configuration | object | Use sane defaults for minimal Redis deployment |
 | sampleApplication | Sample application deploying a p-d pair of specific model | object | See below |
