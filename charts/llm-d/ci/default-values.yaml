@@ -13,6 +13,9 @@ modelservice:
   enabled: false
   metrics:
     enabled: false
+
+gateway:
+  enabled: false
   epp:
     defaultEnvVarsOverride:
     - name: PD_ENABLED

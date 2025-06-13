@@ -7,6 +7,9 @@ sampleApplication:
 modelservice:
   enabled: false
 
+gateway:
+  enabled: false
+
 redis:
   master:
     persistence:
