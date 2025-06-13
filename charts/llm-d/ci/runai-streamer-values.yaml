@@ -4,6 +4,9 @@ test:
 sampleApplication:
   enabled: false
 
+modelservice:
+  enabled: false
+
 redis:
   master:
     persistence:

@@ -35,16 +35,87 @@ spec:
       command: ["/bin/sh", "-c"]
       args:
         - |
+          set -x  # Enable debug mode
+          echo "=== DEBUG: Starting chart test debug ==="
+          echo "Release name: {{ .Release.Name }}"
+          echo "Release namespace: {{ .Release.Namespace }}"
+          echo "Gateway fullname: {{ include "gateway.fullname" . }}"
+          echo "Target service: {{ include "gateway.fullname" . }}-istio.{{ .Release.Namespace }}.svc.cluster.local"
+          echo ""
+
+          echo "=== DEBUG: Checking cluster state ==="
+          echo "Current namespace:"
+          cat /var/run/secrets/kubernetes.io/serviceaccount/namespace || echo "Failed to read namespace"
+          echo ""
+
+          echo "Available services in namespace {{ .Release.Namespace }}:"
+          nslookup -type=SRV _http._tcp.{{ .Release.Namespace }}.svc.cluster.local || echo "No SRV records found"
+          echo ""
+
+          echo "=== DEBUG: Attempting direct service lookups ==="
+          echo "Trying short name lookup:"
+          nslookup {{ include "gateway.fullname" . }}-istio || echo "Short name lookup failed"
+          echo ""
+
+          echo "Trying namespace-qualified lookup:"
+          nslookup {{ include "gateway.fullname" . }}-istio.{{ .Release.Namespace }} || echo "Namespace-qualified lookup failed"
+          echo ""
+
+          echo "Trying full FQDN lookup:"
+          nslookup {{ include "gateway.fullname" . }}-istio.{{ .Release.Namespace }}.svc.cluster.local || echo "FQDN lookup failed"
+          echo ""
+
+          echo -e "\e[32m🥷 Waiting for gateway service to be ready\e[0m"
+          echo ""
+          # Wait for gateway service to exist with timeout
+          timeout=300  # 5 minutes
+          elapsed=0
+          while ! nslookup {{ include "gateway.fullname" . }}-istio.{{ .Release.Namespace }}.svc.cluster.local >/dev/null 2>&1; do
+            echo "Gateway service not found (${elapsed}s/${timeout}s), retrying in 5s..."
+            sleep 5
+            elapsed=$((elapsed + 5))
+            if [ $elapsed -ge $timeout ]; then
+              echo "ERROR: Gateway service not found after ${timeout}s"
+              echo "=== DEBUG: Final service check ==="
+              nslookup {{ include "gateway.fullname" . }}-istio.{{ .Release.Namespace }}.svc.cluster.local || true
+              exit 1
+            fi
+          done
+          echo "Gateway service is ready after ${elapsed}s"
+          echo ""
+
+          echo "=== DEBUG: Testing HTTP connectivity ==="
+          echo "Target URL: http://{{ include "gateway.fullname" . }}-istio/v1/models"
+          echo ""
+
           echo -e "\e[32m🥷 Waiting for pods to come up\e[0m"
           echo ""
-          curl --connect-timeout 5 --max-time 20 --retry 20 --retry-delay 10 --retry-max-time 60 --retry-all-errors http://{{ include "gateway.fullname" . }}-istio/v1/models
+
+          echo "=== DEBUG: First HTTP request ==="
+          curl -v --connect-timeout 5 --max-time 20 --retry 20 --retry-delay 10 --retry-max-time 60 --retry-all-errors http://{{ include "gateway.fullname" . }}-istio/v1/models || {
+            echo "ERROR: First HTTP request failed"
+            echo "=== DEBUG: Network troubleshooting ==="
+            echo "Gateway service lookup:"
+            nslookup {{ include "gateway.fullname" . }}-istio.{{ .Release.Namespace }}.svc.cluster.local || true
+            echo "Attempting ping:"
+            ping -c 3 {{ include "gateway.fullname" . }}-istio.{{ .Release.Namespace }}.svc.cluster.local || true
+            exit 1
+          }
 
           echo ""
           echo ""
           echo -e  "\e[32m🥷 Basic chat validation\e[0m"
           echo ""
-          curl --connect-timeout 5 --max-time 20 --retry 20 --retry-delay 10 --retry-max-time 60 --retry-all-errors http://{{ include "gateway.fullname" . }}-istio/v1/chat/completions \
+
+          echo "=== DEBUG: Second HTTP request ==="
+          curl -v --connect-timeout 5 --max-time 20 --retry 20 --retry-delay 10 --retry-max-time 60 --retry-all-errors http://{{ include "gateway.fullname" . }}-istio/v1/chat/completions \
             -H 'accept: application/json' \
             -H 'Content-Type: application/json' \
-            -d '{"model":"food-review","messages":[{"content":"Say hi","role":"user"}],"stream":false}'
+            -d '{"model":"food-review","messages":[{"content":"Say hi","role":"user"}],"stream":false}' || {
+            echo "ERROR: Second HTTP request failed"
+            exit 1
+          }
+
+          echo ""
+          echo "=== DEBUG: Test completed successfully ==="
 {{- end }}

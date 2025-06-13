@@ -108,6 +108,28 @@ jobs:
         shell: bash
         run: ./chart-dependencies/ci-deps.sh
 
+      - name: Debug cluster state before chart testing
+        if: steps.list-changed.outputs.changed == 'true'
+        run: |
+          echo "=== DEBUG: Cluster state before chart-testing ==="
+          kubectl cluster-info
+          kubectl get nodes -o wide
+          kubectl get namespaces
+          kubectl get pods --all-namespaces
+          kubectl get services --all-namespaces
+          kubectl get crd | grep -E "(gateway|inference)" || echo "No gateway/inference CRDs found"
+          echo ""
+
+          echo "=== DEBUG: Checking Istio installation ==="
+          kubectl get pods -n istio-system || echo "No istio-system namespace"
+          kubectl get svc -n istio-system || echo "No services in istio-system"
+          echo ""
+
+          echo "=== DEBUG: Checking ingress controller ==="
+          kubectl get pods -A | grep ingress || echo "No ingress pods found"
+          kubectl get svc -A | grep ingress || echo "No ingress services found"
+          echo ""
+
       - name: Run chart-testing (install)
         if: steps.list-changed.outputs.changed == 'true'
         env:
@@ -118,3 +140,26 @@ jobs:
             --config ct-install.yaml \
             --upgrade \
             --target-branch "$TARGET_BRANCH"
+
+      - name: Debug cluster state after chart testing failure
+        if: failure() && steps.list-changed.outputs.changed == 'true'
+        run: |
+          echo "=== DEBUG: Cluster state after failure ==="
+          kubectl get pods --all-namespaces -o wide
+          kubectl get services --all-namespaces
+          kubectl get events --all-namespaces --sort-by='.lastTimestamp' | tail -20
+          echo ""
+
+          echo "=== DEBUG: Chart-related pods and services ==="
+          kubectl get pods -A | grep -E "(llm-d|test)" || echo "No chart-related pods found"
+          kubectl get svc -A | grep -E "(llm-d|test)" || echo "No chart-related services found"
+          echo ""
+
+          echo "=== DEBUG: Pod logs for failed pods ==="
+          for pod in $(kubectl get pods -A --field-selector=status.phase=Failed -o jsonpath='{range .items[*]}{.metadata.namespace}{" "}{.metadata.name}{"\n"}{end}'); do
+            namespace=$(echo $pod | cut -d' ' -f1)
+            name=$(echo $pod | cut -d' ' -f2)
+            echo "--- Logs for $namespace/$name ---"
+            kubectl logs -n $namespace $name --previous || kubectl logs -n $namespace $name || echo "No logs available"
+            echo ""
+          done
