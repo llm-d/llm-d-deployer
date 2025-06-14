@@ -87,7 +87,7 @@ check_cmd() {
 check_dependencies() {
   # Verify mikefarah yq is installed
   if ! command -v yq &>/dev/null; then
-    die "Required command not found: yq. Please install mikefarah yq from https://github.com/mikefarah/yq?tab=readme-ov-file#install"
+    die "Test CI - Required command not found: yq. Please install mikefarah yq from https://github.com/mikefarah/yq?tab=readme-ov-file#install"
   fi
   if ! yq --version 2>&1 | grep -q 'mikefarah'; then
     die "Detected yq is not mikefarah’s yq. Please install the required yq from https://github.com/mikefarah/yq?tab=readme-ov-file#install"
