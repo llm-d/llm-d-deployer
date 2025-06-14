@@ -1,0 +1,38 @@
+---
+apiVersion: v2
+name: llm-d-vllm
+type: application
+version: 1.0.0
+appVersion: "0.1"
+description: >-
+  vLLM model serving components for llm-d (separated from inference gateway)
+keywords:
+  - vllm
+  - llm-d
+  - modelservice
+kubeVersion: ">= 1.30.0-0"
+maintainers:
+  - name: llm-d
+    url: https://github.com/llm-d/llm-d-deployer
+sources:
+  - https://github.com/llm-d/llm-d-deployer
+dependencies:
+  - name: common
+    repository: https://charts.bitnami.com/bitnami
+    tags:
+      - bitnami-common
+    version: "2.27.0"
+  - name: redis
+    repository: https://charts.bitnami.com/bitnami
+    tags:
+      - bitnami-redis
+    version: "20.13.4"
+    condition: redis.enabled
+annotations:
+  artifacthub.io/category: ai-machine-learning
+  artifacthub.io/license: Apache-2.0
+  artifacthub.io/links: |
+    - name: Chart Source
+      url: https://github.com/llm-d/llm-d-deployer
+  charts.openshift.io/name: llm-d vLLM Deployer
+  charts.openshift.io/provider: llm-d

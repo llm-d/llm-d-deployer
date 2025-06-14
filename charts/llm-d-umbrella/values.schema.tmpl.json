@@ -1,0 +1,500 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "clusterDomain": {
+      "default": "cluster.local",
+      "description": "Default Kubernetes cluster domain",
+      "required": [],
+      "title": "clusterDomain"
+    },
+    "commonAnnotations": {
+      "additionalProperties": true,
+      "description": "Annotations to add to all deployed objects",
+      "required": [],
+      "title": "commonAnnotations"
+    },
+    "commonLabels": {
+      "additionalProperties": true,
+      "description": "Labels to add to all deployed objects",
+      "required": [],
+      "title": "commonLabels"
+    },
+    "fullnameOverride": {
+      "default": "",
+      "description": "String to fully override common.names.fullname",
+      "required": [],
+      "title": "fullnameOverride"
+    },
+    "gateway": {
+      "additionalProperties": false,
+      "description": "Gateway API configuration (for external access)",
+      "properties": {
+        "annotations": {
+          "additionalProperties": false,
+          "description": "Gateway annotations",
+          "required": [],
+          "title": "annotations",
+          "type": "object"
+        },
+        "enabled": {
+          "default": "true",
+          "description": " that routes traffic to the InferencePool",
+          "required": [],
+          "title": "enabled"
+        },
+        "fullnameOverride": {
+          "default": "",
+          "required": [],
+          "title": "fullnameOverride",
+          "type": "string"
+        },
+        "gatewayClassName": {
+          "default": "istio",
+          "required": [],
+          "title": "gatewayClassName",
+          "type": "string"
+        },
+        "kGatewayParameters": {
+          "additionalProperties": false,
+          "description": "kGateway specific parameters",
+          "properties": {
+            "proxyUID": {
+              "default": "",
+              "required": [],
+              "title": "proxyUID",
+              "type": "string"
+            }
+          },
+          "required": [],
+          "title": "kGatewayParameters",
+          "type": "object"
+        },
+        "listeners": {
+          "items": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "default": "http",
+                    "required": [],
+                    "title": "name",
+                    "type": "string"
+                  },
+                  "port": {
+                    "default": 80,
+                    "required": [],
+                    "title": "port",
+                    "type": "integer"
+                  },
+                  "protocol": {
+                    "default": "HTTP",
+                    "required": [],
+                    "title": "protocol",
+                    "type": "string"
+                  }
+                },
+                "required": [],
+                "type": "object"
+              }
+            ],
+            "required": []
+          },
+          "required": [],
+          "title": "listeners",
+          "type": "array"
+        },
+        "nameOverride": {
+          "default": "",
+          "description": "Gateway naming overrides",
+          "required": [],
+          "title": "nameOverride",
+          "type": "string"
+        },
+        "routes": {
+          "description": "HTTPRoute configuration to route to InferencePool",
+          "items": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "backendRefs": {
+                    "items": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "group": {
+                              "default": "inference.networking.x-k8s.io",
+                              "required": [],
+                              "title": "group",
+                              "type": "string"
+                            },
+                            "kind": {
+                              "default": "InferencePool",
+                              "required": [],
+                              "title": "kind",
+                              "type": "string"
+                            },
+                            "name": {
+                              "default": "vllm-inference-pool",
+                              "required": [],
+                              "title": "name",
+                              "type": "string"
+                            },
+                            "port": {
+                              "default": 8000,
+                              "required": [],
+                              "title": "port",
+                              "type": "integer"
+                            }
+                          },
+                          "required": [],
+                          "type": "object"
+                        }
+                      ],
+                      "required": []
+                    },
+                    "required": [],
+                    "title": "backendRefs",
+                    "type": "array"
+                  },
+                  "matches": {
+                    "items": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "path": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "type": {
+                                  "default": "PathPrefix",
+                                  "required": [],
+                                  "title": "type",
+                                  "type": "string"
+                                },
+                                "value": {
+                                  "default": "/",
+                                  "required": [],
+                                  "title": "value",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [],
+                              "title": "path",
+                              "type": "object"
+                            }
+                          },
+                          "required": [],
+                          "type": "object"
+                        }
+                      ],
+                      "required": []
+                    },
+                    "required": [],
+                    "title": "matches",
+                    "type": "array"
+                  },
+                  "name": {
+                    "default": "llm-inference",
+                    "required": [],
+                    "title": "name",
+                    "type": "string"
+                  }
+                },
+                "required": [],
+                "type": "object"
+              }
+            ],
+            "required": []
+          },
+          "required": [],
+          "title": "routes",
+          "type": "array"
+        }
+      },
+      "required": [],
+      "title": "gateway"
+    },
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "inferencepool": {
+      "additionalProperties": false,
+      "description": "Enable upstream inference gateway components",
+      "properties": {
+        "enabled": {
+          "default": true,
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "inferenceExtension": {
+          "additionalProperties": false,
+          "description": "Configure the inference extension (endpoint picker)",
+          "properties": {
+            "env": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "env",
+              "type": "array"
+            },
+            "externalProcessingPort": {
+              "default": 9002,
+              "required": [],
+              "title": "externalProcessingPort",
+              "type": "integer"
+            },
+            "image": {
+              "additionalProperties": false,
+              "properties": {
+                "hub": {
+                  "default": "gcr.io/gke-ai-eco-dev",
+                  "required": [],
+                  "title": "hub",
+                  "type": "string"
+                },
+                "name": {
+                  "default": "epp",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                },
+                "pullPolicy": {
+                  "default": "Always",
+                  "required": [],
+                  "title": "pullPolicy",
+                  "type": "string"
+                },
+                "tag": {
+                  "default": "0.3.0",
+                  "required": [],
+                  "title": "tag",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "image",
+              "type": "object"
+            },
+            "replicas": {
+              "default": 1,
+              "required": [],
+              "title": "replicas",
+              "type": "integer"
+            }
+          },
+          "required": [],
+          "title": "inferenceExtension",
+          "type": "object"
+        },
+        "inferencePool": {
+          "additionalProperties": false,
+          "description": "Configure the inference pool for vLLM",
+          "properties": {
+            "modelServerType": {
+              "default": "vllm",
+              "required": [],
+              "title": "modelServerType",
+              "type": "string"
+            },
+            "modelServers": {
+              "additionalProperties": false,
+              "description": "Match model servers deployed by llm-d-vllm chart",
+              "properties": {
+                "matchLabels": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "app.kubernetes.io/name": {
+                      "default": "llm-d-vllm",
+                      "required": [],
+                      "title": "app.kubernetes.io/name",
+                      "type": "string"
+                    },
+                    "llm-d.ai/inferenceServing": {
+                      "default": "true",
+                      "required": [],
+                      "title": "llm-d.ai/inferenceServing",
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "title": "matchLabels",
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "title": "modelServers",
+              "type": "object"
+            },
+            "targetPort": {
+              "default": 8000,
+              "required": [],
+              "title": "targetPort",
+              "type": "integer"
+            }
+          },
+          "required": [],
+          "title": "inferencePool",
+          "type": "object"
+        },
+        "provider": {
+          "additionalProperties": false,
+          "description": "Provider configuration",
+          "properties": {
+            "name": {
+              "default": "none",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            }
+          },
+          "required": [],
+          "title": "provider",
+          "type": "object"
+        }
+      },
+      "required": [],
+      "title": "inferencepool"
+    },
+    "kubeVersion": {
+      "default": "",
+      "description": "Override Kubernetes version",
+      "required": [],
+      "title": "kubeVersion"
+    },
+    "llm-d-vllm": {
+      "additionalProperties": false,
+      "description": "Pass-through configuration to llm-d-vllm subchart",
+      "properties": {
+        "modelservice": {
+          "additionalProperties": false,
+          "description": "Enable model service controller",
+          "properties": {
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "vllm": {
+              "additionalProperties": false,
+              "description": "Configure vLLM for inference pool integration",
+              "properties": {
+                "podLabels": {
+                  "additionalProperties": false,
+                  "description": "Ensure consistent labeling for inference pool discovery",
+                  "properties": {
+                    "app.kubernetes.io/name": {
+                      "default": "llm-d-vllm",
+                      "required": [],
+                      "title": "app.kubernetes.io/name",
+                      "type": "string"
+                    },
+                    "llm-d.ai/inferenceServing": {
+                      "default": "true",
+                      "required": [],
+                      "title": "llm-d.ai/inferenceServing",
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "title": "podLabels",
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "title": "vllm",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "modelservice",
+          "type": "object"
+        },
+        "redis": {
+          "additionalProperties": false,
+          "description": "Enable Redis for caching",
+          "properties": {
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            }
+          },
+          "required": [],
+          "title": "redis",
+          "type": "object"
+        },
+        "sampleApplication": {
+          "additionalProperties": false,
+          "description": "Deploy sample application",
+          "properties": {
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "model": {
+              "additionalProperties": false,
+              "properties": {
+                "modelArtifactURI": {
+                  "default": "hf://meta-llama/Llama-3.2-3B-Instruct",
+                  "required": [],
+                  "title": "modelArtifactURI",
+                  "type": "string"
+                },
+                "modelName": {
+                  "default": "meta-llama/Llama-3.2-3B-Instruct",
+                  "required": [],
+                  "title": "modelName",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "model",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "sampleApplication",
+          "type": "object"
+        }
+      },
+      "required": [],
+      "title": "llm-d-vllm",
+      "type": "object"
+    },
+    "nameOverride": {
+      "default": "",
+      "description": "String to partially override common.names.fullname",
+      "required": [],
+      "title": "nameOverride"
+    },
+    "vllm": {
+      "additionalProperties": false,
+      "description": "Enable vLLM model serving components",
+      "properties": {
+        "enabled": {
+          "default": true,
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "title": "vllm"
+    }
+  },
+  "required": [],
+  "type": "object"
+}
