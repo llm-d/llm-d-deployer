@@ -1,0 +1,52 @@
+{{ template "chart.header" . }}
+
+{{ template "chart.description" . }}
+
+## Prerequisites
+
+- Kubernetes 1.30+
+- Helm 3.10+
+- Gateway API CRDs installed
+- **InferencePool CRDs** (from Gateway API Inference Extension):
+  ```bash
+  kubectl apply -f https://github.com/kubernetes-sigs/gateway-api-inference-extension/raw/main/config/manifests/inferencepool-resources.yaml
+  ```
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesSection" . }}
+
+## Installation
+
+1. Install prerequisites:
+```bash
+# Install Gateway API CRDs (if not already installed)
+kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.0.0/standard-install.yaml
+
+# Install InferencePool CRDs
+kubectl apply -f https://github.com/kubernetes-sigs/gateway-api-inference-extension/raw/main/config/manifests/inferencepool-resources.yaml
+```
+
+2. Install the chart:
+```bash
+helm install my-llm-d-umbrella llm-d/llm-d-umbrella
+```
+
+## Architecture
+
+This umbrella chart combines:
+- **Upstream InferencePool**: Intelligent routing and load balancing for inference workloads
+- **llm-d-vLLM**: Dedicated vLLM model serving components
+- **Gateway API**: External traffic routing and management
+
+The modular design enables:
+- Clean separation between inference gateway and model serving
+- Leveraging upstream Gateway API Inference Extension
+- Intelligent endpoint selection and load balancing
+- Backward compatibility with existing deployments
+
+{{ template "chart.homepage" . }}

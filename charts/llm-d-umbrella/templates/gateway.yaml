@@ -1,0 +1,42 @@
+{{- if .Values.gateway.enabled }}
+{{ $isIstio := (eq .Values.gateway.gatewayClassName "istio") }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ include "gateway.fullname" . }}
+  labels:
+    {{- include "umbrella.labels" . | nindent 4 }}
+    app.kubernetes.io/gateway: {{ include "gateway.fullname" . }}
+    app.kubernetes.io/component: inference-gateway
+    {{- if .Values.commonLabels }}
+    {{- toYaml .Values.commonLabels | nindent 4 }}
+    {{- end }}
+    {{- if $isIstio }}
+    istio.io/enable-inference-extproc: "true"
+    {{- end }}
+  annotations:
+    {{- if .Values.commonAnnotations }}
+    {{- toYaml .Values.commonAnnotations | nindent 4 }}
+    {{- end }}
+    {{- if .Values.gateway.annotations }}
+    {{- toYaml .Values.gateway.annotations | nindent 4 }}
+    {{- end }}
+    {{- if $isIstio }}
+    networking.istio.io/service-type: ClusterIP
+    {{- end }}
+spec:
+  gatewayClassName: {{ .Values.gateway.gatewayClassName | quote }}
+  listeners:
+  {{- range .Values.gateway.listeners }}
+    - name: {{ .name }}
+      port: {{ .port }}
+      protocol: {{ .protocol }}
+  {{- end }}
+  {{- if and .Values.gateway.kGatewayParameters.proxyUID  (eq .Values.gateway.gatewayClassName "kgateway") }}
+  infrastructure:
+    parametersRef:
+      name: {{ include "gateway.fullname" . }}
+      group: gateway.kgateway.dev
+      kind: GatewayParameters
+  {{- end}}
+{{- end }}

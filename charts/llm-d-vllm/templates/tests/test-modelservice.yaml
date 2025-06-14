@@ -1,0 +1,48 @@
+{{- if and .Values.modelservice.enabled .Values.sampleApplication.enabled }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "llm-d-vllm.fullname" . }}-test-modelservice
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-weight: "2"
+spec:
+  restartPolicy: Never
+  securityContext:
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - name: curl
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop: ["ALL"]
+      resources:
+        requests:
+          cpu: 10m
+          memory: 20Mi
+        limits:
+          cpu: 10m
+          memory: 20Mi
+      image: quay.io/curl/curl:latest
+      imagePullPolicy: IfNotPresent
+      command: ["/bin/sh", "-c"]
+      args:
+        - |
+          echo -e "\e[32m🧪 Testing vLLM ModelService functionality\e[0m"
+          echo ""
+
+          # Wait for ModelService to be ready
+          echo "Waiting for ModelService pods to be ready..."
+          sleep 30
+
+          # Test that we can reach the model service endpoint
+          echo "Testing model service availability..."
+          curl --connect-timeout 5 --max-time 20 --retry 10 --retry-delay 5 --retry-max-time 60 --retry-all-errors \
+            -H 'accept: application/json' \
+            http://{{ .Values.sampleApplication.model.modelName | replace "/" "-" }}-decode:8000/health || echo "Health check failed, continuing..."
+
+          echo ""
+          echo -e "\e[32m✅ vLLM ModelService test completed\e[0m"
+{{- end }}

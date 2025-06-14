@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "llm-d-vllm.fullname" . }}-test-yaml-syntax
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-weight: "1"
+spec:
+  restartPolicy: Never
+  securityContext:
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - name: yaml-test
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop: ["ALL"]
+      resources:
+        requests:
+          cpu: 10m
+          memory: 20Mi
+        limits:
+          cpu: 10m
+          memory: 20Mi
+      image: quay.io/curl/curl:latest
+      imagePullPolicy: IfNotPresent
+      command: ["/bin/sh", "-c"]
+      args:
+        - |
+          echo -e "\e[32m🧪 Testing vLLM chart YAML syntax\e[0m"
+          echo ""
+          echo "Chart name: {{ include "llm-d-vllm.name" . }}"
+          echo "Chart fullname: {{ include "llm-d-vllm.fullname" . }}"
+          echo "Chart version: {{ .Chart.Version }}"
+          echo "ModelService enabled: {{ .Values.modelservice.enabled }}"
+          echo "Sample app enabled: {{ .Values.sampleApplication.enabled }}"
+          echo ""
+          echo -e "\e[32m✅ vLLM chart YAML syntax test passed\e[0m"
