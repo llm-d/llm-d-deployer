@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart
 
-![Version: 1.0.18](https://img.shields.io/badge/Version-1.0.18-informational?style=flat-square)
+![Version: 1.0.19](https://img.shields.io/badge/Version-1.0.19-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 llm-d is a Kubernetes-native high-performance distributed LLM inference framework
