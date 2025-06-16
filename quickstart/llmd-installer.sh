@@ -25,6 +25,7 @@ DISABLE_METRICS=false
 MONITORING_NAMESPACE="llm-d-monitoring"
 DOWNLOAD_MODEL=""
 DOWNLOAD_TIMEOUT="600"
+GATEWAY_TYPE="istio"
 HELM_RELEASE_NAME="llm-d"
 
 # Minikube-specific flags & globals
@@ -55,6 +56,7 @@ Options:
   -t, --download-timeout           Timeout for model download job
   -k, --minikube                   Deploy on an existing minikube instance with hostPath storage
   -g, --context                    Supply a specific Kubernetes context
+  -j, --gateway                    Select gateway type (istio or kgateway)
   -r, --release                    (Helm) Chart release name
   -h, --help                       Show this help and exit
 EOF
@@ -140,6 +142,7 @@ parse_args() {
       -t|--download-timeout)           DOWNLOAD_TIMEOUT="$2"; shift 2 ;;
       -k|--minikube)                   USE_MINIKUBE=true; shift ;;
       -g|--context)                    KUBERNETES_CONTEXT="$2"; shift 2 ;;
+      -j|--gateway)                    GATEWAY_TYPE="$2"; shift 2 ;;
       -r|--release)                    HELM_RELEASE_NAME="$2"; shift 2 ;;
       -h|--help)                       print_help; exit 0 ;;
       *)                               die "Unknown option: $1" ;;
@@ -389,7 +392,7 @@ create_pvc_and_download_model_if_needed() {
 install() {
   if [[ "${SKIP_INFRA}" == "false" ]]; then
     log_info "🏗️ Installing GAIE Kubernetes infrastructure…"
-    bash ../chart-dependencies/ci-deps.sh
+    bash ../chart-dependencies/ci-deps.sh apply ${GATEWAY_TYPE}
     log_success "GAIE infra applied"
   fi
 
@@ -498,6 +501,17 @@ else
   )
 fi
 
+# Override model configuration if --download-model is specified
+MODEL_OVERRIDE_ARGS=()
+if [[ -n "${DOWNLOAD_MODEL}" ]]; then
+  log_info "Overriding model configuration with user-specified model: ${DOWNLOAD_MODEL}"
+  MODEL_OVERRIDE_ARGS=(
+    --set sampleApplication.model.modelName="${DOWNLOAD_MODEL}"
+    --set sampleApplication.model.modelArtifactURI="pvc://model-pvc/${DOWNLOAD_MODEL}"
+  )
+  log_success "Model will be overridden: ${DOWNLOAD_MODEL}"
+fi
+
   log_info "🚚 Deploying llm-d chart with ${VALUES_PATH}..."
   $HCMD upgrade -i ${HELM_RELEASE_NAME} . \
     ${DEBUG} \
@@ -506,7 +520,8 @@ fi
     "${OCP_DISABLE_INGRESS_ARGS[@]+"${OCP_DISABLE_INGRESS_ARGS[@]}"}" \
     --set gateway.kGatewayParameters.proxyUID="${PROXY_UID}" \
     --set ingress.clusterRouterBase="${BASE_OCP_DOMAIN}" \
-    "${METRICS_ARGS[@]}"
+    "${METRICS_ARGS[@]}" \
+    "${MODEL_OVERRIDE_ARGS[@]}"
   log_success "$HELM_RELEASE_NAME deployed"
 
   post_install
@@ -538,7 +553,7 @@ post_install() {
 uninstall() {
   if [[ "${SKIP_INFRA}" == "false" ]]; then
     log_info "🗑️ Tearing down GAIE Kubernetes infrastructure…"
-    bash ../chart-dependencies/ci-deps.sh delete
+    bash ../chart-dependencies/ci-deps.sh delete ${GATEWAY_TYPE}
   fi
   MODEL_ARTIFACT_URI=$($KCMD get modelservice --ignore-not-found -n ${NAMESPACE} -o yaml | yq '.items[].spec.modelArtifacts.uri')
   PROTOCOL="${MODEL_ARTIFACT_URI%%://*}"
