@@ -25,6 +25,7 @@ DISABLE_METRICS=false
 MONITORING_NAMESPACE="llm-d-monitoring"
 DOWNLOAD_MODEL=""
 DOWNLOAD_TIMEOUT="600"
+HELM_RELEASE_NAME="llm-d"
 
 # Minikube-specific flags & globals
 USE_MINIKUBE=false
@@ -54,6 +55,7 @@ Options:
   -t, --download-timeout           Timeout for model download job
   -k, --minikube                   Deploy on an existing minikube instance with hostPath storage
   -g, --context                    Supply a specific Kubernetes context
+  -r, --release                    (Helm) Chart release name
   -h, --help                       Show this help and exit
 EOF
 }
@@ -138,6 +140,7 @@ parse_args() {
       -t|--download-timeout)           DOWNLOAD_TIMEOUT="$2"; shift 2 ;;
       -k|--minikube)                   USE_MINIKUBE=true; shift ;;
       -g|--context)                    KUBERNETES_CONTEXT="$2"; shift 2 ;;
+      -r|--release)                    HELM_RELEASE_NAME="$2"; shift 2 ;;
       -h|--help)                       print_help; exit 0 ;;
       *)                               die "Unknown option: $1" ;;
     esac
@@ -496,7 +499,7 @@ else
 fi
 
   log_info "🚚 Deploying llm-d chart with ${VALUES_PATH}..."
-  $HCMD upgrade -i llm-d . \
+  $HCMD upgrade -i ${HELM_RELEASE_NAME} . \
     ${DEBUG} \
     --namespace "${NAMESPACE}" \
     "${VALUES_ARGS[@]}" \
@@ -504,7 +507,7 @@ fi
     --set gateway.kGatewayParameters.proxyUID="${PROXY_UID}" \
     --set ingress.clusterRouterBase="${BASE_OCP_DOMAIN}" \
     "${METRICS_ARGS[@]}"
-  log_success "llm-d deployed"
+  log_success "$HELM_RELEASE_NAME deployed"
 
   post_install
 
@@ -546,7 +549,7 @@ uninstall() {
     $KCMD delete job download-model --ignore-not-found || true
   fi
   log_info "🗑️ Uninstalling llm-d chart..."
-  $HCMD uninstall llm-d --ignore-not-found --namespace "${NAMESPACE}" || true
+  $HCMD uninstall ${HELM_RELEASE_NAME} --ignore-not-found --namespace "${NAMESPACE}" || true
 
   log_info "🗑️ Deleting namespace ${NAMESPACE}..."
   $KCMD delete namespace "${NAMESPACE}" --ignore-not-found || true
