@@ -507,7 +507,7 @@ if [[ -n "${DOWNLOAD_MODEL}" ]]; then
   log_info "Overriding model configuration with user-specified model: ${DOWNLOAD_MODEL}"
   MODEL_OVERRIDE_ARGS=(
     --set sampleApplication.model.modelName="${DOWNLOAD_MODEL}"
-    --set sampleApplication.model.modelArtifactURI="pvc://model-pvc/${DOWNLOAD_MODEL}"
+    --set sampleApplication.model.modelArtifactURI="hf://${DOWNLOAD_MODEL}"
   )
   log_success "Model will be overridden: ${DOWNLOAD_MODEL}"
 fi
