@@ -453,53 +453,39 @@ install() {
 
   local metrics_enabled="true"
   if [[ "${DISABLE_METRICS}" == "true" ]]; then
+    log_info "Metrics collection disabled by user request."
     metrics_enabled="false"
-    log_info "Metrics collection disabled by user request"
-  elif ! check_servicemonitor_crd; then
-    log_info "⚠️ ServiceMonitor CRD (monitoring.coreos.com) not found"
-  fi
-
-  if is_openshift; then
-    if ! check_openshift_monitoring; then
-      log_info "⚠️ Metrics collection may not work properly in OpenShift without user workload monitoring enabled"
-    fi
-    log_info "Using OpenShift's built-in monitoring stack"
-    DISABLE_METRICS=true # don't install prometheus if in OpenShift
-    metrics_enabled="true"
-  fi
-
-  # Install Prometheus if not disabled, not on OpenShift, and ServiceMonitor CRD doesn't exist
-  if [[ "${DISABLE_METRICS}" == "false" ]]; then
-    if ! check_servicemonitor_crd; then
-      install_prometheus_grafana
-    else
-      log_info "Skipping Prometheus installation as ServiceMonitor CRD already exists"
-    fi
-  fi
-
-  if [[ "${USE_MINIKUBE}" == "true" ]]; then
-    if [[ "${DISABLE_METRICS}" == "false" ]]; then
+  else
+    if is_openshift; then
+      log_info "Using OpenShift's built-in monitoring stack."
+      if ! check_openshift_monitoring; then
+        log_info "⚠️ Metrics collection may not work properly in OpenShift without user workload monitoring enabled."
+      fi
+      # No Prometheus installation needed; metrics_enabled remains true for chart.
+    elif [[ "${USE_MINIKUBE}" == "true" ]]; then
       log_info "🌱 Minikube detected; provisioning Prometheus/Grafana…"
       install_prometheus_grafana
+    elif ! check_servicemonitor_crd; then
+      log_info "⚠️ ServiceMonitor CRD (monitoring.coreos.com) not found. Installing Prometheus stack."
+      install_prometheus_grafana
     else
-      log_info "Metrics collection disabled by user request"
+      log_info "Skipping Prometheus installation as ServiceMonitor CRD already exists."
     fi
+    log_info "Metrics collection enabled"
   fi
 
-METRICS_ARGS=()
-if [[ "${DISABLE_METRICS}" == "true" ]]; then
-  log_info "Metrics collection disabled by user request"
-  METRICS_ARGS=(
-    --set modelservice.metrics.enabled=false
-    --set modelservice.epp.metrics.enabled=false
-    --set modelservice.vllm.metrics.enabled=false
-  )
-else
-  log_info "Metrics collection enabled"
-  METRICS_ARGS=(
-    --set modelservice.metrics.enabled="${metrics_enabled}"
-  )
-fi
+  METRICS_ARGS=()
+  if [[ "${metrics_enabled}" == "true" ]]; then
+    METRICS_ARGS=(
+      --set modelservice.metrics.enabled=true
+    )
+  else
+    METRICS_ARGS=(
+      --set modelservice.metrics.enabled=false
+      --set modelservice.epp.metrics.enabled=false
+      --set modelservice.vllm.metrics.enabled=false
+    )
+  fi
 
 # Override model configuration if --download-model is specified
 MODEL_OVERRIDE_ARGS=()
