@@ -225,6 +225,13 @@ validate_hf_token() {
   fi
 }
 
+validate_gateway_type() {
+  if [[ "${GATEWAY_TYPE}" != "istio" && "${GATEWAY_TYPE}" != "kgateway" ]]; then
+    die "Invalid gateway type: ${GATEWAY_TYPE}. Supported types are: istio, kgateway."
+  fi
+  log_success "Gateway type validated"
+}
+
 setup_minikube_storage() {
   log_info "📦 Setting up Minikube hostPath RWX Shared Storage..."
   log_info "🔄 Creating PV and PVC for llama model (PVC name: ${PVC_NAME})…"
@@ -518,10 +525,11 @@ fi
     --namespace "${NAMESPACE}" \
     "${VALUES_ARGS[@]}" \
     "${OCP_DISABLE_INGRESS_ARGS[@]+"${OCP_DISABLE_INGRESS_ARGS[@]}"}" \
+    --set gateway.gatewayClassName="${GATEWAY_TYPE}" \
     --set gateway.kGatewayParameters.proxyUID="${PROXY_UID}" \
     --set ingress.clusterRouterBase="${BASE_OCP_DOMAIN}" \
     "${METRICS_ARGS[@]}" \
-    "${MODEL_OVERRIDE_ARGS[@]}"
+    "${MODEL_OVERRIDE_ARGS[@]+"${MODEL_OVERRIDE_ARGS[@]}"}"
   log_success "$HELM_RELEASE_NAME deployed"
 
   post_install
@@ -738,6 +746,7 @@ main() {
   check_cluster_reachability
 
   validate_hf_token
+  validate_gateway_type
 
   if [[ "$ACTION" == "install" ]]; then
     install

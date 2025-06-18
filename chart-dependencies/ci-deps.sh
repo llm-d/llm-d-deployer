@@ -40,6 +40,6 @@ log_success "🚪 GAIE CRDs: ${LOG_ACTION_NAME}..."
 kubectl $MODE -k https://github.com/llm-d/llm-d-inference-scheduler/deploy/components/crds-gie || true
 
 ### Install Gateway provider
-log_success "🎒 Gateway provider '${COLOR_BLUE}${backend}${COLOR_RESET}${COLOR_GREEN}': ${LOG_ACTION_NAME}...${COLOR_RESET}"
+log_success "🎒 Gateway provider '${COLOR_BLUE}${BACKEND}${COLOR_RESET}${COLOR_GREEN}': ${LOG_ACTION_NAME}...${COLOR_RESET}"
 
 $CWD/$BACKEND/install.sh $MODE
