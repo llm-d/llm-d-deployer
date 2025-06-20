@@ -49,6 +49,13 @@ You can use the installer script that installs all the required dependencies.
 > ⚠️ Your Hugging Face account must have access to the model you want to use.  You may need to visit Hugging Face [meta-llama/Llama-3.2-3B-Instruct](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct) and
 > accept the usage terms if you have not already done so.
 
+### Required [Gateway API Inference Extension (GIE)]
+
+```shell
+export GIE_VERSION=v0.8.0
+kubectl apply -f https://github.com/kubernetes-sigs/gateway-api-inference-extension/releases/download/$GIE_VERSION/manifests.yaml
+```
+
 ### Target Platforms
 
 Since the llm-d-deployer is based on helm charts, llm-d can be deployed on a variety of Kubernetes platforms. As more platforms are supported, the installer will be updated to support them.
@@ -347,3 +354,5 @@ make a change, simply uninstall and then run the installer again with any change
 ```bash
 ./llmd-installer.sh --uninstall
 ```
+
+[Gateway API Inference Extension (GIE)]:https://github.com/kubernetes-sigs/gateway-api-inference-extension
