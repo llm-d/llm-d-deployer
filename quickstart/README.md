@@ -52,7 +52,7 @@ You can use the installer script that installs all the required dependencies.
 ### Required [Gateway API Inference Extension (GIE)]
 
 ```shell
-export GIE_VERSION=v0.8.0
+export GIE_VERSION=v0.3.0
 kubectl apply -f https://github.com/kubernetes-sigs/gateway-api-inference-extension/releases/download/$GIE_VERSION/manifests.yaml
 ```
 
