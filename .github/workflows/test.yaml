@@ -108,13 +108,80 @@ jobs:
         shell: bash
         run: ./chart-dependencies/ci-deps.sh
 
+      - name: Debug cluster state before chart testing
+        if: steps.list-changed.outputs.changed == 'true'
+        run: |
+          echo "=== DEBUG: Cluster state before chart-testing ==="
+          kubectl cluster-info
+          kubectl get nodes -o wide
+          kubectl get namespaces
+          kubectl get pods --all-namespaces
+          kubectl get services --all-namespaces
+          kubectl get crd | grep -E "(gateway|inference)" || echo "No gateway/inference CRDs found"
+          echo ""
+
+          echo "=== DEBUG: Checking Istio installation ==="
+          kubectl get pods -n istio-system || echo "No istio-system namespace"
+          kubectl get svc -n istio-system || echo "No services in istio-system"
+          echo ""
+
+          echo "=== DEBUG: Checking ingress controller ==="
+          kubectl get pods -A | grep ingress || echo "No ingress pods found"
+          kubectl get svc -A | grep ingress || echo "No ingress services found"
+          echo ""
+
       - name: Run chart-testing (install)
         if: steps.list-changed.outputs.changed == 'true'
         env:
           TARGET_BRANCH: ${{ github.event.pull_request.base.ref || 'main^' }}
         run: |
+          echo "=== DEBUG: Starting chart-testing install ==="
+          echo "Target branch: $TARGET_BRANCH"
+          echo "Chart-testing config:"
+          cat ct-install.yaml
+          echo ""
+
+          echo "=== DEBUG: Running ct install with maximum verbosity ==="
+          set -x
           ct install \
             --debug \
             --config ct-install.yaml \
             --upgrade \
-            --target-branch "$TARGET_BRANCH"
+            --target-branch "$TARGET_BRANCH" || {
+            echo ""
+            echo "=== DEBUG: Chart-testing failed, checking helm releases ==="
+            helm list --all-namespaces || true
+            echo ""
+            echo "=== DEBUG: Checking for any test namespaces ==="
+            kubectl get namespaces | grep -E "(test|chart)" || echo "No test namespaces found"
+            echo ""
+            echo "=== DEBUG: Checking for any failed pods ==="
+            kubectl get pods --all-namespaces --field-selector=status.phase=Failed || echo "No failed pods found"
+            echo ""
+            echo "=== DEBUG: Recent events ==="
+            kubectl get events --all-namespaces --sort-by='.lastTimestamp' | tail -30
+            exit 1
+          }
+
+      - name: Debug cluster state after chart testing failure
+        if: failure() && steps.list-changed.outputs.changed == 'true'
+        run: |
+          echo "=== DEBUG: Cluster state after failure ==="
+          kubectl get pods --all-namespaces -o wide
+          kubectl get services --all-namespaces
+          kubectl get events --all-namespaces --sort-by='.lastTimestamp' | tail -20
+          echo ""
+
+          echo "=== DEBUG: Chart-related pods and services ==="
+          kubectl get pods -A | grep -E "(llm-d|test)" || echo "No chart-related pods found"
+          kubectl get svc -A | grep -E "(llm-d|test)" || echo "No chart-related services found"
+          echo ""
+
+          echo "=== DEBUG: Pod logs for failed pods ==="
+          for pod in $(kubectl get pods -A --field-selector=status.phase=Failed -o jsonpath='{range .items[*]}{.metadata.namespace}{" "}{.metadata.name}{"\n"}{end}'); do
+            namespace=$(echo $pod | cut -d' ' -f1)
+            name=$(echo $pod | cut -d' ' -f2)
+            echo "--- Logs for $namespace/$name ---"
+            kubectl logs -n $namespace $name --previous || kubectl logs -n $namespace $name || echo "No logs available"
+            echo ""
+          done

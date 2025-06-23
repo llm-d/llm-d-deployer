@@ -35,8 +35,10 @@ Define the type of the modelArtifactURI
     pvc
   {{- else if hasPrefix "hf://" .Values.sampleApplication.model.modelArtifactURI -}}
     hf
+  {{- else if eq .Values.modelservice.vllm.loadFormat "runai_streamer" -}}
+    objectstorage
   {{- else }}
-    {{- fail "Values.sampleApplication.model.modelArtifactURI supports hf:// and pvc://" }}
+    {{- fail "Values.sampleApplication.model.modelArtifactURI supports hf:// and pvc://. For other protocols (like s3://), set modelservice.vllm.loadFormat to 'runai_streamer'" }}
   {{- end }}
 {{- end }}
 

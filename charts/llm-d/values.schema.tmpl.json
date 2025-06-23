@@ -1442,6 +1442,24 @@
           "default": "See below",
           "description": "vLLM container options",
           "properties": {
+            "extraArgs": {
+              "description": "Additional command line arguments for vLLM",
+              "items": {
+                "required": [],
+                "type": "string"
+              },
+              "required": [],
+              "title": "extraArgs"
+            },
+            "extraEnvVars": {
+              "description": "Additional environment variables for vLLM containers",
+              "items": {
+                "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar",
+                "required": []
+              },
+              "required": [],
+              "title": "extraEnvVars"
+            },
             "image": {
               "additionalProperties": false,
               "default": "See below",
@@ -1484,6 +1502,12 @@
               "required": [],
               "title": "image"
             },
+            "loadFormat": {
+              "default": "",
+              "description": "Load format for vLLM model loading \u003cbr /\u003e When set to \"runai_streamer\", enables Run:AI Model Streamer for loading models from object storage \u003cbr /\u003e Options: \"\", \"runai_streamer\", \"runai_streamer_sharded\"",
+              "required": [],
+              "title": "loadFormat"
+            },
             "logLevel": {
               "default": "INFO",
               "description": "Log level to run VLLM with \u003cbr /\u003e VLLM supports standard python log-levels, see: https://docs.python.org/3/library/logging.html#logging-levels \u003cbr /\u003e Options: \"DEBUG\", \"INFO\", \"WARNING\", \"ERROR\", \"CRITICAL\"",
@@ -1503,6 +1527,66 @@
               },
               "required": [],
               "title": "metrics"
+            },
+            "runaiStreamer": {
+              "additionalProperties": false,
+              "default": "See below",
+              "description": "RunAI Model Streamer configuration options \u003cbr /\u003e These options are used when loadFormat is set to \"runai_streamer\" or \"runai_streamer_sharded\"",
+              "properties": {
+                "chunkBytesize": {
+                  "default": "",
+                  "description": "Controls the maximum size of memory each OS thread reads from the file at once \u003cbr /\u003e Positive integer in bytes \u003cbr /\u003e Default: 2,097,152 (2 MiB) for file system, 8,388,608 (8 MiB) for object store",
+                  "required": [],
+                  "title": "chunkBytesize"
+                },
+                "concurrency": {
+                  "default": "16",
+                  "description": "Controls the level of concurrency and number of OS threads reading tensors \u003cbr /\u003e Positive integer",
+                  "required": [],
+                  "title": "concurrency"
+                },
+                "memoryLimit": {
+                  "default": "-1",
+                  "description": "Controls the size of the CPU Memory buffer to which tensors are read \u003cbr /\u003e Integer: -1 (UNLIMITED), 0 (MIN), or positive integer in bytes",
+                  "required": [],
+                  "title": "memoryLimit"
+                },
+                "pattern": {
+                  "default": "",
+                  "description": "Custom naming pattern for sharded model files \u003cbr /\u003e Used with runai_streamer_sharded load format \u003cbr /\u003e Example: \"custom-model-rank-{rank}-part-{part}.safetensors\"",
+                  "required": [],
+                  "title": "pattern"
+                },
+                "s3": {
+                  "additionalProperties": false,
+                  "default": "See below",
+                  "description": "S3/Object store configuration",
+                  "properties": {
+                    "caBundlePath": {
+                      "default": "",
+                      "description": "Path to a certificate bundle to use for HTTPS certificate validation",
+                      "required": [],
+                      "title": "caBundlePath"
+                    },
+                    "endpointUrl": {
+                      "default": "",
+                      "description": "Override url endpoint for reading from S3 compatible object store \u003cbr /\u003e Mandatory for S3-compatible stores like GCS, Minio",
+                      "required": [],
+                      "title": "endpointUrl"
+                    },
+                    "useVirtualAddressing": {
+                      "default": "true",
+                      "description": "Controls parsing the url endpoint for reading from object store \u003cbr /\u003e Boolean: true enables virtual addressing, false uses path-style",
+                      "required": [],
+                      "title": "useVirtualAddressing"
+                    }
+                  },
+                  "required": [],
+                  "title": "s3"
+                }
+              },
+              "required": [],
+              "title": "runaiStreamer"
             }
           },
           "required": [],
