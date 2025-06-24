@@ -415,7 +415,6 @@ install() {
 
   log_info "📦 Creating namespace ${NAMESPACE}..."
   $KCMD create namespace "${NAMESPACE}" --dry-run=client -o yaml | $KCMD apply -f -
-  $KCMD config set-context --current --namespace="${NAMESPACE}"
   log_success "Namespace ready"
 
   cd "${CHART_DIR}"
