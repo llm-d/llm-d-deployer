@@ -343,7 +343,7 @@ create_pvc_and_download_model_if_needed() {
         (.spec.template.spec.containers[0].env[] | select(.name == \"HF_TOKEN\")).valueFrom.secretKeyRef.name = \"${HF_TOKEN_SECRET_NAME}\" |
         (.spec.template.spec.containers[0].env[] | select(.name == \"HF_TOKEN\")).valueFrom.secretKeyRef.key = \"${HF_TOKEN_SECRET_KEY}\" |
         (.spec.template.spec.volumes[] | select(.name == \"model-cache\")).persistentVolumeClaim.claimName = \"${PVC_NAME}\"
-        " "${DOWNLOAD_MODEL_JOB_TEMPLATE_FILE_PATH}" | $KCMD apply -f -
+        " "${DOWNLOAD_MODEL_JOB_TEMPLATE_FILE_PATH}" | $KCMD apply -n ${NAMESPACE} -f -
       elif [[ "${YQ_TYPE}" == "py" ]]; then
         $KCMD apply -f ${DOWNLOAD_MODEL_JOB_TEMPLATE_FILE_PATH} --dry-run=client -o yaml |
         yq -r | \
