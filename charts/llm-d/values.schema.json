@@ -6867,6 +6867,70 @@
             "required": [],
             "title": "nameOverride"
         },
+        "tracing": {
+            "additionalProperties": false,
+            "default": {
+                "enabled": false
+            },
+            "description": "Distributed tracing configuration for llm-d components",
+            "properties": {
+                "alwaysPropagateContext": {
+                    "default": true,
+                    "description": "Always propagate trace context even when tracing is disabled",
+                    "type": "boolean"
+                },
+                "apiToken": {
+                    "default": "",
+                    "description": "API token for trace export (if required by collector)",
+                    "type": "string"
+                },
+                "components": {
+                    "additionalProperties": false,
+                    "description": "Per-component tracing configuration",
+                    "properties": {
+                        "eppInferenceScheduler": {
+                            "default": true,
+                            "description": "Enable tracing for EPP inference scheduler (includes kv-cache-manager)",
+                            "type": "boolean"
+                        },
+                        "inferenceGateway": {
+                            "default": true,
+                            "description": "Enable tracing for inference gateway",
+                            "type": "boolean"
+                        },
+                        "routingProxy": {
+                            "default": true,
+                            "description": "Enable tracing for routing proxy (llm-d-routing-sidecar)",
+                            "type": "boolean"
+                        },
+                        "vllm": {
+                            "default": true,
+                            "description": "Enable tracing for vLLM instances",
+                            "type": "boolean"
+                        }
+                    },
+                    "type": "object"
+                },
+                "enabled": {
+                    "default": false,
+                    "description": "Global tracing enablement (can be overridden per component)",
+                    "type": "boolean"
+                },
+                "otelCollectorEndpoint": {
+                    "default": "http://otel-collector:4317",
+                    "description": "OpenTelemetry collector endpoint",
+                    "type": "string"
+                },
+                "samplingRate": {
+                    "default": 0.1,
+                    "description": "Sampling rate for traces (0.0 to 1.0)",
+                    "type": "number"
+                }
+            },
+            "required": [],
+            "title": "tracing",
+            "type": "object"
+        },
         "redis": {
             "$schema": "http://json-schema.org/schema#",
             "properties": {
