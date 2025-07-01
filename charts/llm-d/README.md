@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart
 
-![Version: 1.0.20](https://img.shields.io/badge/Version-1.0.20-informational?style=flat-square)
+![Version: 1.0.21](https://img.shields.io/badge/Version-1.0.21-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 llm-d is a Kubernetes-native high-performance distributed LLM inference framework
@@ -194,7 +194,7 @@ Kubernetes: `>= 1.30.0-0`
 | modelservice.epp.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
 | modelservice.epp.image.registry | Endpoint picker image registry | string | `"ghcr.io"` |
 | modelservice.epp.image.repository | Endpoint picker image repository | string | `"llm-d/llm-d-inference-scheduler"` |
-| modelservice.epp.image.tag | Endpoint picker image tag | string | `"0.0.4"` |
+| modelservice.epp.image.tag | Endpoint picker image tag | string | `"v0.1.0"` |
 | modelservice.epp.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true,"serviceMonitor":{"annotations":{},"interval":"10s","labels":{},"namespaceSelector":{"any":false,"matchNames":[]},"path":"/metrics","port":"metrics","selector":{"matchLabels":{}}}}` |
 | modelservice.epp.metrics.enabled | Enable metrics scraping from endpoint picker service | bool | `true` |
 | modelservice.epp.metrics.serviceMonitor | Prometheus ServiceMonitor configuration <br /> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md | object | See below |
@@ -215,7 +215,7 @@ Kubernetes: `>= 1.30.0-0`
 | modelservice.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
 | modelservice.image.registry | Model Service controller image registry | string | `"ghcr.io"` |
 | modelservice.image.repository | Model Service controller image repository | string | `"llm-d/llm-d-model-service"` |
-| modelservice.image.tag | Model Service controller image tag | string | `"0.0.10"` |
+| modelservice.image.tag | Model Service controller image tag | string | `"v0.0.15"` |
 | modelservice.inferenceSimulator | llm-d inference simulator container options | object | See below |
 | modelservice.inferenceSimulator.containerSecurityContext | Security settings for a Container. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container | object | `{}` |
 | modelservice.inferenceSimulator.image | llm-d inference simulator image used in ModelService CR presets | object | See below |
@@ -253,12 +253,12 @@ Kubernetes: `>= 1.30.0-0`
 | modelservice.replicas | Number of controller replicas | int | `1` |
 | modelservice.routingProxy | Routing proxy container options | object | See below |
 | modelservice.routingProxy.containerSecurityContext | Security settings for a Container. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container | object | `{}` |
-| modelservice.routingProxy.image | Routing proxy image used in ModelService CR presets | object | `{"imagePullPolicy":"IfNotPresent","pullSecrets":[],"registry":"ghcr.io","repository":"llm-d/llm-d-routing-sidecar","tag":"0.0.6"}` |
+| modelservice.routingProxy.image | Routing proxy image used in ModelService CR presets | object | `{"imagePullPolicy":"IfNotPresent","pullSecrets":[],"registry":"ghcr.io","repository":"llm-d/llm-d-routing-sidecar","tag":"0.0.7"}` |
 | modelservice.routingProxy.image.imagePullPolicy | Specify a imagePullPolicy | string | `"IfNotPresent"` |
 | modelservice.routingProxy.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
 | modelservice.routingProxy.image.registry | Routing proxy image registry | string | `"ghcr.io"` |
 | modelservice.routingProxy.image.repository | Routing proxy image repository | string | `"llm-d/llm-d-routing-sidecar"` |
-| modelservice.routingProxy.image.tag | Routing proxy image tag | string | `"0.0.6"` |
+| modelservice.routingProxy.image.tag | Routing proxy image tag | string | `"0.0.7"` |
 | modelservice.service.enabled | Toggle to deploy a Service resource for Model service controller | bool | `true` |
 | modelservice.service.port | Port number exposed from Model Service controller | int | `8443` |
 | modelservice.service.type | Service type | string | `"ClusterIP"` |

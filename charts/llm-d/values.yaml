@@ -372,7 +372,7 @@ modelservice:
     repository: llm-d/llm-d-model-service
 
     # -- Model Service controller image tag
-    tag: "0.0.10"
+    tag: "v0.0.15"
 
     # -- Specify a imagePullPolicy
     imagePullPolicy: "Always"
@@ -449,7 +449,7 @@ modelservice:
       repository: llm-d/llm-d-inference-scheduler
 
       # -- Endpoint picker image tag
-      tag: 0.0.4
+      tag: v0.1.0
 
     # -- Specify a imagePullPolicy
       imagePullPolicy: "Always"
@@ -815,7 +815,7 @@ modelservice:
       repository: llm-d/llm-d-routing-sidecar
 
       # -- Routing proxy image tag
-      tag: "0.0.6"
+      tag: "0.0.7"
 
       # -- Specify a imagePullPolicy
       imagePullPolicy: "IfNotPresent"

@@ -58,7 +58,11 @@ spec:
         {{- include "common.tplvalues.render" ( dict "value" .Values.modelservice.tolerations "context" $) | nindent 8 }}
       {{- end }}
       containers:
-      - args:
+      - name: manager
+        command:
+        - /manager
+        - run
+        args:
         - --leader-elect=false
         - --health-probe-bind-address=:8081
         - --epp-cluster-role
@@ -67,8 +71,6 @@ spec:
         - {{ include "common.images.renderImagePullSecretsString" (dict "images" (list .Values.modelservice.epp.image) "context" $) }}
         - --pd-pull-secrets
         - {{ include "common.images.renderImagePullSecretsString" (dict "images" (list .Values.modelservice.vllm.image) "context" $) }}
-        command:
-        - /manager
         image: {{ include "modelservice.image" . }}
         imagePullPolicy: {{ .Values.modelservice.image.imagePullPolicy }}
         {{- if .Values.modelservice.containerSecurityContext }}
@@ -81,7 +83,6 @@ spec:
             port: 8081
           initialDelaySeconds: 15
           periodSeconds: 20
-        name: manager
         readinessProbe:
           httpGet:
             path: /readyz

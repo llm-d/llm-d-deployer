@@ -4025,7 +4025,7 @@
                                     "title": "repository"
                                 },
                                 "tag": {
-                                    "default": "0.0.4",
+                                    "default": "v0.1.0",
                                     "description": "Endpoint picker image tag",
                                     "required": [],
                                     "title": "tag"
@@ -4491,7 +4491,7 @@
                             "title": "repository"
                         },
                         "tag": {
-                            "default": "0.0.10",
+                            "default": "v0.0.15",
                             "description": "Model Service controller image tag",
                             "required": [],
                             "title": "tag"
@@ -6580,7 +6580,7 @@
                                     "title": "repository"
                                 },
                                 "tag": {
-                                    "default": "0.0.6",
+                                    "default": "0.0.7",
                                     "description": "Routing proxy image tag",
                                     "required": [],
                                     "title": "tag"
