@@ -1,0 +1,83 @@
+# Tested on AWS g6.12xlarge, minikube setup
+# ./llmd-installer.sh  --minikube --values-file examples/choose-adventure.yaml \
+
+sampleApplication:
+  baseConfigMapRefName: basic-gpu-with-nixl-and-redis-lookup-preset
+  model:
+    modelArtifactURI: hf://meta-llama/Llama-3.2-3B-Instruct
+    modelName: "meta-llama/Llama-3.2-3B-Instruct"
+  resources:
+    limits:
+      nvidia.com/gpu: 2
+    requests:
+      nvidia.com/gpu: 2
+  prefill:
+    replicas: 1
+    extraArgs:
+      - "--tensor-parallel-size"
+      - "2"
+      - "--distributed-executor-backend"
+      - "mp"
+      - "--max-model-len"
+      - "20000"
+      - '--enable-auto-tool-choice'
+      - '--tool-call-parser'
+      - llama3_json
+      - '--chat-template'
+      - /workspace/vllm/examples/tool_chat_template_llama3.2_json.jinja
+  decode:
+    replicas: 1
+    extraArgs:
+      - "--tensor-parallel-size"
+      - "2"
+      - "--distributed-executor-backend"
+      - "mp"
+      - '--enable-auto-tool-choice'
+      - '--tool-call-parser'
+      - llama3_json
+      - '--chat-template'
+      - /workspace/vllm/examples/tool_chat_template_llama3.2_json.jinja
+      - "--max-model-len"
+      - "20000"
+redis:
+  enabled: true
+modelservice:
+  routingProxy:
+    image:
+      registry: quay.io
+      repository: sallyom/llm-d-routing-sidecar
+      tag: tracing-dev
+  epp:
+    image:
+      registry: quay.io
+      repository: sallyom/llm-d-inference-scheduler
+      tag: tracing-dev-1
+    defaultEnvVarsOverride:
+      - name: ENABLE_KVCACHE_AWARE_SCORER
+        value: "true"
+      - name: ENABLE_PREFIX_AWARE_SCORER
+        value: "true"
+      - name: ENABLE_LOAD_AWARE_SCORER
+        value: "true"
+      - name: ENABLE_SESSION_AWARE_SCORER
+        value: "true"
+      - name: PD_ENABLED
+        value: "true"
+      - name: PD_PROMPT_LEN_THRESHOLD
+        value: "10"
+      - name: PREFILL_ENABLE_KVCACHE_AWARE_SCORER
+        value: "true"
+      - name: PREFILL_ENABLE_LOAD_AWARE_SCORER
+        value: "true"
+      - name: PREFILL_ENABLE_PREFIX_AWARE_SCORER
+        value: "true"
+      - name: PREFILL_ENABLE_SESSION_AWARE_SCORER
+        value: "true"
+tracing:
+  enabled: true
+  otelCollectorEndpoint: "otel-collector-collector.tracing.svc.cluster.local:4317"
+  samplingRate: 0.1
+  alwaysPropagateContext: true
+  components:
+    eppInferenceScheduler: true
+    routingProxy: true
