@@ -27,6 +27,13 @@ dependencies:
       - bitnami-redis
     version: "20.13.4"
     condition: redis.enabled
+  - name: llm-d-modelservice
+    repository: https://llm-d-incubation.github.io/llm-d-modelservice
+    tags:
+      - llm-d-modelservice
+      - modelservice
+    version: "0.0.5"
+    # condition: modelservice.enabled
 annotations:
   artifacthub.io/category: ai-machine-learning
   artifacthub.io/license: Apache-2.0

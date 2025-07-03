@@ -267,533 +267,796 @@
       "required": [],
       "title": "kubeVersion"
     },
-    "modelservice": {
+    "llm-d-modelservice": {
       "additionalProperties": false,
-      "default": "See below",
-      "description": "Model service controller configuration",
+      "description": "Modelservice Sub Charts",
       "properties": {
-        "affinity": {
-          "additionalProperties": false,
-          "description": "Affinity for pod assignment \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity",
-          "properties": {
-            "nodeAffinity": {
-              "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.NodeAffinity",
-              "required": []
-            },
-            "podAffinity": {
-              "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.PodAffinity",
-              "required": []
-            },
-            "podAntiAffinity": {
-              "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.PodAntiAffinity",
-              "required": []
-            }
-          },
-          "required": [],
-          "title": "affinity"
-        },
-        "annotations": {
-          "additionalProperties": true,
-          "description": "Annotations to add to all modelservice resources",
-          "required": [],
-          "title": "annotations"
-        },
-        "containerSecurityContext": {
-          "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
-          "description": "Security settings for a Container. \u003cbr /\u003e Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container",
-          "required": []
-        },
         "decode": {
           "additionalProperties": false,
-          "default": "See below",
-          "description": "Decode options",
+          "description": "describe decode pods",
           "properties": {
-            "affinity": {
-              "additionalProperties": false,
-              "description": "Affinity for pod assignment \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity",
-              "properties": {
-                "nodeAffinity": {
-                  "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.NodeAffinity",
-                  "required": []
-                },
-                "podAffinity": {
-                  "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.PodAffinity",
-                  "required": []
-                },
-                "podAntiAffinity": {
-                  "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.PodAntiAffinity",
-                  "required": []
-                }
-              },
-              "required": [],
-              "title": "affinity"
-            },
-            "containerSecurityContext": {
-              "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
-              "description": "Security settings for a Container. \u003cbr /\u003e Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container",
-              "required": []
-            },
-            "nodeSelector": {
-              "additionalProperties": true,
-              "description": "Node labels for pod assignment \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector",
-              "required": [],
-              "title": "nodeSelector"
-            },
-            "podSecurityContext": {
-              "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
-              "description": "Security settings for a Pod.  The security settings that you specify for a Pod apply to all Containers in the Pod. \u003cbr /\u003e Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod",
-              "required": []
-            },
-            "tolerations": {
-              "description": "Node tolerations for server scheduling to nodes with taints \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/",
+            "containers": {
               "items": {
-                "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration",
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "args": {
+                        "items": {
+                          "anyOf": [
+                            {
+                              "required": [],
+                              "type": "string"
+                            },
+                            {
+                              "required": [],
+                              "type": "string"
+                            },
+                            {
+                              "required": [],
+                              "type": "string"
+                            }
+                          ],
+                          "required": []
+                        },
+                        "required": [],
+                        "title": "args",
+                        "type": "array"
+                      },
+                      "command": {
+                        "items": {
+                          "anyOf": [
+                            {
+                              "required": [],
+                              "type": "string"
+                            },
+                            {
+                              "required": [],
+                              "type": "string"
+                            }
+                          ],
+                          "required": []
+                        },
+                        "required": [],
+                        "title": "command",
+                        "type": "array"
+                      },
+                      "env": {
+                        "items": {
+                          "anyOf": [
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "name": {
+                                  "default": "CUDA_VISIBLE_DEVICES",
+                                  "required": [],
+                                  "title": "name",
+                                  "type": "string"
+                                },
+                                "value": {
+                                  "default": "0",
+                                  "required": [],
+                                  "title": "value",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [],
+                              "type": "object"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "name": {
+                                  "default": "UCX_TLS",
+                                  "required": [],
+                                  "title": "name",
+                                  "type": "string"
+                                },
+                                "value": {
+                                  "default": "cuda_ipc,cuda_copy,tcp",
+                                  "required": [],
+                                  "title": "value",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [],
+                              "type": "object"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "name": {
+                                  "default": "HF_HOME",
+                                  "required": [],
+                                  "title": "name",
+                                  "type": "string"
+                                },
+                                "value": {
+                                  "default": "/model-cache",
+                                  "required": [],
+                                  "title": "value",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [],
+                              "type": "object"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "name": {
+                                  "default": "VLLM_NIXL_SIDE_CHANNEL_HOST",
+                                  "required": [],
+                                  "title": "name",
+                                  "type": "string"
+                                },
+                                "valueFrom": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "fieldRef": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "fieldPath": {
+                                          "default": "status.podIP",
+                                          "required": [],
+                                          "title": "fieldPath",
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [],
+                                      "title": "fieldRef",
+                                      "type": "object"
+                                    }
+                                  },
+                                  "required": [],
+                                  "title": "valueFrom",
+                                  "type": "object"
+                                }
+                              },
+                              "required": [],
+                              "type": "object"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "name": {
+                                  "default": "VLLM_NIXL_SIDE_CHANNEL_PORT",
+                                  "required": [],
+                                  "title": "name",
+                                  "type": "string"
+                                },
+                                "value": {
+                                  "default": "5557",
+                                  "required": [],
+                                  "title": "value",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [],
+                              "type": "object"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "name": {
+                                  "default": "VLLM_LOGGING_LEVEL",
+                                  "required": [],
+                                  "title": "name",
+                                  "type": "string"
+                                },
+                                "value": {
+                                  "default": "DEBUG",
+                                  "required": [],
+                                  "title": "value",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [],
+                              "type": "object"
+                            }
+                          ],
+                          "required": []
+                        },
+                        "required": [],
+                        "title": "env",
+                        "type": "array"
+                      },
+                      "image": {
+                        "default": "ghcr.io/llm-d/llm-d:0.0.8",
+                        "required": [],
+                        "title": "image",
+                        "type": "string"
+                      },
+                      "mountModelVolume": {
+                        "default": true,
+                        "required": [],
+                        "title": "mountModelVolume",
+                        "type": "boolean"
+                      },
+                      "name": {
+                        "default": "vllm",
+                        "required": [],
+                        "title": "name",
+                        "type": "string"
+                      },
+                      "ports": {
+                        "items": {
+                          "anyOf": [
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "containerPort": {
+                                  "default": 5557,
+                                  "required": [],
+                                  "title": "containerPort",
+                                  "type": "integer"
+                                },
+                                "protocol": {
+                                  "default": "TCP",
+                                  "required": [],
+                                  "title": "protocol",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [],
+                              "type": "object"
+                            }
+                          ],
+                          "required": []
+                        },
+                        "required": [],
+                        "title": "ports",
+                        "type": "array"
+                      },
+                      "resources": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "limits": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "cpu": {
+                                "default": "16",
+                                "required": [],
+                                "title": "cpu",
+                                "type": "string"
+                              },
+                              "memory": {
+                                "default": "16Gi",
+                                "required": [],
+                                "title": "memory",
+                                "type": "string"
+                              },
+                              "nvidia.com/gpu": {
+                                "default": "1",
+                                "required": [],
+                                "title": "nvidia.com/gpu",
+                                "type": "string"
+                              }
+                            },
+                            "required": [],
+                            "title": "limits",
+                            "type": "object"
+                          },
+                          "requests": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "cpu": {
+                                "default": "16",
+                                "required": [],
+                                "title": "cpu",
+                                "type": "string"
+                              },
+                              "memory": {
+                                "default": "16Gi",
+                                "required": [],
+                                "title": "memory",
+                                "type": "string"
+                              },
+                              "nvidia.com/gpu": {
+                                "default": "1",
+                                "required": [],
+                                "title": "nvidia.com/gpu",
+                                "type": "string"
+                              }
+                            },
+                            "required": [],
+                            "title": "requests",
+                            "type": "object"
+                          }
+                        },
+                        "required": [],
+                        "title": "resources",
+                        "type": "object"
+                      }
+                    },
+                    "required": [],
+                    "type": "object"
+                  }
+                ],
                 "required": []
               },
               "required": [],
-              "title": "tolerations"
+              "title": "containers",
+              "type": "array"
             },
-            "topologySpreadConstraints": {
-              "description": "Topology Spread Constraints for pod assignment \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints",
-              "items": {
-                "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.TopologySpreadConstraint",
-                "required": []
-              },
+            "enableService": {
+              "default": false,
               "required": [],
-              "title": "topologySpreadConstraints"
+              "title": "enableService",
+              "type": "boolean"
             },
-            "vllm": {
-              "additionalProperties": false,
-              "description": "vLLM container settings",
-              "properties": {
-                "containerSecurityContext": {
-                  "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
-                  "additionalProperties": true,
-                  "description": "Security settings for a Container. \u003cbr /\u003e Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container",
-                  "required": []
-                }
-              },
+            "replicas": {
+              "default": 1,
               "required": [],
-              "title": "vllm"
+              "title": "replicas",
+              "type": "integer"
             }
           },
           "required": [],
-          "title": "decode"
+          "title": "decode",
+          "type": "object"
         },
-        "enabled": {
-          "default": "true",
-          "description": "Toggle to deploy modelservice controller related resources",
-          "required": [],
-          "title": "enabled"
-        },
-        "epp": {
+        "endpointPicker": {
           "additionalProperties": false,
-          "default": "See below",
-          "description": "Endpoint picker configuration",
           "properties": {
-            "affinity": {
+            "autoscaling": {
               "additionalProperties": false,
-              "description": "Affinity for pod assignment \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity",
               "properties": {
-                "nodeAffinity": {
-                  "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.NodeAffinity",
-                  "required": []
-                },
-                "podAffinity": {
-                  "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.PodAffinity",
-                  "required": []
-                },
-                "podAntiAffinity": {
-                  "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.PodAntiAffinity",
-                  "required": []
+                "enabled": {
+                  "default": false,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
                 }
               },
               "required": [],
-              "title": "affinity"
+              "title": "autoscaling",
+              "type": "object"
             },
-            "containerSecurityContext": {
-              "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
-              "description": "Security settings for a Container. \u003cbr /\u003e Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container",
-              "required": []
+            "debugLevel": {
+              "default": 5,
+              "required": [],
+              "title": "debugLevel",
+              "type": "integer"
             },
-            "defaultEnvVars": {
-              "description": "Default environment variables for endpoint picker, use `defaultEnvVarsOverride` to override default behavior by defining the same variable again. Ref: https://github.com/llm-d/llm-d-inference-scheduler/blob/main/docs/architecture.md#scorers--configuration",
+            "image": {
+              "default": "ghcr.io/llm-d/llm-d-inference-scheduler:0.0.4",
+              "required": [],
+              "title": "image",
+              "type": "string"
+            },
+            "permissions": {
+              "default": "pod-read",
+              "description": "The name of cluster role containing permissions to be granted to endpointPicker (via a role binding to the service account)",
+              "required": [],
+              "title": "permissions",
+              "type": "string"
+            },
+            "replicas": {
+              "default": 1,
+              "required": [],
+              "title": "replicas",
+              "type": "integer"
+            },
+            "service": {
+              "additionalProperties": false,
+              "properties": {
+                "appProtocol": {
+                  "default": "http2",
+                  "required": [],
+                  "title": "appProtocol",
+                  "type": "string"
+                },
+                "port": {
+                  "default": 9002,
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                },
+                "targetPort": {
+                  "default": 9002,
+                  "required": [],
+                  "title": "targetPort",
+                  "type": "integer"
+                },
+                "type": {
+                  "default": "ClusterIP",
+                  "required": [],
+                  "title": "type",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "service",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "endpointPicker",
+          "type": "object"
+        },
+        "httpRoute": {
+          "default": true,
+          "required": [],
+          "title": "httpRoute",
+          "type": "boolean"
+        },
+        "inferenceModel": {
+          "default": true,
+          "required": [],
+          "title": "inferenceModel",
+          "type": "boolean"
+        },
+        "inferencePool": {
+          "default": true,
+          "required": [],
+          "title": "inferencePool",
+          "type": "boolean"
+        },
+        "modelArtifacts": {
+          "additionalProperties": false,
+          "properties": {
+            "authSecretName": {
+              "default": "llm-d-hf-token",
+              "required": [],
+              "title": "authSecretName",
+              "type": "string"
+            },
+            "size": {
+              "default": "5Mi",
+              "required": [],
+              "title": "size",
+              "type": "string"
+            },
+            "uri": {
+              "default": "hf://meta-llama/Llama-3.2-3B-Instruct",
+              "description": " is extracted and exposed as a template variable that can be used as {{ .HFModelName }}",
+              "required": [],
+              "title": "uri"
+            }
+          },
+          "required": [],
+          "title": "modelArtifacts",
+          "type": "object"
+        },
+        "multinode": {
+          "default": true,
+          "required": [],
+          "title": "multinode",
+          "type": "boolean"
+        },
+        "prefill": {
+          "additionalProperties": false,
+          "description": "describe prefill pods",
+          "properties": {
+            "containers": {
+              "items": {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "args": {
+                        "items": {
+                          "anyOf": [
+                            {
+                              "required": [],
+                              "type": "string"
+                            },
+                            {
+                              "required": [],
+                              "type": "string"
+                            },
+                            {
+                              "required": [],
+                              "type": "string"
+                            }
+                          ],
+                          "required": []
+                        },
+                        "required": [],
+                        "title": "args",
+                        "type": "array"
+                      },
+                      "command": {
+                        "items": {
+                          "anyOf": [
+                            {
+                              "required": [],
+                              "type": "string"
+                            },
+                            {
+                              "required": [],
+                              "type": "string"
+                            }
+                          ],
+                          "required": []
+                        },
+                        "required": [],
+                        "title": "command",
+                        "type": "array"
+                      },
+                      "env": {
+                        "items": {
+                          "anyOf": [
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "name": {
+                                  "default": "CUDA_VISIBLE_DEVICES",
+                                  "required": [],
+                                  "title": "name",
+                                  "type": "string"
+                                },
+                                "value": {
+                                  "default": "0",
+                                  "required": [],
+                                  "title": "value",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [],
+                              "type": "object"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "name": {
+                                  "default": "UCX_TLS",
+                                  "required": [],
+                                  "title": "name",
+                                  "type": "string"
+                                },
+                                "value": {
+                                  "default": "cuda_ipc,cuda_copy,tcp",
+                                  "required": [],
+                                  "title": "value",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [],
+                              "type": "object"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "name": {
+                                  "default": "VLLM_NIXL_SIDE_CHANNEL_PORT",
+                                  "required": [],
+                                  "title": "name",
+                                  "type": "string"
+                                },
+                                "value": {
+                                  "default": "5557",
+                                  "required": [],
+                                  "title": "value",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [],
+                              "type": "object"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "name": {
+                                  "default": "VLLM_NIXL_SIDE_CHANNEL_HOST",
+                                  "required": [],
+                                  "title": "name",
+                                  "type": "string"
+                                },
+                                "valueFrom": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "fieldRef": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "fieldPath": {
+                                          "default": "status.podIP",
+                                          "required": [],
+                                          "title": "fieldPath",
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [],
+                                      "title": "fieldRef",
+                                      "type": "object"
+                                    }
+                                  },
+                                  "required": [],
+                                  "title": "valueFrom",
+                                  "type": "object"
+                                }
+                              },
+                              "required": [],
+                              "type": "object"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "name": {
+                                  "default": "VLLM_LOGGING_LEVEL",
+                                  "required": [],
+                                  "title": "name",
+                                  "type": "string"
+                                },
+                                "value": {
+                                  "default": "DEBUG",
+                                  "required": [],
+                                  "title": "value",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [],
+                              "type": "object"
+                            }
+                          ],
+                          "required": []
+                        },
+                        "required": [],
+                        "title": "env",
+                        "type": "array"
+                      },
+                      "image": {
+                        "default": "ghcr.io/llm-d/llm-d:0.0.8",
+                        "required": [],
+                        "title": "image",
+                        "type": "string"
+                      },
+                      "name": {
+                        "default": "vllm",
+                        "required": [],
+                        "title": "name",
+                        "type": "string"
+                      },
+                      "ports": {
+                        "items": {
+                          "anyOf": [
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "containerPort": {
+                                  "default": 8000,
+                                  "required": [],
+                                  "title": "containerPort",
+                                  "type": "integer"
+                                },
+                                "protocol": {
+                                  "default": "TCP",
+                                  "required": [],
+                                  "title": "protocol",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [],
+                              "type": "object"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "containerPort": {
+                                  "default": 5557,
+                                  "required": [],
+                                  "title": "containerPort",
+                                  "type": "integer"
+                                },
+                                "protocol": {
+                                  "default": "TCP",
+                                  "required": [],
+                                  "title": "protocol",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [],
+                              "type": "object"
+                            }
+                          ],
+                          "required": []
+                        },
+                        "required": [],
+                        "title": "ports",
+                        "type": "array"
+                      },
+                      "resources": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "limits": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "cpu": {
+                                "default": "16",
+                                "required": [],
+                                "title": "cpu",
+                                "type": "string"
+                              },
+                              "memory": {
+                                "default": "16Gi",
+                                "required": [],
+                                "title": "memory",
+                                "type": "string"
+                              },
+                              "nvidia.com/gpu": {
+                                "default": "1",
+                                "required": [],
+                                "title": "nvidia.com/gpu",
+                                "type": "string"
+                              }
+                            },
+                            "required": [],
+                            "title": "limits",
+                            "type": "object"
+                          },
+                          "requests": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "cpu": {
+                                "default": "16",
+                                "required": [],
+                                "title": "cpu",
+                                "type": "string"
+                              },
+                              "memory": {
+                                "default": "16Gi",
+                                "required": [],
+                                "title": "memory",
+                                "type": "string"
+                              },
+                              "nvidia.com/gpu": {
+                                "default": "1",
+                                "required": [],
+                                "title": "nvidia.com/gpu",
+                                "type": "string"
+                              }
+                            },
+                            "required": [],
+                            "title": "requests",
+                            "type": "object"
+                          }
+                        },
+                        "required": [],
+                        "title": "resources",
+                        "type": "object"
+                      }
+                    },
+                    "required": [],
+                    "type": "object"
+                  }
+                ],
+                "required": []
+              },
+              "required": [],
+              "title": "containers",
+              "type": "array"
+            },
+            "replicas": {
+              "default": 1,
+              "required": [],
+              "title": "replicas",
+              "type": "integer"
+            }
+          },
+          "required": [],
+          "title": "prefill",
+          "type": "object"
+        },
+        "routing": {
+          "additionalProperties": false,
+          "properties": {
+            "modelName": {
+              "default": "meta-llama/Llama-3.2-3B-Instruct",
+              "required": [],
+              "title": "modelName",
+              "type": "string"
+            },
+            "parentRefs": {
               "items": {
                 "anyOf": [
                   {
                     "additionalProperties": false,
                     "properties": {
                       "name": {
-                        "default": "ENABLE_KVCACHE_AWARE_SCORER",
+                        "default": "inference-gateway",
                         "required": [],
                         "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "false",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "KVCACHE_AWARE_SCORER_WEIGHT",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "1",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "KVCACHE_INDEXER_REDIS_ADDR",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "{{ if .Values.redis.enabled }}{{ include \"redis.master.service.fullurl\" . }}{{ end }}",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "ENABLE_PREFIX_AWARE_SCORER",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "true",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "PREFIX_AWARE_SCORER_WEIGHT",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "2",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "ENABLE_LOAD_AWARE_SCORER",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "true",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "LOAD_AWARE_SCORER_WEIGHT",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "1",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "ENABLE_SESSION_AWARE_SCORER",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "false",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "SESSION_AWARE_SCORER_WEIGHT",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "1",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "PD_ENABLED",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "false",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "PD_PROMPT_LEN_THRESHOLD",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "10",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "PREFILL_ENABLE_KVCACHE_AWARE_SCORER",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "false",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "PREFILL_KVCACHE_AWARE_SCORER_WEIGHT",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "1",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "PREFILL_KVCACHE_INDEXER_REDIS_ADDR",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "{{ if .Values.redis.enabled }}{{ include \"redis.master.service.fullurl\" . }}{{ end }}",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "PREFILL_ENABLE_LOAD_AWARE_SCORER",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "false",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "PREFILL_LOAD_AWARE_SCORER_WEIGHT",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "1",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "PREFILL_ENABLE_PREFIX_AWARE_SCORER",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "false",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "PREFILL_PREFIX_AWARE_SCORER_WEIGHT",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "1",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "PREFILL_ENABLE_SESSION_AWARE_SCORER",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "false",
-                        "required": [],
-                        "title": "value",
-                        "type": "string"
-                      }
-                    },
-                    "required": [],
-                    "type": "object"
-                  },
-                  {
-                    "additionalProperties": false,
-                    "properties": {
-                      "name": {
-                        "default": "PREFILL_SESSION_AWARE_SCORER_WEIGHT",
-                        "required": [],
-                        "title": "name",
-                        "type": "string"
-                      },
-                      "value": {
-                        "default": "1",
-                        "required": [],
-                        "title": "value",
                         "type": "string"
                       }
                     },
@@ -804,713 +1067,69 @@
                 "required": []
               },
               "required": [],
-              "title": "defaultEnvVars"
+              "title": "parentRefs",
+              "type": "array"
             },
-            "defaultEnvVarsOverride": {
-              "description": "Override default environment variables for endpoint picker. This list has priorito over `defaultEnvVars`",
-              "items": {
-                "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar",
-                "required": []
-              },
-              "required": [],
-              "title": "defaultEnvVarsOverride"
-            },
-            "image": {
+            "proxy": {
               "additionalProperties": false,
-              "default": "See below",
-              "description": "Endpoint picker image used in ModelService CR presets",
               "properties": {
-                "imagePullPolicy": {
-                  "default": "Always",
-                  "description": "Specify a imagePullPolicy",
+                "debugLevel": {
+                  "default": 5,
                   "required": [],
-                  "title": "imagePullPolicy"
+                  "title": "debugLevel",
+                  "type": "integer"
                 },
-                "pullSecrets": {
-                  "description": "Optionally specify an array of imagePullSecrets (evaluated as templates)",
-                  "items": {
-                    "required": [],
-                    "type": "string"
-                  },
-                  "required": [],
-                  "title": "pullSecrets"
-                },
-                "registry": {
-                  "default": "ghcr.io",
-                  "description": "Endpoint picker image registry",
-                  "required": [],
-                  "title": "registry"
-                },
-                "repository": {
-                  "default": "llm-d/llm-d-inference-scheduler",
-                  "description": "Endpoint picker image repository",
-                  "required": [],
-                  "title": "repository"
-                },
-                "tag": {
-                  "default": "0.0.4",
-                  "description": "Endpoint picker image tag",
-                  "required": [],
-                  "title": "tag"
-                }
-              },
-              "required": [],
-              "title": "image"
-            },
-            "metrics": {
-              "additionalProperties": false,
-              "description": "Enable metrics gathering via podMonitor / ServiceMonitor",
-              "properties": {
-                "enabled": {
-                  "default": "true",
-                  "description": "Enable metrics scraping from endpoint picker service",
-                  "required": [],
-                  "title": "enabled"
-                },
-                "serviceMonitor": {
+                "image": {
                   "additionalProperties": false,
-                  "default": "See below",
-                  "description": "Prometheus ServiceMonitor configuration \u003cbr /\u003e Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md",
                   "properties": {
-                    "annotations": {
-                      "additionalProperties": true,
-                      "description": "Additional annotations provided to the ServiceMonitor",
+                    "registry": {
+                      "default": "ghcr.io",
                       "required": [],
-                      "title": "annotations"
+                      "title": "registry",
+                      "type": "string"
                     },
-                    "interval": {
-                      "default": "10s",
-                      "description": "ServiceMonitor endpoint interval at which metrics should be scraped",
+                    "repository": {
+                      "default": "llm-d/llm-d-routing-sidecar",
                       "required": [],
-                      "title": "interval"
+                      "title": "repository",
+                      "type": "string"
                     },
-                    "labels": {
-                      "additionalProperties": true,
-                      "description": "Additional labels provided to the ServiceMonitor",
+                    "tags": {
+                      "default": "0.0.6",
                       "required": [],
-                      "title": "labels"
-                    },
-                    "namespaceSelector": {
-                      "additionalProperties": false,
-                      "description": "ServiceMonitor namespace selector",
-                      "properties": {
-                        "any": {
-                          "default": false,
-                          "required": [],
-                          "title": "any",
-                          "type": "boolean"
-                        },
-                        "matchNames": {
-                          "description": " items:   type: string @schema",
-                          "items": {
-                            "required": [],
-                            "type": "string"
-                          },
-                          "required": [],
-                          "title": "matchNames"
-                        }
-                      },
-                      "required": [],
-                      "title": "namespaceSelector"
-                    },
-                    "path": {
-                      "default": "/metrics",
-                      "description": "ServiceMonitor endpoint path",
-                      "required": [],
-                      "title": "path"
-                    },
-                    "port": {
-                      "default": "metrics",
-                      "description": "ServiceMonitor endpoint port",
-                      "required": [],
-                      "title": "port"
-                    },
-                    "selector": {
-                      "additionalProperties": false,
-                      "description": "ServiceMonitor selector matchLabels \u003c/br\u003e matchLabels must match labels on modelservice Services",
-                      "properties": {
-                        "matchLabels": {
-                          "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector",
-                          "description": " $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector @schema",
-                          "required": []
-                        }
-                      },
-                      "required": [],
-                      "title": "selector"
+                      "title": "tags",
+                      "type": "string"
                     }
                   },
                   "required": [],
-                  "title": "serviceMonitor"
+                  "title": "image",
+                  "type": "object"
+                },
+                "targetPort": {
+                  "default": 8200,
+                  "required": [],
+                  "title": "targetPort",
+                  "type": "integer"
                 }
               },
               "required": [],
-              "title": "metrics"
+              "title": "proxy",
+              "type": "object"
             },
-            "nodeSelector": {
-              "additionalProperties": true,
-              "description": "Node labels for pod assignment \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector",
+            "servicePort": {
+              "default": 8080,
               "required": [],
-              "title": "nodeSelector"
-            },
-            "podSecurityContext": {
-              "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
-              "description": "Security settings for a Pod.  The security settings that you specify for a Pod apply to all Containers in the Pod. \u003cbr /\u003e Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod",
-              "required": []
-            },
-            "tolerations": {
-              "description": "Node tolerations for server scheduling to nodes with taints \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/",
-              "items": {
-                "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration",
-                "required": []
-              },
-              "required": [],
-              "title": "tolerations"
-            },
-            "topologySpreadConstraints": {
-              "description": "Topology Spread Constraints for pod assignment \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints",
-              "items": {
-                "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.TopologySpreadConstraint",
-                "required": []
-              },
-              "required": [],
-              "title": "topologySpreadConstraints"
+              "title": "servicePort",
+              "type": "integer"
             }
           },
           "required": [],
-          "title": "epp"
-        },
-        "fullnameOverride": {
-          "default": "",
-          "description": "String to fully override modelservice.fullname",
-          "required": [],
-          "title": "fullnameOverride"
-        },
-        "image": {
-          "additionalProperties": false,
-          "default": "See below",
-          "description": "Modelservice controller image, please change only if appropriate adjustments to the CRD are being made",
-          "properties": {
-            "imagePullPolicy": {
-              "default": "Always",
-              "description": "Specify a imagePullPolicy",
-              "required": [],
-              "title": "imagePullPolicy"
-            },
-            "pullSecrets": {
-              "description": "Optionally specify an array of imagePullSecrets (evaluated as templates)",
-              "items": {
-                "required": [],
-                "type": "string"
-              },
-              "required": [],
-              "title": "pullSecrets"
-            },
-            "registry": {
-              "default": "ghcr.io",
-              "description": "Model Service controller image registry",
-              "required": [],
-              "title": "registry"
-            },
-            "repository": {
-              "default": "llm-d/llm-d-model-service",
-              "description": "Model Service controller image repository",
-              "required": [],
-              "title": "repository"
-            },
-            "tag": {
-              "default": "0.0.10",
-              "description": "Model Service controller image tag",
-              "required": [],
-              "title": "tag"
-            }
-          },
-          "required": [],
-          "title": "image"
-        },
-        "inferenceSimulator": {
-          "additionalProperties": false,
-          "default": "See below",
-          "description": "llm-d inference simulator container options",
-          "properties": {
-            "containerSecurityContext": {
-              "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
-              "description": "Security settings for a Container. \u003cbr /\u003e Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container",
-              "required": []
-            },
-            "image": {
-              "additionalProperties": false,
-              "default": "See below",
-              "description": "llm-d inference simulator image used in ModelService CR presets",
-              "properties": {
-                "imagePullPolicy": {
-                  "default": "IfNotPresent",
-                  "description": "Specify a imagePullPolicy",
-                  "required": [],
-                  "title": "imagePullPolicy"
-                },
-                "pullSecrets": {
-                  "description": "Optionally specify an array of imagePullSecrets (evaluated as templates)",
-                  "items": {
-                    "required": [],
-                    "type": "string"
-                  },
-                  "required": [],
-                  "title": "pullSecrets"
-                },
-                "registry": {
-                  "default": "ghcr.io",
-                  "description": "llm-d inference simulator image registry",
-                  "required": [],
-                  "title": "registry"
-                },
-                "repository": {
-                  "default": "llm-d/llm-d-inference-sim",
-                  "description": "llm-d inference simulator image repository",
-                  "required": [],
-                  "title": "repository"
-                },
-                "tag": {
-                  "default": "0.0.4",
-                  "description": "llm-d inference simulator image tag",
-                  "required": [],
-                  "title": "tag"
-                }
-              },
-              "required": [],
-              "title": "image"
-            }
-          },
-          "required": [],
-          "title": "inferenceSimulator"
-        },
-        "metrics": {
-          "additionalProperties": false,
-          "description": "Enable metrics gathering via podMonitor / ServiceMonitor",
-          "properties": {
-            "enabled": {
-              "default": "true",
-              "description": "Enable metrics scraping from prefill and decode services, see `model",
-              "required": [],
-              "title": "enabled"
-            },
-            "serviceMonitor": {
-              "additionalProperties": false,
-              "default": "See below",
-              "description": "Prometheus ServiceMonitor configuration \u003cbr /\u003e Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md",
-              "properties": {
-                "annotations": {
-                  "additionalProperties": true,
-                  "description": "Additional annotations provided to the ServiceMonitor",
-                  "required": [],
-                  "title": "annotations"
-                },
-                "interval": {
-                  "default": "15s",
-                  "description": "ServiceMonitor endpoint interval at which metrics should be scraped",
-                  "required": [],
-                  "title": "interval"
-                },
-                "labels": {
-                  "additionalProperties": true,
-                  "description": "Additional labels provided to the ServiceMonitor",
-                  "required": [],
-                  "title": "labels"
-                },
-                "namespaceSelector": {
-                  "additionalProperties": false,
-                  "description": "ServiceMonitor namespace selector",
-                  "properties": {
-                    "any": {
-                      "default": false,
-                      "required": [],
-                      "title": "any",
-                      "type": "boolean"
-                    },
-                    "matchNames": {
-                      "description": " items:   type: string @schema",
-                      "items": {
-                        "required": [],
-                        "type": "string"
-                      },
-                      "required": [],
-                      "title": "matchNames"
-                    }
-                  },
-                  "required": [],
-                  "title": "namespaceSelector"
-                },
-                "path": {
-                  "default": "/metrics",
-                  "description": "ServiceMonitor endpoint path",
-                  "required": [],
-                  "title": "path"
-                },
-                "port": {
-                  "default": "vllm",
-                  "description": "ServiceMonitor endpoint port",
-                  "required": [],
-                  "title": "port"
-                },
-                "selector": {
-                  "additionalProperties": false,
-                  "description": "ServiceMonitor selector matchLabels \u003c/br\u003e matchLabels must match labels on modelservice Services",
-                  "properties": {
-                    "matchLabels": {
-                      "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector",
-                      "description": " $ref: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector @schema",
-                      "required": []
-                    }
-                  },
-                  "required": [],
-                  "title": "selector"
-                }
-              },
-              "required": [],
-              "title": "serviceMonitor"
-            }
-          },
-          "required": [],
-          "title": "metrics"
-        },
-        "nameOverride": {
-          "default": "",
-          "description": "String to partially override modelservice.fullname",
-          "required": [],
-          "title": "nameOverride"
-        },
-        "nodeSelector": {
-          "additionalProperties": true,
-          "description": "Node labels for pod assignment \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector",
-          "required": [],
-          "title": "nodeSelector"
-        },
-        "podAnnotations": {
-          "additionalProperties": true,
-          "description": "Pod annotations for modelservice",
-          "required": [],
-          "title": "podAnnotations"
-        },
-        "podLabels": {
-          "additionalProperties": true,
-          "description": "Pod labels for modelservice",
-          "required": [],
-          "title": "podLabels"
-        },
-        "podSecurityContext": {
-          "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
-          "description": "Security settings for a Pod.  The security settings that you specify for a Pod apply to all Containers in the Pod. \u003cbr /\u003e Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod",
-          "required": []
-        },
-        "prefill": {
-          "additionalProperties": false,
-          "default": "See below",
-          "description": "Prefill options",
-          "properties": {
-            "affinity": {
-              "additionalProperties": false,
-              "description": "Affinity for pod assignment \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity",
-              "properties": {
-                "nodeAffinity": {
-                  "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.NodeAffinity",
-                  "required": []
-                },
-                "podAffinity": {
-                  "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.PodAffinity",
-                  "required": []
-                },
-                "podAntiAffinity": {
-                  "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.PodAntiAffinity",
-                  "required": []
-                }
-              },
-              "required": [],
-              "title": "affinity"
-            },
-            "containerSecurityContext": {
-              "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
-              "description": "Security settings for a Container. \u003cbr /\u003e Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container",
-              "required": []
-            },
-            "nodeSelector": {
-              "additionalProperties": true,
-              "description": "Node labels for pod assignment \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector",
-              "required": [],
-              "title": "nodeSelector"
-            },
-            "podSecurityContext": {
-              "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
-              "description": "Security settings for a Pod.  The security settings that you specify for a Pod apply to all Containers in the Pod. \u003cbr /\u003e Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod",
-              "required": []
-            },
-            "tolerations": {
-              "description": "Node tolerations for server scheduling to nodes with taints \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/",
-              "items": {
-                "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration",
-                "required": []
-              },
-              "required": [],
-              "title": "tolerations"
-            },
-            "topologySpreadConstraints": {
-              "description": "Topology Spread Constraints for pod assignment \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints",
-              "items": {
-                "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.TopologySpreadConstraint",
-                "required": []
-              },
-              "required": [],
-              "title": "topologySpreadConstraints"
-            },
-            "vllm": {
-              "additionalProperties": false,
-              "description": "vLLM container settings",
-              "properties": {
-                "containerSecurityContext": {
-                  "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
-                  "additionalProperties": true,
-                  "description": "Security settings for a Container. \u003cbr /\u003e Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container",
-                  "required": []
-                }
-              },
-              "required": [],
-              "title": "vllm"
-            }
-          },
-          "required": [],
-          "title": "prefill"
-        },
-        "rbac": {
-          "additionalProperties": false,
-          "properties": {
-            "create": {
-              "default": "true",
-              "description": "Enable the creation of RBAC resources",
-              "required": [],
-              "title": "create"
-            }
-          },
-          "required": [],
-          "title": "rbac",
+          "title": "routing",
           "type": "object"
-        },
-        "replicas": {
-          "default": "1",
-          "description": "Number of controller replicas",
-          "required": [],
-          "title": "replicas"
-        },
-        "routingProxy": {
-          "additionalProperties": false,
-          "default": "See below",
-          "description": "Routing proxy container options",
-          "properties": {
-            "containerSecurityContext": {
-              "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext",
-              "description": "Security settings for a Container. \u003cbr /\u003e Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container",
-              "required": []
-            },
-            "image": {
-              "additionalProperties": false,
-              "description": "Routing proxy image used in ModelService CR presets",
-              "properties": {
-                "imagePullPolicy": {
-                  "default": "IfNotPresent",
-                  "description": "Specify a imagePullPolicy",
-                  "required": [],
-                  "title": "imagePullPolicy"
-                },
-                "pullSecrets": {
-                  "description": "Optionally specify an array of imagePullSecrets (evaluated as templates)",
-                  "items": {
-                    "required": [],
-                    "type": "string"
-                  },
-                  "required": [],
-                  "title": "pullSecrets"
-                },
-                "registry": {
-                  "default": "ghcr.io",
-                  "description": "Routing proxy image registry",
-                  "required": [],
-                  "title": "registry"
-                },
-                "repository": {
-                  "default": "llm-d/llm-d-routing-sidecar",
-                  "description": "Routing proxy image repository",
-                  "required": [],
-                  "title": "repository"
-                },
-                "tag": {
-                  "default": "0.0.6",
-                  "description": "Routing proxy image tag",
-                  "required": [],
-                  "title": "tag"
-                }
-              },
-              "required": [],
-              "title": "image"
-            }
-          },
-          "required": [],
-          "title": "routingProxy"
-        },
-        "service": {
-          "additionalProperties": false,
-          "description": "Model service controller settings",
-          "properties": {
-            "enabled": {
-              "default": "true",
-              "description": "Toggle to deploy a Service resource for Model service controller",
-              "required": [],
-              "title": "enabled"
-            },
-            "port": {
-              "default": "8443",
-              "description": "Port number exposed from Model Service controller",
-              "required": [],
-              "title": "port"
-            },
-            "type": {
-              "default": "ClusterIP",
-              "description": "Service type",
-              "required": [],
-              "title": "type"
-            }
-          },
-          "required": [],
-          "title": "service",
-          "type": "object"
-        },
-        "serviceAccount": {
-          "additionalProperties": false,
-          "default": "See below",
-          "description": "Service Account Configuration",
-          "properties": {
-            "annotations": {
-              "additionalProperties": true,
-              "description": "Additional custom annotations for the ServiceAccount.",
-              "required": [],
-              "title": "annotations"
-            },
-            "create": {
-              "default": "true",
-              "description": "Enable the creation of a ServiceAccount for Modelservice pods",
-              "required": [],
-              "title": "create"
-            },
-            "fullnameOverride": {
-              "default": "",
-              "description": "String to fully override modelservice.serviceAccountName, defaults to modelservice.fullname",
-              "required": [],
-              "title": "fullnameOverride"
-            },
-            "labels": {
-              "additionalProperties": true,
-              "description": "Additional custom labels to the service ServiceAccount.",
-              "required": [],
-              "title": "labels"
-            },
-            "nameOverride": {
-              "default": "",
-              "description": "String to partially override modelservice.serviceAccountName, defaults to modelservice.fullname",
-              "required": [],
-              "title": "nameOverride"
-            }
-          },
-          "required": [],
-          "title": "serviceAccount"
-        },
-        "tolerations": {
-          "description": "Node tolerations for server scheduling to nodes with taints \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/",
-          "items": {
-            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration",
-            "required": []
-          },
-          "required": [],
-          "title": "tolerations"
-        },
-        "topologySpreadConstraints": {
-          "description": "Topology Spread Constraints for pod assignment \u003cbr /\u003e Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints",
-          "items": {
-            "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master/_definitions.json#/definitions/io.k8s.api.core.v1.TopologySpreadConstraint",
-            "required": []
-          },
-          "required": [],
-          "title": "topologySpreadConstraints"
-        },
-        "vllm": {
-          "additionalProperties": false,
-          "default": "See below",
-          "description": "vLLM container options",
-          "properties": {
-            "image": {
-              "additionalProperties": false,
-              "default": "See below",
-              "description": "vLLM image used in ModelService CR presets",
-              "properties": {
-                "imagePullPolicy": {
-                  "default": "IfNotPresent",
-                  "description": "Specify a imagePullPolicy",
-                  "required": [],
-                  "title": "imagePullPolicy"
-                },
-                "pullSecrets": {
-                  "description": "Optionally specify an array of imagePullSecrets (evaluated as templates)",
-                  "items": {
-                    "required": [],
-                    "type": "string"
-                  },
-                  "required": [],
-                  "title": "pullSecrets"
-                },
-                "registry": {
-                  "default": "ghcr.io",
-                  "description": "llm-d image registry",
-                  "required": [],
-                  "title": "registry"
-                },
-                "repository": {
-                  "default": "llm-d/llm-d",
-                  "description": "llm-d image repository",
-                  "required": [],
-                  "title": "repository"
-                },
-                "tag": {
-                  "default": "0.0.8",
-                  "description": "llm-d image tag",
-                  "required": [],
-                  "title": "tag"
-                }
-              },
-              "required": [],
-              "title": "image"
-            },
-            "logLevel": {
-              "default": "INFO",
-              "description": "Log level to run VLLM with \u003cbr /\u003e VLLM supports standard python log-levels, see: https://docs.python.org/3/library/logging.html#logging-levels \u003cbr /\u003e Options: \"DEBUG\", \"INFO\", \"WARNING\", \"ERROR\", \"CRITICAL\"",
-              "required": [],
-              "title": "logLevel"
-            },
-            "metrics": {
-              "additionalProperties": false,
-              "description": "Enable metrics gathering via podMonitor / ServiceMonitor",
-              "properties": {
-                "enabled": {
-                  "default": "true",
-                  "description": "Enable metrics scraping from prefill \u0026 decode services",
-                  "required": [],
-                  "title": "enabled"
-                }
-              },
-              "required": [],
-              "title": "metrics"
-            }
-          },
-          "required": [],
-          "title": "vllm"
         }
       },
       "required": [],
-      "title": "modelservice"
+      "title": "llm-d-modelservice"
     },
     "nameOverride": {
       "default": "",

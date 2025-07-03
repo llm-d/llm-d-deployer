@@ -5,5 +5,8 @@ dependencies:
 - name: redis
   repository: https://charts.bitnami.com/bitnami
   version: 20.13.4
-digest: sha256:772ec68662ea0b33874d50d86123af9486c4f549bd1fb18db7b685315a3d0163
-generated: "2025-05-01T11:06:09.676658+02:00"
+- name: llm-d-modelservice
+  repository: https://llm-d-incubation.github.io/llm-d-modelservice
+  version: 0.0.5
+digest: sha256:2e9342cba826d4bf0ebfc6d690c55bfe387523d71f600dbb7d300a41c28e7f80
+generated: "2025-07-03T07:15:39.194449-07:00"

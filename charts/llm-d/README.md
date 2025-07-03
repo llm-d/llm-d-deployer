@@ -135,6 +135,7 @@ Kubernetes: `>= 1.30.0-0`
 |------------|------|---------|
 | https://charts.bitnami.com/bitnami | common | 2.27.0 |
 | https://charts.bitnami.com/bitnami | redis | 20.13.4 |
+| https://llm-d-incubation.github.io/llm-d-modelservice | llm-d-modelservice | 0.0.5 |
 
 ## Values
 
@@ -169,117 +170,7 @@ Kubernetes: `>= 1.30.0-0`
 | ingress.tls.enabled | Enable TLS configuration for the host defined at `ingress.host` parameter | bool | `false` |
 | ingress.tls.secretName | The name to which the TLS Secret will be called | string | `""` |
 | kubeVersion | Override Kubernetes version | string | `""` |
-| modelservice | Model service controller configuration | object | See below |
-| modelservice.affinity | Affinity for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity | object | `{}` |
-| modelservice.annotations | Annotations to add to all modelservice resources | object | `{}` |
-| modelservice.containerSecurityContext | Security settings for a Container. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container | object | `{}` |
-| modelservice.decode | Decode options | object | See below |
-| modelservice.decode.affinity | Affinity for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity | object | `{}` |
-| modelservice.decode.containerSecurityContext | Security settings for a Container. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container | object | `{}` |
-| modelservice.decode.nodeSelector | Node labels for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector | object | `{}` |
-| modelservice.decode.podSecurityContext | Security settings for a Pod.  The security settings that you specify for a Pod apply to all Containers in the Pod. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod | object | `{}` |
-| modelservice.decode.tolerations | Node tolerations for server scheduling to nodes with taints <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ | list | `[{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}]` |
-| modelservice.decode.tolerations[0] | default NVIDIA GPU toleration | object | `{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}` |
-| modelservice.decode.topologySpreadConstraints | Topology Spread Constraints for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints | list | `[]` |
-| modelservice.decode.vllm | vLLM container settings | object | `{"containerSecurityContext":{"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["MKNOD"]}}}}` |
-| modelservice.decode.vllm.containerSecurityContext | Security settings for a Container. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container | object | `{"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["MKNOD"]}}}` |
-| modelservice.enabled | Toggle to deploy modelservice controller related resources | bool | `true` |
-| modelservice.epp | Endpoint picker configuration | object | See below |
-| modelservice.epp.affinity | Affinity for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity | object | `{}` |
-| modelservice.epp.containerSecurityContext | Security settings for a Container. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container | object | `{}` |
-| modelservice.epp.defaultEnvVars | Default environment variables for endpoint picker, use `defaultEnvVarsOverride` to override default behavior by defining the same variable again. Ref: https://github.com/llm-d/llm-d-inference-scheduler/blob/main/docs/architecture.md#scorers--configuration | list | `[{"name":"ENABLE_KVCACHE_AWARE_SCORER","value":"false"},{"name":"KVCACHE_AWARE_SCORER_WEIGHT","value":"1"},{"name":"KVCACHE_INDEXER_REDIS_ADDR","value":"{{ if .Values.redis.enabled }}{{ include \"redis.master.service.fullurl\" . }}{{ end }}"},{"name":"ENABLE_PREFIX_AWARE_SCORER","value":"true"},{"name":"PREFIX_AWARE_SCORER_WEIGHT","value":"2"},{"name":"ENABLE_LOAD_AWARE_SCORER","value":"true"},{"name":"LOAD_AWARE_SCORER_WEIGHT","value":"1"},{"name":"ENABLE_SESSION_AWARE_SCORER","value":"false"},{"name":"SESSION_AWARE_SCORER_WEIGHT","value":"1"},{"name":"PD_ENABLED","value":"false"},{"name":"PD_PROMPT_LEN_THRESHOLD","value":"10"},{"name":"PREFILL_ENABLE_KVCACHE_AWARE_SCORER","value":"false"},{"name":"PREFILL_KVCACHE_AWARE_SCORER_WEIGHT","value":"1"},{"name":"PREFILL_KVCACHE_INDEXER_REDIS_ADDR","value":"{{ if .Values.redis.enabled }}{{ include \"redis.master.service.fullurl\" . }}{{ end }}"},{"name":"PREFILL_ENABLE_LOAD_AWARE_SCORER","value":"false"},{"name":"PREFILL_LOAD_AWARE_SCORER_WEIGHT","value":"1"},{"name":"PREFILL_ENABLE_PREFIX_AWARE_SCORER","value":"false"},{"name":"PREFILL_PREFIX_AWARE_SCORER_WEIGHT","value":"1"},{"name":"PREFILL_ENABLE_SESSION_AWARE_SCORER","value":"false"},{"name":"PREFILL_SESSION_AWARE_SCORER_WEIGHT","value":"1"}]` |
-| modelservice.epp.defaultEnvVarsOverride | Override default environment variables for endpoint picker. This list has priorito over `defaultEnvVars` | list | `[]` |
-| modelservice.epp.image | Endpoint picker image used in ModelService CR presets | object | See below |
-| modelservice.epp.image.imagePullPolicy | Specify a imagePullPolicy | string | `"Always"` |
-| modelservice.epp.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
-| modelservice.epp.image.registry | Endpoint picker image registry | string | `"ghcr.io"` |
-| modelservice.epp.image.repository | Endpoint picker image repository | string | `"llm-d/llm-d-inference-scheduler"` |
-| modelservice.epp.image.tag | Endpoint picker image tag | string | `"0.0.4"` |
-| modelservice.epp.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true,"serviceMonitor":{"annotations":{},"interval":"10s","labels":{},"namespaceSelector":{"any":false,"matchNames":[]},"path":"/metrics","port":"metrics","selector":{"matchLabels":{}}}}` |
-| modelservice.epp.metrics.enabled | Enable metrics scraping from endpoint picker service | bool | `true` |
-| modelservice.epp.metrics.serviceMonitor | Prometheus ServiceMonitor configuration <br /> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md | object | See below |
-| modelservice.epp.metrics.serviceMonitor.annotations | Additional annotations provided to the ServiceMonitor | object | `{}` |
-| modelservice.epp.metrics.serviceMonitor.interval | ServiceMonitor endpoint interval at which metrics should be scraped | string | `"10s"` |
-| modelservice.epp.metrics.serviceMonitor.labels | Additional labels provided to the ServiceMonitor | object | `{}` |
-| modelservice.epp.metrics.serviceMonitor.namespaceSelector | ServiceMonitor namespace selector | object | `{"any":false,"matchNames":[]}` |
-| modelservice.epp.metrics.serviceMonitor.path | ServiceMonitor endpoint path | string | `"/metrics"` |
-| modelservice.epp.metrics.serviceMonitor.port | ServiceMonitor endpoint port | string | `"metrics"` |
-| modelservice.epp.metrics.serviceMonitor.selector | ServiceMonitor selector matchLabels </br> matchLabels must match labels on modelservice Services | object | `{"matchLabels":{}}` |
-| modelservice.epp.nodeSelector | Node labels for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector | object | `{}` |
-| modelservice.epp.podSecurityContext | Security settings for a Pod.  The security settings that you specify for a Pod apply to all Containers in the Pod. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod | object | `{}` |
-| modelservice.epp.tolerations | Node tolerations for server scheduling to nodes with taints <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ | list | `[]` |
-| modelservice.epp.topologySpreadConstraints | Topology Spread Constraints for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints | list | `[]` |
-| modelservice.fullnameOverride | String to fully override modelservice.fullname | string | `""` |
-| modelservice.image | Modelservice controller image, please change only if appropriate adjustments to the CRD are being made | object | See below |
-| modelservice.image.imagePullPolicy | Specify a imagePullPolicy | string | `"Always"` |
-| modelservice.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
-| modelservice.image.registry | Model Service controller image registry | string | `"ghcr.io"` |
-| modelservice.image.repository | Model Service controller image repository | string | `"llm-d/llm-d-model-service"` |
-| modelservice.image.tag | Model Service controller image tag | string | `"0.0.10"` |
-| modelservice.inferenceSimulator | llm-d inference simulator container options | object | See below |
-| modelservice.inferenceSimulator.containerSecurityContext | Security settings for a Container. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container | object | `{}` |
-| modelservice.inferenceSimulator.image | llm-d inference simulator image used in ModelService CR presets | object | See below |
-| modelservice.inferenceSimulator.image.imagePullPolicy | Specify a imagePullPolicy | string | `"IfNotPresent"` |
-| modelservice.inferenceSimulator.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
-| modelservice.inferenceSimulator.image.registry | llm-d inference simulator image registry | string | `"ghcr.io"` |
-| modelservice.inferenceSimulator.image.repository | llm-d inference simulator image repository | string | `"llm-d/llm-d-inference-sim"` |
-| modelservice.inferenceSimulator.image.tag | llm-d inference simulator image tag | string | `"0.0.4"` |
-| modelservice.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true,"serviceMonitor":{"annotations":{},"interval":"15s","labels":{},"namespaceSelector":{"any":false,"matchNames":[]},"path":"/metrics","port":"vllm","selector":{"matchLabels":{}}}}` |
-| modelservice.metrics.enabled | Enable metrics scraping from prefill and decode services, see `model | bool | `true` |
-| modelservice.metrics.serviceMonitor | Prometheus ServiceMonitor configuration <br /> Ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md | object | See below |
-| modelservice.metrics.serviceMonitor.annotations | Additional annotations provided to the ServiceMonitor | object | `{}` |
-| modelservice.metrics.serviceMonitor.interval | ServiceMonitor endpoint interval at which metrics should be scraped | string | `"15s"` |
-| modelservice.metrics.serviceMonitor.labels | Additional labels provided to the ServiceMonitor | object | `{}` |
-| modelservice.metrics.serviceMonitor.namespaceSelector | ServiceMonitor namespace selector | object | `{"any":false,"matchNames":[]}` |
-| modelservice.metrics.serviceMonitor.path | ServiceMonitor endpoint path | string | `"/metrics"` |
-| modelservice.metrics.serviceMonitor.port | ServiceMonitor endpoint port | string | `"vllm"` |
-| modelservice.metrics.serviceMonitor.selector | ServiceMonitor selector matchLabels </br> matchLabels must match labels on modelservice Services | object | `{"matchLabels":{}}` |
-| modelservice.nameOverride | String to partially override modelservice.fullname | string | `""` |
-| modelservice.nodeSelector | Node labels for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector | object | `{}` |
-| modelservice.podAnnotations | Pod annotations for modelservice | object | `{}` |
-| modelservice.podLabels | Pod labels for modelservice | object | `{}` |
-| modelservice.podSecurityContext | Security settings for a Pod.  The security settings that you specify for a Pod apply to all Containers in the Pod. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod | object | `{}` |
-| modelservice.prefill | Prefill options | object | See below |
-| modelservice.prefill.affinity | Affinity for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity | object | `{}` |
-| modelservice.prefill.containerSecurityContext | Security settings for a Container. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container | object | `{}` |
-| modelservice.prefill.nodeSelector | Node labels for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector | object | `{}` |
-| modelservice.prefill.podSecurityContext | Security settings for a Pod.  The security settings that you specify for a Pod apply to all Containers in the Pod. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod | object | `{}` |
-| modelservice.prefill.tolerations | Node tolerations for server scheduling to nodes with taints <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ | list | `[{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}]` |
-| modelservice.prefill.tolerations[0] | default NVIDIA GPU toleration | object | `{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}` |
-| modelservice.prefill.topologySpreadConstraints | Topology Spread Constraints for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints | list | `[]` |
-| modelservice.prefill.vllm | vLLM container settings | object | `{"containerSecurityContext":{"allowPrivilegeEscalation":false}}` |
-| modelservice.prefill.vllm.containerSecurityContext | Security settings for a Container. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container | object | `{"allowPrivilegeEscalation":false}` |
-| modelservice.rbac.create | Enable the creation of RBAC resources | bool | `true` |
-| modelservice.replicas | Number of controller replicas | int | `1` |
-| modelservice.routingProxy | Routing proxy container options | object | See below |
-| modelservice.routingProxy.containerSecurityContext | Security settings for a Container. <br /> Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container | object | `{}` |
-| modelservice.routingProxy.image | Routing proxy image used in ModelService CR presets | object | `{"imagePullPolicy":"IfNotPresent","pullSecrets":[],"registry":"ghcr.io","repository":"llm-d/llm-d-routing-sidecar","tag":"0.0.6"}` |
-| modelservice.routingProxy.image.imagePullPolicy | Specify a imagePullPolicy | string | `"IfNotPresent"` |
-| modelservice.routingProxy.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
-| modelservice.routingProxy.image.registry | Routing proxy image registry | string | `"ghcr.io"` |
-| modelservice.routingProxy.image.repository | Routing proxy image repository | string | `"llm-d/llm-d-routing-sidecar"` |
-| modelservice.routingProxy.image.tag | Routing proxy image tag | string | `"0.0.6"` |
-| modelservice.service.enabled | Toggle to deploy a Service resource for Model service controller | bool | `true` |
-| modelservice.service.port | Port number exposed from Model Service controller | int | `8443` |
-| modelservice.service.type | Service type | string | `"ClusterIP"` |
-| modelservice.serviceAccount | Service Account Configuration | object | See below |
-| modelservice.serviceAccount.annotations | Additional custom annotations for the ServiceAccount. | object | `{}` |
-| modelservice.serviceAccount.create | Enable the creation of a ServiceAccount for Modelservice pods | bool | `true` |
-| modelservice.serviceAccount.fullnameOverride | String to fully override modelservice.serviceAccountName, defaults to modelservice.fullname | string | `""` |
-| modelservice.serviceAccount.labels | Additional custom labels to the service ServiceAccount. | object | `{}` |
-| modelservice.serviceAccount.nameOverride | String to partially override modelservice.serviceAccountName, defaults to modelservice.fullname | string | `""` |
-| modelservice.tolerations | Node tolerations for server scheduling to nodes with taints <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ | list | `[]` |
-| modelservice.topologySpreadConstraints | Topology Spread Constraints for pod assignment <br /> Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#pod-topology-spread-constraints | list | `[]` |
-| modelservice.vllm | vLLM container options | object | See below |
-| modelservice.vllm.image | vLLM image used in ModelService CR presets | object | See below |
-| modelservice.vllm.image.imagePullPolicy | Specify a imagePullPolicy | string | `"IfNotPresent"` |
-| modelservice.vllm.image.pullSecrets | Optionally specify an array of imagePullSecrets (evaluated as templates) | list | `[]` |
-| modelservice.vllm.image.registry | llm-d image registry | string | `"ghcr.io"` |
-| modelservice.vllm.image.repository | llm-d image repository | string | `"llm-d/llm-d"` |
-| modelservice.vllm.image.tag | llm-d image tag | string | `"0.0.8"` |
-| modelservice.vllm.logLevel | Log level to run VLLM with <br /> VLLM supports standard python log-levels, see: https://docs.python.org/3/library/logging.html#logging-levels <br /> Options: "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL" | string | `"INFO"` |
-| modelservice.vllm.metrics | Enable metrics gathering via podMonitor / ServiceMonitor | object | `{"enabled":true}` |
-| modelservice.vllm.metrics.enabled | Enable metrics scraping from prefill & decode services | bool | `true` |
+| llm-d-modelservice | Modelservice Sub Charts | object | `{"decode":{"containers":[{"args":["--enforce-eager","--kv-transfer-config","{\"kv_connector\":\"NixlConnector\", \"kv_role\":\"kv_both\"}"],"command":["vllm","serve"],"env":[{"name":"CUDA_VISIBLE_DEVICES","value":"0"},{"name":"UCX_TLS","value":"cuda_ipc,cuda_copy,tcp"},{"name":"HF_HOME","value":"/model-cache"},{"name":"VLLM_NIXL_SIDE_CHANNEL_HOST","valueFrom":{"fieldRef":{"fieldPath":"status.podIP"}}},{"name":"VLLM_NIXL_SIDE_CHANNEL_PORT","value":"5557"},{"name":"VLLM_LOGGING_LEVEL","value":"DEBUG"}],"image":"ghcr.io/llm-d/llm-d:0.0.8","mountModelVolume":true,"name":"vllm","ports":[{"containerPort":5557,"protocol":"TCP"}],"resources":{"limits":{"cpu":"16","memory":"16Gi","nvidia.com/gpu":"1"},"requests":{"cpu":"16","memory":"16Gi","nvidia.com/gpu":"1"}}}],"enableService":false,"replicas":1},"endpointPicker":{"autoscaling":{"enabled":false},"debugLevel":5,"image":"ghcr.io/llm-d/llm-d-inference-scheduler:0.0.4","permissions":"pod-read","replicas":1,"service":{"appProtocol":"http2","port":9002,"targetPort":9002,"type":"ClusterIP"}},"httpRoute":true,"inferenceModel":true,"inferencePool":true,"modelArtifacts":{"authSecretName":"llm-d-hf-token","size":"5Mi","uri":"hf://meta-llama/Llama-3.2-3B-Instruct"},"multinode":true,"prefill":{"containers":[{"args":["--enforce-eager","--kv-transfer-config","{\"kv_connector\":\"NixlConnector\", \"kv_role\":\"kv_both\"}"],"command":["vllm","serve"],"env":[{"name":"CUDA_VISIBLE_DEVICES","value":"0"},{"name":"UCX_TLS","value":"cuda_ipc,cuda_copy,tcp"},{"name":"VLLM_NIXL_SIDE_CHANNEL_PORT","value":"5557"},{"name":"VLLM_NIXL_SIDE_CHANNEL_HOST","valueFrom":{"fieldRef":{"fieldPath":"status.podIP"}}},{"name":"VLLM_LOGGING_LEVEL","value":"DEBUG"}],"image":"ghcr.io/llm-d/llm-d:0.0.8","name":"vllm","ports":[{"containerPort":8000,"protocol":"TCP"},{"containerPort":5557,"protocol":"TCP"}],"resources":{"limits":{"cpu":"16","memory":"16Gi","nvidia.com/gpu":"1"},"requests":{"cpu":"16","memory":"16Gi","nvidia.com/gpu":"1"}}}],"replicas":1},"routing":{"modelName":"meta-llama/Llama-3.2-3B-Instruct","parentRefs":[{"name":"inference-gateway"}],"proxy":{"debugLevel":5,"image":{"registry":"ghcr.io","repository":"llm-d/llm-d-routing-sidecar","tags":"0.0.6"},"targetPort":8200},"servicePort":8080}}` |
 | nameOverride | String to partially override common.names.fullname | string | `""` |
 | redis | Bitnami/Redis chart configuration | object | Use sane defaults for minimal Redis deployment |
 | sampleApplication | Sample application deploying a p-d pair of specific model | object | See below |
