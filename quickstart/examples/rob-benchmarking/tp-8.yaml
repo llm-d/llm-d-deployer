@@ -11,33 +11,33 @@ sampleApplication:
         replicas: 1
         resources:
           limits:
-            nvidia.com/gpu: 1
+            nvidia.com/gpu: 8
             rdma/ib: 1
           requests:
-            nvidia.com/gpu: 1
+            nvidia.com/gpu: 8
             rdma/ib: 1
             cpu: "32"
             memory: 128Gi
         extraArgs:
             - "--tensor-parallel-size"
-            - "1"
+            - "8"
             - "--disable-log-requests"
             - "--max-model-len"
             - "32768"
             - "--block-size"
             - "128"
             - "--enforce-eager"
-            # - "--num-gpu-blocks-override"
-            # - "60000"
+            - "--num-gpu-blocks-override"
+            - "60000"
 
     decode:
         replicas: 1
         resources:
           limits:
-            nvidia.com/gpu: 1
+            nvidia.com/gpu: 8
             rdma/ib: 1
           requests:
-            nvidia.com/gpu: 1
+            nvidia.com/gpu: 8
             rdma/ib: 1
             cpu: "32"
             memory: 128Gi
@@ -50,14 +50,14 @@ sampleApplication:
             - "--block-size"
             - "128"
             - "--enforce-eager"
-            # - "--num-gpu-blocks-override"
-            # - "60000"
+            - "--num-gpu-blocks-override"
+            - "60000"
 modelservice:
   vllm:
     image:
       registry: docker.io    
       repository: robertgouldshaw2/vllm-nixl
-      tag: launch-debug-0.10
+      tag: nixl-oh-debug-0.1
   epp:
     defaultEnvVarsOverride:
       - name: ENABLE_KVCACHE_AWARE_SCORER

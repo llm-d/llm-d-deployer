@@ -1,4 +1,3 @@
-HF_TOKEN := "my_token"
 NAMESPACE := "pete-davidson"
 
 logs POD:
@@ -8,31 +7,28 @@ get-pods:
     kubectl get pods -n {{NAMESPACE}} -o wide
 
 hf-token:
-  kubectl create secret generic hf-token-secret --from-literal=HF_TOKEN={{HF_TOKEN}} -n {{NAMESPACE}}
+  kubectl create secret generic hf-token-secret --from-literal=HF_TOKEN="$HF_TOKEN" -n {{NAMESPACE}}
 
-[working-directory: '/Users/robertgshaw/llm-d-deployer/quickstart']
+[working-directory: '/home/rshaw/llm-d-deployer/quickstart']
 install VALUES:
     ./llmd-installer.sh \
         --namespace {{NAMESPACE}} \
         --storage-class shared-vast --storage-size 300Gi \
         --values-file ./examples/rob-benchmarking/{{VALUES}} --skip-infra
 
-[working-directory: '/Users/robertgshaw/llm-d-deployer/quickstart']
+[working-directory: '/home/rshaw/llm-d-deployer/quickstart']
 uninstall:
     ./llmd-installer.sh \
         --namespace {{NAMESPACE}} \
-        --uninstall --skip-infra
+        --uninstall
 
 gh-token GH_TOKEN:
     kubectl create secret generic gh-token-secret --from-literal=GH_TOKEN='{{GH_TOKEN}}' -n {{NAMESPACE}}
 
 # Interactive benchmark commands:
 start-bench:
-    kubectl create secret generic hf-token-secret --from-literal=HF_TOKEN={{HF_TOKEN}} -n {{NAMESPACE}}
+    kubectl create secret generic hf-token-secret --from-literal=HF_TOKEN="$HF_TOKEN" -n {{NAMESPACE}}
     kubectl apply -n {{NAMESPACE}} -f benchmark-interactive-pod.yaml
-
-start-bench-2:
-    kubectl apply -n {{NAMESPACE}} -f benchmark-interactive-pod-2.yaml
 
 delete-bench:
     kubectl delete pod -n {{NAMESPACE}} benchmark-interactive
@@ -42,9 +38,3 @@ exec-bench:
     kubectl cp sweep-sharegpt.sh {{NAMESPACE}}/benchmark-interactive:/app/sweep-sharegpt.sh && \
     kubectl cp Justfile.remote {{NAMESPACE}}/benchmark-interactive:/app/Justfile && \
     kubectl exec -it -n {{NAMESPACE}} benchmark-interactive -- /bin/bash
-
-exec-bench-2:
-    kubectl cp sweep.sh {{NAMESPACE}}/benchmark-interactive-2:/app/sweep.sh && \
-    kubectl cp sweep-sharegpt.sh {{NAMESPACE}}/benchmark-interactive-2:/app/sweep-sharegpt.sh && \
-    kubectl cp Justfile.remote {{NAMESPACE}}/benchmark-interactive-2:/app/Justfile && \
-    kubectl exec -it -n {{NAMESPACE}} benchmark-interactive-2 -- /bin/bash
