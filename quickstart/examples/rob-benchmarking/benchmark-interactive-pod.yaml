@@ -4,7 +4,7 @@ kind: Pod
 metadata:
     name: benchmark-interactive
     labels:
-        app: benchmark-interactive # Labels for organization
+        app: benchmark-interactive
 spec:
     containers:
         - name: benchmark-runner
