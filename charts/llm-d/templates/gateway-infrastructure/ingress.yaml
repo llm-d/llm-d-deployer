@@ -1,6 +1,6 @@
 {{- if and .Values.gateway.enabled .Values.ingress.enabled (eq .Values.gateway.serviceType "NodePort") }}
 {{- $gatewayFullname := include "gateway.fullname" . }}
-{{- $host := include "sampleApplication.ingressHost" . }}
+{{- $host := include "gateway.ingressHost" . }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:

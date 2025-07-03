@@ -2,11 +2,5 @@ dependencies:
 - name: common
   repository: https://charts.bitnami.com/bitnami
   version: 2.27.0
-- name: redis
-  repository: https://charts.bitnami.com/bitnami
-  version: 20.13.4
-- name: llm-d-modelservice
-  repository: https://llm-d-incubation.github.io/llm-d-modelservice
-  version: 0.0.5
-digest: sha256:2e9342cba826d4bf0ebfc6d690c55bfe387523d71f600dbb7d300a41c28e7f80
-generated: "2025-07-03T07:15:39.194449-07:00"
+digest: sha256:19b8483e731784bfe20a4d8d60dea334748d9a44d6661eeecffc3e8c15ff98c7
+generated: "2025-07-03T15:49:21.986858-07:00"

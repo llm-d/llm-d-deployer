@@ -9,3 +9,15 @@ Create a default fully qualified app name for inferenceGateway.
     {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
   {{- end -}}
 {{- end -}}
+
+
+{{/*
+Define the template for ingress host
+*/}}
+{{- define "gateway.ingressHost" -}}
+  {{- if .Values.ingress.host -}}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.ingress.host "context" $ ) }}
+  {{- else }}
+    {{- include "gateway.fullname" . }}.{{ default "localhost" .Values.ingress.clusterRouterBase }}
+  {{- end}}
+{{- end}}
