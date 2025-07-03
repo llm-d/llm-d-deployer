@@ -9,3 +9,14 @@ Create a default fully qualified app name for inferenceGateway.
     {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
   {{- end -}}
 {{- end -}}
+
+{{/*
+Resolve gateway class name
+*/}}
+{{- define "gateway.className" -}}
+  {{- if contains "gke-l7" .Values.gateway.gatewayClassName -}}
+    {{- print .Values.gateway.gatewayClassName -}}
+  {{- else -}}
+    {{- .Values.gateway.gatewayClassName -}}
+  {{- end -}}
+{{- end -}}

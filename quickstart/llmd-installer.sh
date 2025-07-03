@@ -56,7 +56,7 @@ Options:
   -t, --download-timeout           Timeout for model download job
   -k, --minikube                   Deploy on an existing minikube instance with hostPath storage
   -g, --context                    Supply a specific Kubernetes context
-  -j, --gateway                    Select gateway type (istio or kgateway)
+  -j, --gateway                    Select gateway type (istio, kgateway, gke-l7-rilb, gke-l7-regional-external-managed) (default: istio)
   -r, --release                    (Helm) Chart release name
   -h, --help                       Show this help and exit
 EOF
@@ -226,9 +226,13 @@ validate_hf_token() {
 }
 
 validate_gateway_type() {
-  if [[ "${GATEWAY_TYPE}" != "istio" && "${GATEWAY_TYPE}" != "kgateway" ]]; then
-    die "Invalid gateway type: ${GATEWAY_TYPE}. Supported types are: istio, kgateway."
-  fi
+  case "${GATEWAY_TYPE}" in
+    istio|kgateway|gke-l7-rilb|gke-l7-regional-external-managed)
+      ;; # valid
+    *)
+      die "Invalid gateway type: ${GATEWAY_TYPE}. Supported types are: istio, kgateway, gke-l7-rilb, gke-l7-regional-external-managed."
+      ;;
+  esac
   log_success "Gateway type validated"
 }
 

@@ -121,6 +121,7 @@ The installer needs to be run from the `llm-d-deployer/quickstart` directory as 
 | `-t`, `--download-timeout`           | Timeout for model download job                                | `./llmd-installer.sh --download-timeout`                         |
 | `-D`, `--download-model`             | Download the model to PVC from Hugging Face                   | `./llmd-installer.sh --download-model`                           |
 | `-m`, `--disable-metrics-collection` | Disable metrics collection (Prometheus will not be installed) | `./llmd-installer.sh --disable-metrics-collection`               |
+| `-j`, `--gateway`                    | Select gateway type (istio, kgateway, gke-l7-rilb, gke-l7-regional-external-managed) (default: istio) | `./llm-installer.sh --gateway gke-l7-rilb`                      |
 | `-h`, `--help`                       | Show this help and exit                                       | `./llmd-installer.sh --help`                                     |
 
 ## Examples
