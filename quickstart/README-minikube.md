@@ -161,52 +161,38 @@ export HF_TOKEN="your-token"
 
 The inference-gateway serves as the HTTP ingress point for all inference requests in our deployment.
 It’s implemented as a Kubernetes Gateway (`gateway.networking.k8s.io/v1`) using whichever `gatewayClassName` you’ve
-chosen, either `kgateway` or `istio` and sits in front of your inference pods to handle path-based routing, load-balancing,
+chosen, either `istio` or `kgateway` and sits in front of your inference pods to handle path-based routing, load-balancing,
 retries, and metrics. All calls to `/v1/models` and `/v1/completions` flow through this gateway to the appropriate
 `decode` or `prefill` services.
 
+#### Step 1: Port-forward the llm-d-inference-gateway service
+
+Open a terminal and run:
+
 ```bash
-# -------------------------------------------------------------------------
-# Option A: Direct NodePort (no minikube tunnel required)
-# -------------------------------------------------------------------------
-# 1) Grab the Minikube VM IP and the NodePort that the gateway is listening on
-MINIKUBE_IP=$(minikube ip)
-NODEPORT=$(kubectl get svc llm-d-inference-gateway -n llm-d -o jsonpath='{.spec.ports[0].nodePort}')
+if kubectl get svc -n llm-d llm-d-inference-gateway-istio &>/dev/null; then
+  kubectl port-forward -n llm-d svc/llm-d-inference-gateway-istio 3000:80 # port forward istio gateway
+else
+  kubectl port-forward -n llm-d svc/llm-d-inference-gateway 3000:80 # port forward kgateway gateway
+fi
+```
+
+#### Step 2: Test the Inference Gateway with curl
+
+In a new terminal, use `curl` to interact with the inference gateway:
+
+```bash
+# 1) List the available models and get the model ID
+curl -s http://127.0.0.1:3000/v1/models
 MODEL_ID=<INSERT_MODEL_NAME e.g. meta-llama/Llama-3.2-3B-Instruct, Qwen/Qwen3-0.6B, etc>
-# List the serving model, if unsure what the model id is
-curl -s http://$MINIKUBE_IP:$NODEPORT/v1/models
-# 2) Curl the same completion endpoint on that high-numbered port:
-curl -X POST http://$MINIKUBE_IP:$NODEPORT/v1/completions \
+
+# 2) Send a completion request to the model
+curl -X POST http://127.0.0.1:3000/v1/completions \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{
     "model": "'"$MODEL_ID"'",
     "prompt": "You are a helpful AI assistant. Please introduce yourself in one sentence."
-  }'
-
-
-# -------------------------------------------------------------------------
-# Option B: LoadBalancer + minikube tunnel
-# -------------------------------------------------------------------------
-# 1) Before minkube tunnel is run: EXTERNAL-IP is still <pending>
-kubectl get svc -n llm-d | grep llm-d-inference-gateway
-# ➜ llm-d-inference-gateway LoadBalancer 10.109.40.169 <pending> 80:30185/TCP
-
-# 2) In a separate terminal, start the tunnel (grants a host-reachable VIP)
-minikube tunnel
-
-# 3) After minikube tunnel is run: EXTERNAL-IP flips to the real address
-kubectl get svc -n llm-d | grep llm-d-inference-gateway
-# ➜ llm-d-inference-gateway LoadBalancer 10.109.40.169 10.109.40.169 80:30185/TCP
-
-# 4) Hit the gateway’s plain completion endpoint with a role-based prompt:
-MODEL_ID=meta-llama/Llama-3.2-3B-Instruct
-curl -X POST http://10.109.40.169/v1/completions \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "model": "'"$MODEL_ID"'",
-    "prompt": "You are a helpful AI assistant. Please introduce yourself in one sentence.",
   }'
 ```
 
