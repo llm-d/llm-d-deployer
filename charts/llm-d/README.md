@@ -152,9 +152,6 @@ Kubernetes: `>= 1.30.0-0`
 | gateway.gatewayClassName | Gateway class that determines the backend used Currently supported values: "kgateway" or "istio" | string | `"istio"` |
 | gateway.nameOverride | String to partially override gateway.fullname | string | `""` |
 | gateway.serviceType | Gateway's service type. Ingress is only available if the service type is set to NodePort. Accepted values: ["LoadBalancer", "NodePort"] | string | `"NodePort"` |
-| global | Global parameters Global Docker image parameters Please, note that this will override the image parameters, including dependencies, configured to use the global value Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass | object | See below |
-| global.imagePullSecrets | Global Docker registry secret names as an array </br> E.g. `imagePullSecrets: [myRegistryKeySecretName]` | list | `[]` |
-| global.imageRegistry | Global Docker image registry | string | `""` |
 | ingress | Ingress configuration | object | See below |
 | ingress.annotations | Additional annotations for the Ingress resource | object | `{}` |
 | ingress.clusterRouterBase | used as part of the host dirivation if not specified from OCP cluster domain (dont edit) | string | `""` |

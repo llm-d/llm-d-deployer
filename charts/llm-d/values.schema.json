@@ -142,42 +142,10 @@
             "title": "gateway"
         },
         "global": {
-            "additionalProperties": false,
-            "default": "See below",
-            "description": "Global parameters Global Docker image parameters Please, note that this will override the image parameters, including dependencies, configured to use the global value Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass",
-            "properties": {
-                "imagePullSecrets": {
-                    "description": "Global Docker registry secret names as an array </br> E.g. `imagePullSecrets: [myRegistryKeySecretName]`",
-                    "items": {
-                        "required": [],
-                        "type": "string"
-                    },
-                    "required": [],
-                    "title": "imagePullSecrets"
-                },
-                "imageRegistry": {
-                    "default": "",
-                    "description": "Global Docker image registry",
-                    "required": [],
-                    "title": "imageRegistry"
-                },
-                "security": {
-                    "additionalProperties": false,
-                    "properties": {
-                        "allowInsecureImages": {
-                            "default": true,
-                            "required": [],
-                            "title": "allowInsecureImages",
-                            "type": "boolean"
-                        }
-                    },
-                    "required": [],
-                    "title": "security",
-                    "type": "object"
-                }
-            },
+            "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
             "required": [],
-            "title": "global"
+            "title": "global",
+            "type": "object"
         },
         "ingress": {
             "additionalProperties": false,

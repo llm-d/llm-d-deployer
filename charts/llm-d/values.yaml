@@ -4,27 +4,6 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# -- Global parameters
-# Global Docker image parameters
-# Please, note that this will override the image parameters, including dependencies, configured to use the global value
-# Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
-# @default -- See below
-global:
-  # -- Global Docker image registry
-  imageRegistry: ""
-
-  # @schema
-  # items:
-  #   type: string
-  # @schema
-  # -- Global Docker registry secret names as an array
-  # </br> E.g. `imagePullSecrets: [myRegistryKeySecretName]`
-  imagePullSecrets: []
-
-  security:
-    allowInsecureImages: true
-
-
 # @schema
 # additionalProperties: true
 # @schema
