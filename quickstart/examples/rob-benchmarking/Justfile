@@ -20,21 +20,18 @@ install VALUES:
 uninstall:
     ./llmd-installer.sh \
         --namespace {{NAMESPACE}} \
-        --uninstall
+        --uninstall --skip-infra
 
 gh-token GH_TOKEN:
     kubectl create secret generic gh-token-secret --from-literal=GH_TOKEN='{{GH_TOKEN}}' -n {{NAMESPACE}}
 
 # Interactive benchmark commands:
 start-bench:
-    kubectl create secret generic hf-token-secret --from-literal=HF_TOKEN="$HF_TOKEN" -n {{NAMESPACE}}
     kubectl apply -n {{NAMESPACE}} -f benchmark-interactive-pod.yaml
 
 delete-bench:
     kubectl delete pod -n {{NAMESPACE}} benchmark-interactive
 
 exec-bench:
-    kubectl cp sweep.sh {{NAMESPACE}}/benchmark-interactive:/app/sweep.sh && \
-    kubectl cp sweep-sharegpt.sh {{NAMESPACE}}/benchmark-interactive:/app/sweep-sharegpt.sh && \
     kubectl cp Justfile.remote {{NAMESPACE}}/benchmark-interactive:/app/Justfile && \
     kubectl exec -it -n {{NAMESPACE}} benchmark-interactive -- /bin/bash

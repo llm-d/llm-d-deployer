@@ -11,16 +11,16 @@ sampleApplication:
         replicas: 1
         resources:
           limits:
-            nvidia.com/gpu: 8
+            nvidia.com/gpu: 1
             rdma/ib: 1
           requests:
-            nvidia.com/gpu: 8
+            nvidia.com/gpu: 1
             rdma/ib: 1
             cpu: "32"
             memory: 128Gi
         extraArgs:
             - "--tensor-parallel-size"
-            - "8"
+            - "1"
             - "--disable-log-requests"
             - "--max-model-len"
             - "32768"
@@ -31,16 +31,16 @@ sampleApplication:
         replicas: 1
         resources:
           limits:
-            nvidia.com/gpu: 8
+            nvidia.com/gpu: 1
             rdma/ib: 1
           requests:
-            nvidia.com/gpu: 8
+            nvidia.com/gpu: 1
             rdma/ib: 1
             cpu: "32"
             memory: 128Gi
         extraArgs:
             - "--tensor-parallel-size"
-            - "8"
+            - "1"
             - "--disable-log-requests"
             - "--max-model-len"
             - "32768"

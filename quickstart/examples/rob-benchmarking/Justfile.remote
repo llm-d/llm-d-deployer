@@ -1,27 +1,25 @@
 # Use this Justfile within the cluster.
 
-MODEL := "meta-llama/Llama-3.1-8B-Instruct"
-# MODEL := "RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8-dynamic"
+MODEL := "RedHatAI/Meta-Llama-3.1-8B-Instruct-FP8"
 BASE_URL := "http://llm-d-inference-gateway"
 
 pull:
   cd vllm && git pull
 
-download_sharegpt:
-  apt update && apt install wget && wget https://huggingface.co/datasets/anon8231489123/ShareGPT_Vicuna_unfiltered/resolve/main/ShareGPT_V3_unfiltered_cleaned_split.json
-
-sweep POD_IP:
-  uv pip install pybase64 && cd vllm && git pull && cd .. && \
-  MODEL={{MODEL}} POD_IP={{POD_IP}} bash ./sweep.sh   
-
-sweep_sharegpt POD_IP:
-  uv pip install pybase64 && cd vllm && git pull && cd .. && \
-  MODEL={{MODEL}} POD_IP={{POD_IP}} bash ./sweep-sharegpt.sh   
-
 eval:
     lm_eval --model local-completions --tasks gsm8k \
     --model_args model={{MODEL}},base_url={{BASE_URL}}/v1/completions,num_concurrent=100,max_retries=3,tokenized_requests=False \
     --limit 1000
+
+benchmark_one INPUT_LEN:
+  cd vllm && git fetch && git checkout 3c6fd286b40ada67bba98216ed410bb3a0d38b16 && uv pip install pybase64 && \
+    python benchmarks/benchmark_one_concurrent.py \
+      --base-url {{BASE_URL}} \
+      --model {{MODEL}} \
+      --input-len {{INPUT_LEN}} \
+      --output-len 1 \
+      --num-requests 10 \
+      --seed $(date +%s)
 
 benchmark RR NUM_REQUESTS INPUT_LEN OUTPUT_LEN:
     python vllm/benchmarks/benchmark_serving.py \
@@ -49,19 +47,6 @@ benchmark_no_pd_concurrency POD_IP CONCURRENCY NUM_REQUESTS INPUT_LEN OUTPUT_LEN
         --metric-percentiles 90,95,99 \
         --ignore-eos
 
-# just benchmark 4 1000 15000 5000 <-- current 1P3D setup
-benchmark_no_pd POD_IP RR NUM_REQUESTS INPUT_LEN OUTPUT_LEN:
-    python vllm/benchmarks/benchmark_serving.py \
-        --base-url http://{{POD_IP}}:8000 \
-        --model {{MODEL}} \
-        --dataset-name random \
-        --random-prefix-len 600 \
-        --random-input-len {{INPUT_LEN}} \
-        --random-output-len {{OUTPUT_LEN}}  \
-        --request-rate {{RR}} \
-        --seed $(date +%M%H%M%S) \
-        --num-prompts {{NUM_REQUESTS}} \
-        --ignore-eos
 
 send_request:
   curl -X POST {{BASE_URL}}/v1/completions \
