@@ -52,7 +52,7 @@ modelservice:
     image:
       registry: docker.io    
       repository: robertgouldshaw2/vllm-nixl
-      tag: nixl-oh-debug-0.3
+      tag: nixl-oh-debug-fixed-0.1
   epp:
     defaultEnvVarsOverride:
       - name: ENABLE_KVCACHE_AWARE_SCORER
