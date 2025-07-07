@@ -191,8 +191,8 @@ gateway:
   # -- String to partially override gateway.fullname
   nameOverride: ""
 
-  # -- Gateway class that determines the backend used
-  # Currently supported values: "kgateway" or "istio"
+  # -- Gateway class that determines the backend used.
+  # Currently supported values: "istio", "kgateway", "gke-l7-rilb", or "gke-l7-regional-external-managed"
   gatewayClassName: istio
 
   # @schema

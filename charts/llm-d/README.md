@@ -1,7 +1,7 @@
 
 # llm-d Helm Chart
 
-![Version: 1.0.20](https://img.shields.io/badge/Version-1.0.20-informational?style=flat-square)
+![Version: 1.0.21](https://img.shields.io/badge/Version-1.0.21-informational?style=flat-square)
 ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 llm-d is a Kubernetes-native high-performance distributed LLM inference framework
@@ -150,7 +150,7 @@ Kubernetes: `>= 1.30.0-0`
 | gateway.annotations | Additional annotations provided to the Gateway resource | object | `{}` |
 | gateway.enabled | Deploy resources related to Gateway | bool | `true` |
 | gateway.fullnameOverride | String to fully override gateway.fullname | string | `""` |
-| gateway.gatewayClassName | Gateway class that determines the backend used Currently supported values: "kgateway" or "istio" | string | `"istio"` |
+| gateway.gatewayClassName | Gateway class that determines the backend used. Currently supported values: "istio", "kgateway", "gke-l7-rilb", or "gke-l7-regional-external-managed" | string | `"istio"` |
 | gateway.nameOverride | String to partially override gateway.fullname | string | `""` |
 | gateway.serviceType | Gateway's service type. Ingress is only available if the service type is set to NodePort. Accepted values: ["LoadBalancer", "NodePort"] | string | `"NodePort"` |
 | global | Global parameters Global Docker image parameters Please, note that this will override the image parameters, including dependencies, configured to use the global value Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass | object | See below |
