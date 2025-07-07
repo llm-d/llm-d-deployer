@@ -21,12 +21,6 @@ dependencies:
     tags:
       - bitnami-common
     version: "2.27.0"
-  - name: redis
-    repository: https://charts.bitnami.com/bitnami
-    tags:
-      - bitnami-redis
-    version: "20.13.4"
-    condition: redis.enabled
 annotations:
   artifacthub.io/category: ai-machine-learning
   artifacthub.io/license: Apache-2.0
