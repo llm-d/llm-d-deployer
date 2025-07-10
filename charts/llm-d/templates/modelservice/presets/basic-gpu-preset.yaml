@@ -75,8 +75,6 @@ data:
                 - "--port"
                 - "8001"
               env:
-                - name: VLLM_USE_V1
-                  value: "1"
                 - name: HOME
                   value: /home
                 {{- if .Values.modelservice.vllm.logLevel }}
@@ -156,8 +154,6 @@ data:
                 - "--port"
                 - "8000"
               env:
-                - name: VLLM_USE_V1
-                  value: "1"
                 - name: HOME
                   value: /home
                 {{ if .Values.modelservice.vllm.logLevel }}
