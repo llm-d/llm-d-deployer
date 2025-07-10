@@ -1,7 +1,7 @@
 NAMESPACE := "pete-davidson"
 
 logs:
-    kubectl logs -f $POD -n {{NAMESPACE}} | grep -v "GET /metrics HTTP/1.1" | grep -v "TRANSFER BATCHED"
+    kubectl logs -f $POD -n {{NAMESPACE}} | grep -v "GET /metrics HTTP/1.1" | grep -v ".get_finished" | grep -v ".transfer_batched"
 
 logs-stats:
     kubectl logs -f $POD -n {{NAMESPACE}} | grep -e "Engine 000:"

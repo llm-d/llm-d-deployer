@@ -50,15 +50,15 @@ modelservice:
     image:
       registry: docker.io    
       repository: robertgouldshaw2/vllm-nixl
-      tag: nixl-oh-debug-fixed-0.1
+      tag: nixl-oh-debug-fixed-0.3
   epp:
     defaultEnvVarsOverride:
       - name: ENABLE_KVCACHE_AWARE_SCORER
         value: "false"
       - name: ENABLE_PREFIX_AWARE_SCORER
-        value: "true"
+        value: "false"
       - name: ENABLE_LOAD_AWARE_SCORER
-        value: "true"
+        value: "false"
       - name: ENABLE_SESSION_AWARE_SCORER
         value: "false"
       - name: PD_ENABLED
@@ -68,9 +68,9 @@ modelservice:
       - name: PREFILL_ENABLE_KVCACHE_AWARE_SCORER
         value: "false"
       - name: PREFILL_ENABLE_LOAD_AWARE_SCORER
-        value: "true"
+        value: "false"
       - name: PREFILL_ENABLE_PREFIX_AWARE_SCORER
-        value: "true"
+        value: "false"
       - name: PREFILL_ENABLE_SESSION_AWARE_SCORER
         value: "false"
 redis:
