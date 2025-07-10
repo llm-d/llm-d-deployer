@@ -58,7 +58,7 @@ modelservice:
       - name: ENABLE_PREFIX_AWARE_SCORER
         value: "false"
       - name: ENABLE_LOAD_AWARE_SCORER
-        value: "false"
+        value: "true"
       - name: ENABLE_SESSION_AWARE_SCORER
         value: "false"
       - name: PD_ENABLED
@@ -68,7 +68,7 @@ modelservice:
       - name: PREFILL_ENABLE_KVCACHE_AWARE_SCORER
         value: "false"
       - name: PREFILL_ENABLE_LOAD_AWARE_SCORER
-        value: "false"
+        value: "true"
       - name: PREFILL_ENABLE_PREFIX_AWARE_SCORER
         value: "false"
       - name: PREFILL_ENABLE_SESSION_AWARE_SCORER
