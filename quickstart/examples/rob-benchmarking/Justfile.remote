@@ -1,6 +1,6 @@
 # Use this Justfile within the cluster.
 
-MODEL := "RedHatAI/Llama-3.3-70B-Instruct-FP8-dynamic"
+MODEL := "RedHatAI/Llama-4-Scout-17B-16E-Instruct-FP8-dynamic"
 BASE_URL := "http://llm-d-inference-gateway"
 
 pull:
