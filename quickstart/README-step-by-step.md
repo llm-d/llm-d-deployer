@@ -13,7 +13,6 @@ Following prerequisite are required for the installer to work.
 - [Helm – quick-start install](https://helm.sh/docs/intro/install/)
 - [kubectl – install & setup](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
-
 ### Required credentials and configuration
 
 - [HuggingFace HF_TOKEN](https://huggingface.co/docs/hub/en/security-tokens)
@@ -58,11 +57,9 @@ Select the appropriate option for your environment.
 
 #### Installing istio
 
-To beging with, export the environmental variables.
+To begin with, export the environmental variables.
 
-Before doing this, please check the appropriate hub and tag from the link below.
-
-https://github.com/llm-d/llm-d-deployer/blob/main/chart-dependencies/istio/install.sh
+Before doing this, please check the appropriate hub and tag from [the istio installation script](https://github.com/llm-d/llm-d-deployer/blob/main/chart-dependencies/istio/install.sh).
 
 ```bash
 export TAG=1.27-alpha.0551127f00634403cddd4634567e65a8ecc499a7
@@ -160,7 +157,6 @@ Apply modelservice CRD.
 kubectl apply -f https://raw.githubusercontent.com/llm-d/llm-d-deployer/refs/heads/main/charts/llm-d/crds/modelservice-crd.yaml
 ```
 
-
 Clone the llm-d-deployer repository and change directory.
 
 ```bash
@@ -178,7 +174,6 @@ helm dependency build .
 We have everything we need to deploy llm-d.
 
 Important: The installation command and its options differ depending on the Network Stack selected in step 2.
-
 
 #### with istio
 
@@ -335,6 +330,7 @@ ModelService resources are created.
 ```bash
 kubectl get pods -n llm-d
 ```
+
 ```bash
 NAME                                                       READY   STATUS    RESTARTS   AGE
 llm-d-inference-gateway-istio-69cbf58fb4-ckzkw             1/1     Running   0          19m
