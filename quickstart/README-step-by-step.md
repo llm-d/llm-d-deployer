@@ -43,7 +43,7 @@ Apply CRDs for Gateway API.
 kubectl apply -k https://github.com/llm-d/llm-d-inference-scheduler/deploy/components/crds-gateway-api
 ```
 
-Then, Apply CRDs for Gateway API Inference Extention.
+Then, Apply CRDs for Gateway API Inference Extension.
 
 ```bash
 kubectl apply -k https://github.com/llm-d/llm-d-inference-scheduler/deploy/components/crds-gie
@@ -78,7 +78,7 @@ After that, deploy istiod.
 helm upgrade -i istiod oci://$HUB/charts/istiod --version $TAG -n istio-system --set tag=$TAG --set hub=$HUB --wait
 ```
 
-The resources are created as follows. 
+The resources are created as follows.
 
 ```bash
 kubectl get pods,svc -n istio-system
@@ -119,7 +119,7 @@ helm upgrade -i \
     kgateway oci://cr.kgateway.dev/kgateway-dev/charts/kgateway
 ```
 
-The resources are created as follows. 
+The resources are created as follows.
 
 ```bash
 kubectl get pods,svc -n kgateway-system
@@ -325,7 +325,7 @@ spec:
   decoupleScaling: false
 ```
 
-ModelService resources are created. 
+ModelService resources are created.
 
 ```bash
 kubectl get pods -n llm-d
