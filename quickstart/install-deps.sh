@@ -49,9 +49,15 @@ done
 # Install yq (v4+)
 if ! command -v yq &> /dev/null; then
   echo "Installing yq..."
-  sudo curl -sLo /usr/local/bin/yq \
+  curl -sLo yq \
     "https://github.com/mikefarah/yq/releases/latest/download/yq_${OS}_${ARCH}"
-  sudo chmod +x /usr/local/bin/yq
+  chmod +x yq
+  sudo mv yq /usr/local/bin/yq
+fi
+
+if ! yq --version 2>&1 | grep -q 'mikefarah'; then
+  echo "Detected yq is not mikefarah’s yq. Please uninstall your current yq and re-run this script."
+  exit 1
 fi
 
 # Install kubectl
