@@ -1,0 +1,29 @@
+project_version: llm-d-1.1.0
+chart_version: 1.1.0
+release_date: 2025-07-17
+components:
+  - name: epp
+    version: v0.1.0
+    old_version: 0.0.3
+    repo: llm-d/llm-d-inference-scheduler
+    url: https://github.com/llm-d/llm-d-inference-scheduler
+  - name: modelservice
+    version: v0.0.15
+    old_version: 0.0.10
+    repo: llm-d/llm-d-model-service
+    url: https://github.com/llm-d/llm-d-model-service
+  - name: vllm
+    version: 0.0.8
+    old_version: 0.0.8
+    repo: llm-d/llm-d
+    url: https://github.com/llm-d/llm-d
+  - name: routingProxy
+    version: 0.0.7
+    old_version: 0.0.6
+    repo: llm-d/llm-d-routing-sidecar
+    url: https://github.com/llm-d/llm-d-routing-sidecar
+  - name: inferenceSimulator
+    version: v0.1.2
+    old_version: 0.0.4
+    repo: llm-d/llm-d-inference-sim
+    url: https://github.com/llm-d/llm-d-inference-sim
