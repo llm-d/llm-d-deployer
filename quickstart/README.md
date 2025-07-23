@@ -2,6 +2,8 @@
 
 Getting Started with llm-d on Kubernetes.  For specific instructions on how to install llm-d on minikube, see the [README-minikube.md](README-minikube.md) instructions.
 
+If you want to deploy llm-d and related tools step by step, see the [README-step-by-step.md](README-step-by-step.md) instructions.
+
 For more information on llm-d, see the llm-d git repository [here](https://github.com/llm-d/llm-d) and website [here](https://llm-d.ai).
 
 ## Overview
