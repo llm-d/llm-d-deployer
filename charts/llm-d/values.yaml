@@ -607,6 +607,14 @@ modelservice:
         value: "false"
       - name: PREFILL_SESSION_AWARE_SCORER_WEIGHT
         value: "1"
+      - name: OTEL_TRACING_ENABLED
+        value: '{{ if and .Values.tracing.enabled .Values.tracing.components.eppInferenceScheduler }}"true"{{ else }}"false"{{ end }}'
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: '{{ .Values.tracing.otelCollectorEndpoint }}'
+      - name: OTEL_SERVICE_NAME
+        value: "llm-d-kv-cache-manager"
+      - name: OTEL_SAMPLING_RATE
+        value: '{{ .Values.tracing.samplingRate }}'
 
     # @schema
     # items:
@@ -926,6 +934,35 @@ modelservice:
   rbac:
     # -- Enable the creation of RBAC resources
     create: true
+
+# -- Distributed tracing configuration for llm-d components
+# @default -- Tracing disabled by default
+tracing:
+  # -- Global tracing enablement (can be overridden per component)
+  enabled: true
+  
+  # -- OpenTelemetry collector endpoint
+  otelCollectorEndpoint: "http://otel-collector:4317"
+  
+  # -- API token for trace export (if required by collector)
+  apiToken: ""
+  
+  # -- Sampling rate for traces (0.0 to 1.0)
+  samplingRate: 0.1
+  
+  # -- Per-component tracing configuration
+  components:
+    # -- Enable tracing for EPP inference scheduler (includes kv-cache-manager)
+    eppInferenceScheduler: true
+    
+    # -- Enable tracing for inference gateway
+    inferenceGateway: true
+    
+    # -- Enable tracing for routing proxy (llm-d-routing-sidecar)
+    routingProxy: true
+    
+    # -- Enable tracing for vLLM instances
+    vllm: true
 
 # @schema
 # $ref: https://raw.githubusercontent.com/bitnami/charts/refs/tags/redis/20.13.4/bitnami/redis/values.schema.json

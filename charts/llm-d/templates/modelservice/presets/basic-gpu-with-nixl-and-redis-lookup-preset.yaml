@@ -54,6 +54,15 @@ data:
                 - "--port=8000"
                 - "--vllm-port=8001"
                 - "--connector=nixlv2"
+              env:
+                - name: OTEL_TRACING_ENABLED
+                  value: '{{ if and .Values.tracing.enabled .Values.tracing.components.routingProxy }}"true"{{ else }}"false"{{ end }}'
+                - name: OTEL_EXPORTER_OTLP_ENDPOINT
+                  value: '{{ .Values.tracing.otelCollectorEndpoint }}'
+                - name: OTEL_SERVICE_NAME
+                  value: "llm-d-routing-sidecar"
+                - name: OTEL_SAMPLING_RATE
+                  value: '{{ .Values.tracing.samplingRate }}'
               ports:
                 - containerPort: 8000
                   protocol: TCP
