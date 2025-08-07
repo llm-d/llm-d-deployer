@@ -31,6 +31,13 @@ You can use the installer script that installs all the required dependencies. Th
 > ⚠️ You may need to visit Hugging Face [meta-llama/Llama-3.2-3B-Instruct](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct) and
 > accept the usage terms to pull this with your HF token if you have not already done so.
 
+### Required [Gateway API Inference Extension (GIE)]
+
+```shell
+export GIE_VERSION=v0.3.0
+kubectl apply -f https://github.com/kubernetes-sigs/gateway-api-inference-extension/releases/download/$GIE_VERSION/manifests.yaml
+```
+
 ### Target Platform
 
 #### MiniKube
@@ -286,3 +293,5 @@ To delete the Minikube cluster, simply run:
 ```bash
 minikube delete
 ```
+
+[Gateway API Inference Extension (GIE)]:https://github.com/kubernetes-sigs/gateway-api-inference-extension
