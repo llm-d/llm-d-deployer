@@ -1,0 +1,51 @@
+Thank you for installing {{ .Chart.Name }}.
+
+Your release is named `{{ .Release.Name }}`.
+
+To learn more about the release, try:
+
+```bash
+$ helm status {{ .Release.Name }}
+$ helm get all {{ .Release.Name }}
+```
+
+This umbrella chart combines:
+
+{{ if .Values.inferencepool.enabled }}
+✅ Upstream InferencePool - Intelligent routing and load balancing
+{{- else }}
+❌ InferencePool - Disabled
+{{- end }}
+
+{{ if .Values.vllm.enabled }}
+✅ vLLM Model Serving - ModelService controller and vLLM containers
+{{- else }}
+❌ vLLM Model Serving - Disabled
+{{- end }}
+
+{{ if .Values.gateway.enabled }}
+✅ Gateway API - External traffic routing to InferencePool
+{{- else }}
+❌ Gateway API - Disabled
+{{- end }}
+
+{{ if and .Values.inferencepool.enabled .Values.vllm.enabled .Values.gateway.enabled }}
+🎉 Complete llm-d deployment ready!
+
+Access your inference endpoint:
+{{ if .Values.gateway.gatewayClassName }}
+Gateway Class: {{ .Values.gateway.gatewayClassName }}
+{{- end }}
+{{ if .Values.gateway.listeners }}
+Listeners:
+{{- range .Values.gateway.listeners }}
+  {{ .name }}: {{ .protocol }}://{{ include "gateway.fullname" $ }}:{{ .port }}
+{{- end }}
+{{- end }}
+
+{{ if index .Values "llm-d-vllm" "sampleApplication" "enabled" }}
+Sample application deployed with model: {{ index .Values "llm-d-vllm" "sampleApplication" "model" "modelName" }}
+{{- end }}
+{{- else }}
+⚠️  Incomplete deployment - enable all components for full functionality
+{{- end }}

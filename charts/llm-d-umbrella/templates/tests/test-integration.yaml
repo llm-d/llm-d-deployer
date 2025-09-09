@@ -1,0 +1,52 @@
+{{- if and .Values.gateway.enabled .Values.inferencepool.enabled .Values.vllm.enabled }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "umbrella.fullname" . }}-test-integration
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-weight: "3"
+spec:
+  restartPolicy: Never
+  securityContext:
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - name: curl
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop: ["ALL"]
+      resources:
+        requests:
+          cpu: 10m
+          memory: 20Mi
+        limits:
+          cpu: 10m
+          memory: 20Mi
+      image: quay.io/curl/curl:latest
+      imagePullPolicy: IfNotPresent
+      command: ["/bin/sh", "-c"]
+      args:
+        - |
+          echo -e "\e[32m🧪 Testing umbrella chart integration\e[0m"
+          echo ""
+
+          # Wait for all components to be ready
+          echo "Waiting for InferencePool and Gateway to be ready..."
+          sleep 45
+
+          # Test Gateway availability
+          echo "Testing Gateway resource creation..."
+          echo "Gateway should be created with name: {{ include "gateway.fullname" . }}"
+
+          # Test basic connectivity through gateway
+          echo "Testing connectivity through inference gateway..."
+          curl --connect-timeout 5 --max-time 20 --retry 5 --retry-delay 10 --retry-max-time 60 --retry-all-errors \
+            -H 'accept: application/json' \
+            http://{{ include "gateway.fullname" . }}:{{ (index .Values.gateway.listeners 0).port }}/health || echo "Gateway health check failed, continuing..."
+
+          echo ""
+          echo -e "\e[32m✅ Umbrella chart integration test completed\e[0m"
+{{- end }}

@@ -1,0 +1,113 @@
+# yaml-language-server: $schema=values.schema.json
+
+# Default values for llm-d-umbrella chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Common parameters
+# -- Override Kubernetes version
+kubeVersion: ""
+
+# -- String to partially override common.names.fullname
+nameOverride: ""
+
+# -- String to fully override common.names.fullname
+fullnameOverride: ""
+
+# -- Default Kubernetes cluster domain
+clusterDomain: cluster.local
+
+# @schema
+# additionalProperties: true
+# @schema
+# -- Labels to add to all deployed objects
+commonLabels: {}
+
+# @schema
+# additionalProperties: true
+# @schema
+# -- Annotations to add to all deployed objects
+commonAnnotations: {}
+
+# -- Enable upstream inference gateway components
+inferencepool:
+  enabled: true
+
+  # InferencePool configuration (passed to upstream chart)
+  inferencePool:
+    targetPort: 8000
+    modelServerType: vllm
+    # Match model servers deployed by llm-d-vllm chart
+    modelServers:
+      matchLabels:
+        app.kubernetes.io/name: llm-d-vllm
+        llm-d.ai/inferenceServing: "true"
+
+  # Provider configuration
+  provider:
+    name: none  # or "gke" for GKE-specific features
+
+# -- Enable vLLM model serving components
+vllm:
+  enabled: true
+
+# Pass-through configuration to llm-d-vllm subchart
+llm-d-vllm:
+  # Enable model service controller
+  modelservice:
+    enabled: true
+
+    # Configure vLLM for inference pool integration
+    vllm:
+      # Ensure consistent labeling for inference pool discovery
+      podLabels:
+        app.kubernetes.io/name: llm-d-vllm
+        llm-d.ai/inferenceServing: "true"
+
+  # Deploy sample application
+  sampleApplication:
+    enabled: true
+    model:
+      modelName: "meta-llama/Llama-3.2-3B-Instruct"
+      modelArtifactURI: "hf://meta-llama/Llama-3.2-3B-Instruct"
+
+  # Enable Redis for caching
+  redis:
+    enabled: true
+
+# -- Gateway API configuration (for external access)
+gateway:
+  # This would create a standard Gateway API Gateway resource
+  # that routes traffic to the InferencePool
+  enabled: true
+
+  gatewayClassName: istio  # or kgateway
+
+  # Gateway annotations
+  annotations: {}
+
+  # Gateway naming overrides
+  nameOverride: ""
+  fullnameOverride: ""
+
+  # kGateway specific parameters
+  kGatewayParameters:
+    proxyUID: ""
+
+  listeners:
+    - name: http
+      port: 80
+      protocol: HTTP
+
+  # HTTPRoute configuration to route to InferencePool
+  routes:
+    - name: llm-inference
+      matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - group: inference.networking.x-k8s.io
+          kind: InferencePool
+          name: "{{ .Release.Name }}-inferencepool"
+          port: 8000

@@ -1,0 +1,544 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "clusterDomain": {
+      "default": "cluster.local",
+      "description": "Default Kubernetes cluster domain",
+      "required": [],
+      "title": "clusterDomain"
+    },
+    "commonAnnotations": {
+      "additionalProperties": true,
+      "description": "Annotations to add to all deployed objects",
+      "required": [],
+      "title": "commonAnnotations"
+    },
+    "commonLabels": {
+      "additionalProperties": true,
+      "description": "Labels to add to all deployed objects",
+      "required": [],
+      "title": "commonLabels"
+    },
+    "extraDeploy": {
+      "description": "Array of extra objects to deploy with the release",
+      "items": {
+        "required": [],
+        "type": [
+          "string",
+          "object"
+        ]
+      },
+      "required": [],
+      "title": "extraDeploy"
+    },
+    "fullnameOverride": {
+      "default": "",
+      "description": "String to fully override common.names.fullname",
+      "required": [],
+      "title": "fullnameOverride"
+    },
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "inferencePool": {
+      "additionalProperties": false,
+      "description": "Integration with upstream inference gateway",
+      "properties": {
+        "enabled": {
+          "default": "false",
+          "description": "Enable integration with upstream inferencepool chart",
+          "required": [],
+          "title": "enabled"
+        },
+        "modelServerType": {
+          "default": "vllm",
+          "description": "Model server type (vllm or triton-tensorrt-llm)",
+          "required": [],
+          "title": "modelServerType"
+        },
+        "modelServers": {
+          "additionalProperties": false,
+          "description": "Labels to match model servers",
+          "properties": {
+            "matchLabels": {
+              "additionalProperties": false,
+              "properties": {
+                "app": {
+                  "default": "llm-d-vllm",
+                  "required": [],
+                  "title": "app",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "matchLabels",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "modelServers"
+        },
+        "targetPort": {
+          "default": "8000",
+          "description": "Target port for model servers",
+          "required": [],
+          "title": "targetPort"
+        }
+      },
+      "required": [],
+      "title": "inferencePool"
+    },
+    "kubeVersion": {
+      "default": "",
+      "description": "Override Kubernetes version",
+      "required": [],
+      "title": "kubeVersion"
+    },
+    "modelservice": {
+      "additionalProperties": false,
+      "description": "Model service controller configuration",
+      "properties": {
+        "enabled": {
+          "default": "true",
+          "description": "Toggle to deploy modelservice controller related resources",
+          "required": [],
+          "title": "enabled"
+        },
+        "epp": {
+          "additionalProperties": false,
+          "description": "Endpoint picker configuration",
+          "properties": {
+            "image": {
+              "additionalProperties": false,
+              "properties": {
+                "imagePullPolicy": {
+                  "default": "Always",
+                  "required": [],
+                  "title": "imagePullPolicy",
+                  "type": "string"
+                },
+                "pullSecrets": {
+                  "items": {
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "pullSecrets",
+                  "type": "array"
+                },
+                "registry": {
+                  "default": "ghcr.io",
+                  "required": [],
+                  "title": "registry",
+                  "type": "string"
+                },
+                "repository": {
+                  "default": "llm-d/llm-d-inference-scheduler",
+                  "required": [],
+                  "title": "repository",
+                  "type": "string"
+                },
+                "tag": {
+                  "default": "0.0.4",
+                  "required": [],
+                  "title": "tag",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "image",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "epp"
+        },
+        "image": {
+          "additionalProperties": false,
+          "description": "Model Service controller image",
+          "properties": {
+            "imagePullPolicy": {
+              "default": "Always",
+              "required": [],
+              "title": "imagePullPolicy",
+              "type": "string"
+            },
+            "pullSecrets": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "pullSecrets",
+              "type": "array"
+            },
+            "registry": {
+              "default": "ghcr.io",
+              "required": [],
+              "title": "registry",
+              "type": "string"
+            },
+            "repository": {
+              "default": "llm-d/llm-d-model-service",
+              "required": [],
+              "title": "repository",
+              "type": "string"
+            },
+            "tag": {
+              "default": "0.0.10",
+              "required": [],
+              "title": "tag",
+              "type": "string"
+            }
+          },
+          "required": [],
+          "title": "image"
+        },
+        "rbac": {
+          "additionalProperties": false,
+          "description": "RBAC configuration",
+          "properties": {
+            "create": {
+              "default": true,
+              "required": [],
+              "title": "create",
+              "type": "boolean"
+            }
+          },
+          "required": [],
+          "title": "rbac"
+        },
+        "replicas": {
+          "default": "1",
+          "description": "Number of controller replicas",
+          "required": [],
+          "title": "replicas"
+        },
+        "service": {
+          "additionalProperties": false,
+          "description": "Service configuration",
+          "properties": {
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "port": {
+              "default": 8443,
+              "required": [],
+              "title": "port",
+              "type": "integer"
+            },
+            "type": {
+              "default": "ClusterIP",
+              "required": [],
+              "title": "type",
+              "type": "string"
+            }
+          },
+          "required": [],
+          "title": "service"
+        },
+        "serviceAccount": {
+          "additionalProperties": false,
+          "description": "Service Account Configuration",
+          "properties": {
+            "annotations": {
+              "additionalProperties": false,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "create": {
+              "default": true,
+              "required": [],
+              "title": "create",
+              "type": "boolean"
+            },
+            "labels": {
+              "additionalProperties": false,
+              "required": [],
+              "title": "labels",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "serviceAccount"
+        },
+        "vllm": {
+          "additionalProperties": false,
+          "description": "vLLM container options",
+          "properties": {
+            "extraArgs": {
+              "description": "Additional command line arguments for vLLM",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "extraArgs"
+            },
+            "extraEnvVars": {
+              "description": "Additional environment variables for vLLM containers",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "extraEnvVars"
+            },
+            "image": {
+              "additionalProperties": false,
+              "properties": {
+                "imagePullPolicy": {
+                  "default": "IfNotPresent",
+                  "required": [],
+                  "title": "imagePullPolicy",
+                  "type": "string"
+                },
+                "pullSecrets": {
+                  "items": {
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "pullSecrets",
+                  "type": "array"
+                },
+                "registry": {
+                  "default": "ghcr.io",
+                  "required": [],
+                  "title": "registry",
+                  "type": "string"
+                },
+                "repository": {
+                  "default": "llm-d/llm-d",
+                  "required": [],
+                  "title": "repository",
+                  "type": "string"
+                },
+                "tag": {
+                  "default": "0.0.8",
+                  "required": [],
+                  "title": "tag",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "image",
+              "type": "object"
+            },
+            "loadFormat": {
+              "default": "",
+              "description": "Load format for model loading",
+              "required": [],
+              "title": "loadFormat"
+            },
+            "logLevel": {
+              "default": "INFO",
+              "description": "Log level for vLLM",
+              "required": [],
+              "title": "logLevel"
+            }
+          },
+          "required": [],
+          "title": "vllm"
+        }
+      },
+      "required": [],
+      "title": "modelservice"
+    },
+    "nameOverride": {
+      "default": "",
+      "description": "String to partially override common.names.fullname",
+      "required": [],
+      "title": "nameOverride"
+    },
+    "redis": {
+      "additionalProperties": false,
+      "description": "Bitnami/Redis chart configuration for caching",
+      "properties": {
+        "enabled": {
+          "default": true,
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "master": {
+          "additionalProperties": false,
+          "properties": {
+            "persistence": {
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "size": {
+                  "default": "8Gi",
+                  "required": [],
+                  "title": "size",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "persistence",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "master",
+          "type": "object"
+        }
+      },
+      "required": [],
+      "title": "redis"
+    },
+    "sampleApplication": {
+      "additionalProperties": false,
+      "description": "Sample application deploying a model",
+      "properties": {
+        "decode": {
+          "additionalProperties": false,
+          "description": "Decode configuration",
+          "properties": {
+            "extraArgs": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "extraArgs",
+              "type": "array"
+            },
+            "replicas": {
+              "default": 1,
+              "required": [],
+              "title": "replicas",
+              "type": "integer"
+            }
+          },
+          "required": [],
+          "title": "decode"
+        },
+        "enabled": {
+          "default": "true",
+          "description": "Enable rendering of sample application resources",
+          "required": [],
+          "title": "enabled"
+        },
+        "model": {
+          "additionalProperties": false,
+          "description": "Model configuration",
+          "properties": {
+            "auth": {
+              "additionalProperties": false,
+              "description": "HF token authentication",
+              "properties": {
+                "hfToken": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "key": {
+                      "default": "HF_TOKEN",
+                      "required": [],
+                      "title": "key",
+                      "type": "string"
+                    },
+                    "name": {
+                      "default": "llm-d-hf-token",
+                      "required": [],
+                      "title": "name",
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "title": "hfToken",
+                  "type": "object"
+                }
+              },
+              "required": [],
+              "title": "auth"
+            },
+            "modelArtifactURI": {
+              "default": "hf://meta-llama/Llama-3.2-3B-Instruct",
+              "description": "Fully qualified model artifact location URI",
+              "required": [],
+              "title": "modelArtifactURI"
+            },
+            "modelName": {
+              "default": "meta-llama/Llama-3.2-3B-Instruct",
+              "description": "Name of the model",
+              "required": [],
+              "title": "modelName"
+            }
+          },
+          "required": [],
+          "title": "model"
+        },
+        "prefill": {
+          "additionalProperties": false,
+          "description": "Prefill configuration",
+          "properties": {
+            "extraArgs": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "extraArgs",
+              "type": "array"
+            },
+            "replicas": {
+              "default": 1,
+              "required": [],
+              "title": "replicas",
+              "type": "integer"
+            }
+          },
+          "required": [],
+          "title": "prefill"
+        },
+        "resources": {
+          "additionalProperties": false,
+          "description": "Resource requirements",
+          "properties": {
+            "limits": {
+              "additionalProperties": false,
+              "properties": {
+                "nvidia.com/gpu": {
+                  "default": "1",
+                  "required": [],
+                  "title": "nvidia.com/gpu",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "limits",
+              "type": "object"
+            },
+            "requests": {
+              "additionalProperties": false,
+              "properties": {
+                "nvidia.com/gpu": {
+                  "default": "1",
+                  "required": [],
+                  "title": "nvidia.com/gpu",
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "requests",
+              "type": "object"
+            }
+          },
+          "required": [],
+          "title": "resources"
+        }
+      },
+      "required": [],
+      "title": "sampleApplication"
+    }
+  },
+  "required": [],
+  "type": "object"
+}

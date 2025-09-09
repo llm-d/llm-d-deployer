@@ -1,0 +1,12 @@
+dependencies:
+- name: common
+  repository: https://charts.bitnami.com/bitnami
+  version: 2.27.0
+- name: inferencepool
+  repository: oci://us-central1-docker.pkg.dev/k8s-staging-images/gateway-api-inference-extension/charts
+  version: v0
+- name: llm-d-vllm
+  repository: file://../llm-d-vllm
+  version: 1.0.0
+digest: sha256:80feac6ba991f6b485fa14153c7f061a0cbfb19d65ee332c03c8fba288922501
+generated: "2025-06-13T19:53:15.903878-04:00"
