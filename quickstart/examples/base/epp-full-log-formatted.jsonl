@@ -1,0 +1,399 @@
+{
+  "level": "Level(-4)",
+  "ts": "2025-05-16T16:15:04Z",
+  "caller": "requestcontrol/director.go:94",
+  "msg": "LLM request assembled",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+  "request": "TargetModel: meta-llama/Llama-3.2-3B-Instruct, Critical: false, PromptLength: 387, Headers: map[:authority:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com :method:POST :path:/v1/completions :scheme:http accept:*/* content-length:481 content-type:application/json forwarded:for=98.37.180.33;host=llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com;proto=http user-agent:curl/8.7.1 x-envoy-external-address:10.129.2.17 x-forwarded-for:98.37.180.33,10.129.2.17 x-forwarded-host:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com x-forwarded-port:80 x-forwarded-proto:http x-request-id:5e1ca989-a775-4ed2-a517-2addd9600c23]"
+}
+{
+  "level": "Level(-4)",
+  "ts": "2025-05-16T16:15:04Z",
+  "logger": "PD",
+  "caller": "pd/scheduler.go:96",
+  "msg": "Disagregated prefill/decode disabled - scheduling to decode worker only",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+  "request": "TargetModel: meta-llama/Llama-3.2-3B-Instruct, Critical: false, PromptLength: 387, Headers: map[:authority:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com :method:POST :path:/v1/completions :scheme:http accept:*/* content-length:481 content-type:application/json forwarded:for=98.37.180.33;host=llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com;proto=http user-agent:curl/8.7.1 x-envoy-external-address:10.129.2.17 x-forwarded-for:98.37.180.33,10.129.2.17 x-forwarded-host:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com x-forwarded-port:80 x-forwarded-proto:http x-request-id:5e1ca989-a775-4ed2-a517-2addd9600c23]"
+}
+{
+  "level": "Level(-4)",
+  "ts": "2025-05-16T16:15:04Z",
+  "caller": "scheduling/scheduler.go:119",
+  "msg": "Scheduling a request, Metrics: [{Pod:{NamespacedName:greg-test/meta-llama-llama-3-2-3b-instruct-decode-7c679bb8b4-md6hq Address:10.128.14.66 Labels:map[llm-d.ai/inferenceServing:true llm-d.ai/model:meta-llama-llama-3-2-3b-instruct llm-d.ai/role:decode pod-template-hash:7c679bb8b4]} MetricsState:{ActiveModels:map[] WaitingModels:map[] MaxActiveModels:0 RunningQueueSize:0 WaitingQueueSize:0 KVCacheUsagePercent:0 KvCacheMaxTokenCapacity:0 UpdateTime:2025-05-16 16:15:04.98228294 +0000 UTC m=+390.873016897}} {Pod:{NamespacedName:greg-test/meta-llama-llama-3-2-3b-instruct-decode-7c679bb8b4-9m4wm Address:10.131.11.76 Labels:map[llm-d.ai/inferenceServing:true llm-d.ai/model:meta-llama-llama-3-2-3b-instruct llm-d.ai/role:decode pod-template-hash:7c679bb8b4]} MetricsState:{ActiveModels:map[] WaitingModels:map[] MaxActiveModels:0 RunningQueueSize:0 WaitingQueueSize:0 KVCacheUsagePercent:0 KvCacheMaxTokenCapacity:0 UpdateTime:2025-05-16 16:15:04.956832301 +0000 UTC m=+390.847566248}}]",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+  "request": "TargetModel: meta-llama/Llama-3.2-3B-Instruct, Critical: false, PromptLength: 387, Headers: map[:authority:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com :method:POST :path:/v1/completions :scheme:http accept:*/* content-length:481 content-type:application/json forwarded:for=98.37.180.33;host=llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com;proto=http user-agent:curl/8.7.1 x-envoy-external-address:10.129.2.17 x-forwarded-for:98.37.180.33,10.129.2.17 x-forwarded-host:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com x-forwarded-port:80 x-forwarded-proto:http x-request-id:5e1ca989-a775-4ed2-a517-2addd9600c23]"
+}
+{
+  "level": "Level(-4)",
+  "ts": "2025-05-16T16:15:04Z",
+  "caller": "scheduling/scheduler.go:149",
+  "msg": "Before running filter plugins",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+  "request": "TargetModel: meta-llama/Llama-3.2-3B-Instruct, Critical: false, PromptLength: 387, Headers: map[:authority:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com :method:POST :path:/v1/completions :scheme:http accept:*/* content-length:481 content-type:application/json forwarded:for=98.37.180.33;host=llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com;proto=http user-agent:curl/8.7.1 x-envoy-external-address:10.129.2.17 x-forwarded-for:98.37.180.33,10.129.2.17 x-forwarded-host:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com x-forwarded-port:80 x-forwarded-proto:http x-request-id:5e1ca989-a775-4ed2-a517-2addd9600c23]",
+  "pods": [
+    {
+      "NamespacedName": {
+        "Namespace": "greg-test",
+        "Name": "meta-llama-llama-3-2-3b-instruct-decode-7c679bb8b4-md6hq"
+      },
+      "Address": "10.128.14.66",
+      "Labels": {
+        "llm-d.ai/inferenceServing": "true",
+        "llm-d.ai/model": "meta-llama-llama-3-2-3b-instruct",
+        "llm-d.ai/role": "decode",
+        "pod-template-hash": "7c679bb8b4"
+      },
+      "ActiveModels": {},
+      "WaitingModels": {},
+      "MaxActiveModels": 0,
+      "RunningQueueSize": 0,
+      "WaitingQueueSize": 0,
+      "KVCacheUsagePercent": 0,
+      "KvCacheMaxTokenCapacity": 0,
+      "UpdateTime": "2025-05-16T16:15:04.98228294Z"
+    },
+    {
+      "NamespacedName": {
+        "Namespace": "greg-test",
+        "Name": "meta-llama-llama-3-2-3b-instruct-decode-7c679bb8b4-9m4wm"
+      },
+      "Address": "10.131.11.76",
+      "Labels": {
+        "llm-d.ai/inferenceServing": "true",
+        "llm-d.ai/model": "meta-llama-llama-3-2-3b-instruct",
+        "llm-d.ai/role": "decode",
+        "pod-template-hash": "7c679bb8b4"
+      },
+      "ActiveModels": {},
+      "WaitingModels": {},
+      "MaxActiveModels": 0,
+      "RunningQueueSize": 0,
+      "WaitingQueueSize": 0,
+      "KVCacheUsagePercent": 0,
+      "KvCacheMaxTokenCapacity": 0,
+      "UpdateTime": "2025-05-16T16:15:04.956832301Z"
+    }
+  ]
+}
+{
+  "level": "Level(-4)",
+  "ts": "2025-05-16T16:15:04Z",
+  "caller": "scheduling/scheduler.go:152",
+  "msg": "Running filter plugin",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+  "request": "TargetModel: meta-llama/Llama-3.2-3B-Instruct, Critical: false, PromptLength: 387, Headers: map[:authority:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com :method:POST :path:/v1/completions :scheme:http accept:*/* content-length:481 content-type:application/json forwarded:for=98.37.180.33;host=llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com;proto=http user-agent:curl/8.7.1 x-envoy-external-address:10.129.2.17 x-forwarded-for:98.37.180.33,10.129.2.17 x-forwarded-host:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com x-forwarded-port:80 x-forwarded-proto:http x-request-id:5e1ca989-a775-4ed2-a517-2addd9600c23]",
+  "plugin": "decode-filter"
+}
+{
+  "level": "Level(-4)",
+  "ts": "2025-05-16T16:15:04Z",
+  "caller": "scheduling/scheduler.go:156",
+  "msg": "Filter plugin result",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+  "request": "TargetModel: meta-llama/Llama-3.2-3B-Instruct, Critical: false, PromptLength: 387, Headers: map[:authority:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com :method:POST :path:/v1/completions :scheme:http accept:*/* content-length:481 content-type:application/json forwarded:for=98.37.180.33;host=llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com;proto=http user-agent:curl/8.7.1 x-envoy-external-address:10.129.2.17 x-forwarded-for:98.37.180.33,10.129.2.17 x-forwarded-host:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com x-forwarded-port:80 x-forwarded-proto:http x-request-id:5e1ca989-a775-4ed2-a517-2addd9600c23]",
+  "plugin": "decode-filter",
+  "pods": [
+    {
+      "NamespacedName": {
+        "Namespace": "greg-test",
+        "Name": "meta-llama-llama-3-2-3b-instruct-decode-7c679bb8b4-md6hq"
+      },
+      "Address": "10.128.14.66",
+      "Labels": {
+        "llm-d.ai/inferenceServing": "true",
+        "llm-d.ai/model": "meta-llama-llama-3-2-3b-instruct",
+        "llm-d.ai/role": "decode",
+        "pod-template-hash": "7c679bb8b4"
+      },
+      "ActiveModels": {},
+      "WaitingModels": {},
+      "MaxActiveModels": 0,
+      "RunningQueueSize": 0,
+      "WaitingQueueSize": 0,
+      "KVCacheUsagePercent": 0,
+      "KvCacheMaxTokenCapacity": 0,
+      "UpdateTime": "2025-05-16T16:15:04.98228294Z"
+    },
+    {
+      "NamespacedName": {
+        "Namespace": "greg-test",
+        "Name": "meta-llama-llama-3-2-3b-instruct-decode-7c679bb8b4-9m4wm"
+      },
+      "Address": "10.131.11.76",
+      "Labels": {
+        "llm-d.ai/inferenceServing": "true",
+        "llm-d.ai/model": "meta-llama-llama-3-2-3b-instruct",
+        "llm-d.ai/role": "decode",
+        "pod-template-hash": "7c679bb8b4"
+      },
+      "ActiveModels": {},
+      "WaitingModels": {},
+      "MaxActiveModels": 0,
+      "RunningQueueSize": 0,
+      "WaitingQueueSize": 0,
+      "KVCacheUsagePercent": 0,
+      "KvCacheMaxTokenCapacity": 0,
+      "UpdateTime": "2025-05-16T16:15:04.956832301Z"
+    }
+  ]
+}
+{
+  "level": "Level(-4)",
+  "ts": "2025-05-16T16:15:04Z",
+  "caller": "scheduling/scheduler.go:161",
+  "msg": "After running filter plugins",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+  "request": "TargetModel: meta-llama/Llama-3.2-3B-Instruct, Critical: false, PromptLength: 387, Headers: map[:authority:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com :method:POST :path:/v1/completions :scheme:http accept:*/* content-length:481 content-type:application/json forwarded:for=98.37.180.33;host=llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com;proto=http user-agent:curl/8.7.1 x-envoy-external-address:10.129.2.17 x-forwarded-for:98.37.180.33,10.129.2.17 x-forwarded-host:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com x-forwarded-port:80 x-forwarded-proto:http x-request-id:5e1ca989-a775-4ed2-a517-2addd9600c23]"
+}
+{
+  "level": "Level(-4)",
+  "ts": "2025-05-16T16:15:04Z",
+  "caller": "scheduling/scheduler.go:168",
+  "msg": "Before running scorer plugins",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+  "request": "TargetModel: meta-llama/Llama-3.2-3B-Instruct, Critical: false, PromptLength: 387, Headers: map[:authority:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com :method:POST :path:/v1/completions :scheme:http accept:*/* content-length:481 content-type:application/json forwarded:for=98.37.180.33;host=llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com;proto=http user-agent:curl/8.7.1 x-envoy-external-address:10.129.2.17 x-forwarded-for:98.37.180.33,10.129.2.17 x-forwarded-host:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com x-forwarded-port:80 x-forwarded-proto:http x-request-id:5e1ca989-a775-4ed2-a517-2addd9600c23]",
+  "pods": [
+    {
+      "NamespacedName": {
+        "Namespace": "greg-test",
+        "Name": "meta-llama-llama-3-2-3b-instruct-decode-7c679bb8b4-md6hq"
+      },
+      "Address": "10.128.14.66",
+      "Labels": {
+        "llm-d.ai/inferenceServing": "true",
+        "llm-d.ai/model": "meta-llama-llama-3-2-3b-instruct",
+        "llm-d.ai/role": "decode",
+        "pod-template-hash": "7c679bb8b4"
+      },
+      "ActiveModels": {},
+      "WaitingModels": {},
+      "MaxActiveModels": 0,
+      "RunningQueueSize": 0,
+      "WaitingQueueSize": 0,
+      "KVCacheUsagePercent": 0,
+      "KvCacheMaxTokenCapacity": 0,
+      "UpdateTime": "2025-05-16T16:15:04.98228294Z"
+    },
+    {
+      "NamespacedName": {
+        "Namespace": "greg-test",
+        "Name": "meta-llama-llama-3-2-3b-instruct-decode-7c679bb8b4-9m4wm"
+      },
+      "Address": "10.131.11.76",
+      "Labels": {
+        "llm-d.ai/inferenceServing": "true",
+        "llm-d.ai/model": "meta-llama-llama-3-2-3b-instruct",
+        "llm-d.ai/role": "decode",
+        "pod-template-hash": "7c679bb8b4"
+      },
+      "ActiveModels": {},
+      "WaitingModels": {},
+      "MaxActiveModels": 0,
+      "RunningQueueSize": 0,
+      "WaitingQueueSize": 0,
+      "KVCacheUsagePercent": 0,
+      "KvCacheMaxTokenCapacity": 0,
+      "UpdateTime": "2025-05-16T16:15:04.956832301Z"
+    }
+  ]
+}
+{
+  "level": "Level(-4)",
+  "ts": "2025-05-16T16:15:04Z",
+  "caller": "scheduling/scheduler.go:176",
+  "msg": "Running scorer",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+  "request": "TargetModel: meta-llama/Llama-3.2-3B-Instruct, Critical: false, PromptLength: 387, Headers: map[:authority:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com :method:POST :path:/v1/completions :scheme:http accept:*/* content-length:481 content-type:application/json forwarded:for=98.37.180.33;host=llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com;proto=http user-agent:curl/8.7.1 x-envoy-external-address:10.129.2.17 x-forwarded-for:98.37.180.33,10.129.2.17 x-forwarded-host:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com x-forwarded-port:80 x-forwarded-proto:http x-request-id:5e1ca989-a775-4ed2-a517-2addd9600c23]",
+  "scorer": "session-affinity-scorer"
+}
+{
+  "level": "Level(-4)",
+  "ts": "2025-05-16T16:15:04Z",
+  "caller": "scheduling/scheduler.go:183",
+  "msg": "After running scorer",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+  "request": "TargetModel: meta-llama/Llama-3.2-3B-Instruct, Critical: false, PromptLength: 387, Headers: map[:authority:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com :method:POST :path:/v1/completions :scheme:http accept:*/* content-length:481 content-type:application/json forwarded:for=98.37.180.33;host=llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com;proto=http user-agent:curl/8.7.1 x-envoy-external-address:10.129.2.17 x-forwarded-for:98.37.180.33,10.129.2.17 x-forwarded-host:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com x-forwarded-port:80 x-forwarded-proto:http x-request-id:5e1ca989-a775-4ed2-a517-2addd9600c23]",
+  "scorer": "session-affinity-scorer"
+}
+{
+  "level": "Level(-4)",
+  "ts": "2025-05-16T16:15:04Z",
+  "caller": "scheduling/scheduler.go:176",
+  "msg": "Running scorer",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+  "request": "TargetModel: meta-llama/Llama-3.2-3B-Instruct, Critical: false, PromptLength: 387, Headers: map[:authority:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com :method:POST :path:/v1/completions :scheme:http accept:*/* content-length:481 content-type:application/json forwarded:for=98.37.180.33;host=llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com;proto=http user-agent:curl/8.7.1 x-envoy-external-address:10.129.2.17 x-forwarded-for:98.37.180.33,10.129.2.17 x-forwarded-host:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com x-forwarded-port:80 x-forwarded-proto:http x-request-id:5e1ca989-a775-4ed2-a517-2addd9600c23]",
+  "scorer": "prefix-aware-scorer"
+}
+{
+  "level": "Level(-4)",
+  "ts": "2025-05-16T16:15:04Z",
+  "logger": "prefix-aware-scorer",
+  "caller": "scorer/prefix_aware.go:65",
+  "msg": "Got pod scores",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+  "scores": null
+}
+{
+  "level": "Level(-4)",
+  "ts": "2025-05-16T16:15:04Z",
+  "logger": "prefix-aware-scorer",
+  "caller": "scorer/prefix_aware.go:68",
+  "msg": "No scores found for pods",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23"
+}
+{
+  "level": "Level(-4)",
+  "ts": "2025-05-16T16:15:04Z",
+  "caller": "scheduling/scheduler.go:183",
+  "msg": "After running scorer",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+  "request": "TargetModel: meta-llama/Llama-3.2-3B-Instruct, Critical: false, PromptLength: 387, Headers: map[:authority:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com :method:POST :path:/v1/completions :scheme:http accept:*/* content-length:481 content-type:application/json forwarded:for=98.37.180.33;host=llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com;proto=http user-agent:curl/8.7.1 x-envoy-external-address:10.129.2.17 x-forwarded-for:98.37.180.33,10.129.2.17 x-forwarded-host:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com x-forwarded-port:80 x-forwarded-proto:http x-request-id:5e1ca989-a775-4ed2-a517-2addd9600c23]",
+  "scorer": "prefix-aware-scorer"
+}
+{
+  "level": "Level(-4)",
+  "ts": "2025-05-16T16:15:04Z",
+  "caller": "scheduling/scheduler.go:176",
+  "msg": "Running scorer",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+  "request": "TargetModel: meta-llama/Llama-3.2-3B-Instruct, Critical: false, PromptLength: 387, Headers: map[:authority:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com :method:POST :path:/v1/completions :scheme:http accept:*/* content-length:481 content-type:application/json forwarded:for=98.37.180.33;host=llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com;proto=http user-agent:curl/8.7.1 x-envoy-external-address:10.129.2.17 x-forwarded-for:98.37.180.33,10.129.2.17 x-forwarded-host:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com x-forwarded-port:80 x-forwarded-proto:http x-request-id:5e1ca989-a775-4ed2-a517-2addd9600c23]",
+  "scorer": "load-aware-scorer"
+}
+{
+  "level": "Level(-4)",
+  "ts": "2025-05-16T16:15:04Z",
+  "caller": "scheduling/scheduler.go:183",
+  "msg": "After running scorer",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+  "request": "TargetModel: meta-llama/Llama-3.2-3B-Instruct, Critical: false, PromptLength: 387, Headers: map[:authority:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com :method:POST :path:/v1/completions :scheme:http accept:*/* content-length:481 content-type:application/json forwarded:for=98.37.180.33;host=llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com;proto=http user-agent:curl/8.7.1 x-envoy-external-address:10.129.2.17 x-forwarded-for:98.37.180.33,10.129.2.17 x-forwarded-host:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com x-forwarded-port:80 x-forwarded-proto:http x-request-id:5e1ca989-a775-4ed2-a517-2addd9600c23]",
+  "scorer": "load-aware-scorer"
+}
+{
+  "level": "Level(-4)",
+  "ts": "2025-05-16T16:15:04Z",
+  "caller": "scheduling/scheduler.go:185",
+  "msg": "After running scorer plugins",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+  "request": "TargetModel: meta-llama/Llama-3.2-3B-Instruct, Critical: false, PromptLength: 387, Headers: map[:authority:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com :method:POST :path:/v1/completions :scheme:http accept:*/* content-length:481 content-type:application/json forwarded:for=98.37.180.33;host=llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com;proto=http user-agent:curl/8.7.1 x-envoy-external-address:10.129.2.17 x-forwarded-for:98.37.180.33,10.129.2.17 x-forwarded-host:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com x-forwarded-port:80 x-forwarded-proto:http x-request-id:5e1ca989-a775-4ed2-a517-2addd9600c23]"
+}
+{
+  "level": "Level(-4)",
+  "ts": "2025-05-16T16:15:04Z",
+  "caller": "scheduling/scheduler.go:199",
+  "msg": "Before running picker plugin",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+  "request": "TargetModel: meta-llama/Llama-3.2-3B-Instruct, Critical: false, PromptLength: 387, Headers: map[:authority:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com :method:POST :path:/v1/completions :scheme:http accept:*/* content-length:481 content-type:application/json forwarded:for=98.37.180.33;host=llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com;proto=http user-agent:curl/8.7.1 x-envoy-external-address:10.129.2.17 x-forwarded-for:98.37.180.33,10.129.2.17 x-forwarded-host:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com x-forwarded-port:80 x-forwarded-proto:http x-request-id:5e1ca989-a775-4ed2-a517-2addd9600c23]",
+  "podsError": "json: unsupported type: map[types.Pod]float64"
+}
+{
+  "level": "Level(-4)",
+  "ts": "2025-05-16T16:15:04Z",
+  "caller": "picker/max_score_picker.go:47",
+  "msg": "Selecting a pod with the max score from 2 candidates: [{Pod:{NamespacedName:greg-test/meta-llama-llama-3-2-3b-instruct-decode-7c679bb8b4-md6hq Address:10.128.14.66 Labels:map[llm-d.ai/inferenceServing:true llm-d.ai/model:meta-llama-llama-3-2-3b-instruct llm-d.ai/role:decode pod-template-hash:7c679bb8b4]} MetricsState:{ActiveModels:map[] WaitingModels:map[] MaxActiveModels:0 RunningQueueSize:0 WaitingQueueSize:0 KVCacheUsagePercent:0 KvCacheMaxTokenCapacity:0 UpdateTime:2025-05-16 16:15:04.98228294 +0000 UTC m=+390.873016897}} {Pod:{NamespacedName:greg-test/meta-llama-llama-3-2-3b-instruct-decode-7c679bb8b4-9m4wm Address:10.131.11.76 Labels:map[llm-d.ai/inferenceServing:true llm-d.ai/model:meta-llama-llama-3-2-3b-instruct llm-d.ai/role:decode pod-template-hash:7c679bb8b4]} MetricsState:{ActiveModels:map[] WaitingModels:map[] MaxActiveModels:0 RunningQueueSize:0 WaitingQueueSize:0 KVCacheUsagePercent:0 KvCacheMaxTokenCapacity:0 UpdateTime:2025-05-16 16:15:04.956832301 +0000 UTC m=+390.847566248}}]",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+  "request": "TargetModel: meta-llama/Llama-3.2-3B-Instruct, Critical: false, PromptLength: 387, Headers: map[:authority:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com :method:POST :path:/v1/completions :scheme:http accept:*/* content-length:481 content-type:application/json forwarded:for=98.37.180.33;host=llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com;proto=http user-agent:curl/8.7.1 x-envoy-external-address:10.129.2.17 x-forwarded-for:98.37.180.33,10.129.2.17 x-forwarded-host:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com x-forwarded-port:80 x-forwarded-proto:http x-request-id:5e1ca989-a775-4ed2-a517-2addd9600c23]"
+}
+{
+  "level": "Level(-4)",
+  "ts": "2025-05-16T16:15:04Z",
+  "caller": "picker/random_picker.go:38",
+  "msg": "Selecting a random pod from 2 candidates: [{Pod:{NamespacedName:greg-test/meta-llama-llama-3-2-3b-instruct-decode-7c679bb8b4-md6hq Address:10.128.14.66 Labels:map[llm-d.ai/inferenceServing:true llm-d.ai/model:meta-llama-llama-3-2-3b-instruct llm-d.ai/role:decode pod-template-hash:7c679bb8b4]} MetricsState:{ActiveModels:map[] WaitingModels:map[] MaxActiveModels:0 RunningQueueSize:0 WaitingQueueSize:0 KVCacheUsagePercent:0 KvCacheMaxTokenCapacity:0 UpdateTime:2025-05-16 16:15:04.98228294 +0000 UTC m=+390.873016897}} {Pod:{NamespacedName:greg-test/meta-llama-llama-3-2-3b-instruct-decode-7c679bb8b4-9m4wm Address:10.131.11.76 Labels:map[llm-d.ai/inferenceServing:true llm-d.ai/model:meta-llama-llama-3-2-3b-instruct llm-d.ai/role:decode pod-template-hash:7c679bb8b4]} MetricsState:{ActiveModels:map[] WaitingModels:map[] MaxActiveModels:0 RunningQueueSize:0 WaitingQueueSize:0 KVCacheUsagePercent:0 KvCacheMaxTokenCapacity:0 UpdateTime:2025-05-16 16:15:04.956832301 +0000 UTC m=+390.847566248}}]",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+  "request": "TargetModel: meta-llama/Llama-3.2-3B-Instruct, Critical: false, PromptLength: 387, Headers: map[:authority:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com :method:POST :path:/v1/completions :scheme:http accept:*/* content-length:481 content-type:application/json forwarded:for=98.37.180.33;host=llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com;proto=http user-agent:curl/8.7.1 x-envoy-external-address:10.129.2.17 x-forwarded-for:98.37.180.33,10.129.2.17 x-forwarded-host:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com x-forwarded-port:80 x-forwarded-proto:http x-request-id:5e1ca989-a775-4ed2-a517-2addd9600c23]"
+}
+{
+  "level": "Level(-4)",
+  "ts": "2025-05-16T16:15:04Z",
+  "caller": "scheduling/scheduler.go:203",
+  "msg": "After running picker plugin",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+  "request": "TargetModel: meta-llama/Llama-3.2-3B-Instruct, Critical: false, PromptLength: 387, Headers: map[:authority:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com :method:POST :path:/v1/completions :scheme:http accept:*/* content-length:481 content-type:application/json forwarded:for=98.37.180.33;host=llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com;proto=http user-agent:curl/8.7.1 x-envoy-external-address:10.129.2.17 x-forwarded-for:98.37.180.33,10.129.2.17 x-forwarded-host:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com x-forwarded-port:80 x-forwarded-proto:http x-request-id:5e1ca989-a775-4ed2-a517-2addd9600c23]",
+  "result": {
+    "TargetPod": {
+      "Pod": {
+        "NamespacedName": {
+          "Namespace": "greg-test",
+          "Name": "meta-llama-llama-3-2-3b-instruct-decode-7c679bb8b4-md6hq"
+        },
+        "Address": "10.128.14.66",
+        "Labels": {
+          "llm-d.ai/inferenceServing": "true",
+          "llm-d.ai/model": "meta-llama-llama-3-2-3b-instruct",
+          "llm-d.ai/role": "decode",
+          "pod-template-hash": "7c679bb8b4"
+        },
+        "ActiveModels": {},
+        "WaitingModels": {},
+        "MaxActiveModels": 0,
+        "RunningQueueSize": 0,
+        "WaitingQueueSize": 0,
+        "KVCacheUsagePercent": 0,
+        "KvCacheMaxTokenCapacity": 0,
+        "UpdateTime": "2025-05-16T16:15:04.98228294Z"
+      },
+      "Score": 0.5
+    }
+  }
+}
+{
+  "level": "Level(-4)",
+  "ts": "2025-05-16T16:15:04Z",
+  "caller": "scheduling/scheduler.go:210",
+  "msg": "Running post-schedule plugin",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+  "request": "TargetModel: meta-llama/Llama-3.2-3B-Instruct, Critical: false, PromptLength: 387, Headers: map[:authority:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com :method:POST :path:/v1/completions :scheme:http accept:*/* content-length:481 content-type:application/json forwarded:for=98.37.180.33;host=llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com;proto=http user-agent:curl/8.7.1 x-envoy-external-address:10.129.2.17 x-forwarded-for:98.37.180.33,10.129.2.17 x-forwarded-host:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com x-forwarded-port:80 x-forwarded-proto:http x-request-id:5e1ca989-a775-4ed2-a517-2addd9600c23]",
+  "plugin": "prefix-aware-scorer"
+}
+{
+  "level": "info",
+  "ts": "2025-05-16T16:15:04Z",
+  "logger": "prefix-aware-scorer",
+  "caller": "scorer/prefix_aware.go:102",
+  "msg": "PostResponse called",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+  "req": "TargetModel: meta-llama/Llama-3.2-3B-Instruct, Critical: false, PromptLength: 387, Headers: map[:authority:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com :method:POST :path:/v1/completions :scheme:http accept:*/* content-length:481 content-type:application/json forwarded:for=98.37.180.33;host=llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com;proto=http user-agent:curl/8.7.1 x-envoy-external-address:10.129.2.17 x-forwarded-for:98.37.180.33,10.129.2.17 x-forwarded-host:llm-d-inference-gateway.apps.summit-gpu.octo-emerging.redhataicoe.com x-forwarded-port:80 x-forwarded-proto:http x-request-id:5e1ca989-a775-4ed2-a517-2addd9600c23]",
+  "pod": "{Pod:{NamespacedName:greg-test/meta-llama-llama-3-2-3b-instruct-decode-7c679bb8b4-md6hq Address:10.128.14.66 Labels:map[llm-d.ai/inferenceServing:true llm-d.ai/model:meta-llama-llama-3-2-3b-instruct llm-d.ai/role:decode pod-template-hash:7c679bb8b4]} MetricsState:{ActiveModels:map[] WaitingModels:map[] MaxActiveModels:0 RunningQueueSize:0 WaitingQueueSize:0 KVCacheUsagePercent:0 KvCacheMaxTokenCapacity:0 UpdateTime:2025-05-16 16:15:04.98228294 +0000 UTC m=+390.873016897}}"
+}
+{
+  "level": "Level(-2)",
+  "ts": "2025-05-16T16:15:04Z",
+  "caller": "requestcontrol/director.go:135",
+  "msg": "Request handled",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+  "model": "meta-llama/Llama-3.2-3B-Instruct",
+  "targetModel": "meta-llama/Llama-3.2-3B-Instruct",
+  "endpoint": "{NamespacedName:greg-test/meta-llama-llama-3-2-3b-instruct-decode-7c679bb8b4-md6hq Address:10.128.14.66 Labels:map[llm-d.ai/inferenceServing:true llm-d.ai/model:meta-llama-llama-3-2-3b-instruct llm-d.ai/role:decode pod-template-hash:7c679bb8b4]}"
+}
+{
+  "level": "Level(-4)",
+  "ts": "2025-05-16T16:15:10Z",
+  "caller": "requestcontrol/director.go:150",
+  "msg": "LLM response assembled",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+  "response": {
+    "RequestId": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+    "Headers": {
+      ":status": "200",
+      "content-length": "3015",
+      "content-type": "application/json",
+      "date": "Fri, 16 May 2025 16:15:04 GMT",
+      "server": "uvicorn",
+      "x-envoy-upstream-service-time": "5295"
+    },
+    "Body": "",
+    "IsStreaming": false,
+    "EndOfStream": false
+  }
+}
+{
+  "level": "Level(-3)",
+  "ts": "2025-05-16T16:15:10Z",
+  "caller": "handlers/response.go:56",
+  "msg": "Response generated",
+  "x-request-id": "5e1ca989-a775-4ed2-a517-2addd9600c23",
+  "usage": {
+    "prompt_tokens": 75,
+    "completion_tokens": 500,
+    "total_tokens": 575
+  }
+}

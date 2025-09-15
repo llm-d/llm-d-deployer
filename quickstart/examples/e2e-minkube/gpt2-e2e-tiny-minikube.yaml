@@ -1,0 +1,41 @@
+# Validated to run with minikube on a single Nvidia L4 with 32G of RAM. EC2 type: g6.2xlarge
+sampleApplication:
+  baseConfigMapRefName: basic-gpu-preset
+  enabled: true
+  model:
+    modelArtifactURI: pvc://model-pvc/models/openai-community/gpt2
+    modelName: "openai-community/gpt2"
+    servedModelNames: []
+    auth:
+      # -- HF token auth config via k8s secret.
+      hfToken:
+        # -- Name of the secret to create to store your huggingface token
+        name: llm-d-hf-token
+        # -- Value of the token. Do not set this but use `envsubst` in conjunction with the helm chart
+        key: HF_TOKEN
+  resources:
+    limits:
+      #nvidia.com/gpu: 1
+    requests:
+      # cpu: "16"
+      # memory: 16Gi
+      # Comment out the GPU request to so both p/d will spawn on a single GPU in a minikube node
+      # nvidia.com/gpu: 1
+  inferencePoolPort: 8000
+  prefill:
+    replicas: 1
+    # -- args to add to the prefill deployment
+    extraArgs:
+      - "--gpu-memory-utilization"
+      - "0.2"
+      - "--cpu-offload-gb"
+      - "8"
+  decode:
+    # -- number of desired decode replicas
+    replicas: 1
+    # -- args to add to the decode deployment
+    extraArgs:
+      - "--gpu-memory-utilization"
+      - "0.3"
+      - "--cpu-offload-gb"
+      - "8"
