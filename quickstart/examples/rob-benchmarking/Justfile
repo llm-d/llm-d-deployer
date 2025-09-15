@@ -1,0 +1,40 @@
+NAMESPACE := "pete-davidson"
+
+logs POD:
+    kubectl logs -f {{POD}} -n {{NAMESPACE}} | grep -v "GET /metrics HTTP/1.1" | grep -v ".get_finished" | grep -v ".transfer_batched"
+
+logs-stats POD:
+    kubectl logs -f {{POD}} -n {{NAMESPACE}} | grep -e "Engine 000:"
+
+get-pods:
+    kubectl get pods -n {{NAMESPACE}} -o wide
+
+hf-token:
+  kubectl create secret generic hf-token-secret --from-literal=HF_TOKEN="$HF_TOKEN" -n {{NAMESPACE}}
+
+[working-directory: '/home/rshaw/llm-d-deployer/quickstart']
+install VALUES:
+    ./llmd-installer.sh \
+        --namespace {{NAMESPACE}} \
+        --storage-class shared-vast --storage-size 300Gi \
+        --values-file ./examples/rob-benchmarking/{{VALUES}} --skip-infra
+
+[working-directory: '/home/rshaw/llm-d-deployer/quickstart']
+uninstall:
+    ./llmd-installer.sh \
+        --namespace {{NAMESPACE}} \
+        --uninstall --skip-infra
+
+gh-token GH_TOKEN:
+    kubectl create secret generic gh-token-secret --from-literal=GH_TOKEN='{{GH_TOKEN}}' -n {{NAMESPACE}}
+
+# Interactive benchmark commands:
+start-bench:
+    kubectl apply -n {{NAMESPACE}} -f benchmark-interactive-pod.yaml
+
+delete-bench:
+    kubectl delete pod -n {{NAMESPACE}} benchmark-interactive
+
+exec-bench:
+    kubectl cp Justfile.remote {{NAMESPACE}}/benchmark-interactive:/app/Justfile && \
+    kubectl exec -it -n {{NAMESPACE}} benchmark-interactive -- /bin/bash

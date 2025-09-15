@@ -158,7 +158,7 @@ data:
             - name: dshm
               emptyDir:
                 medium: Memory
-                sizeLimit: 1Gi
+                sizeLimit: 16Gi
             {{ `{{- if .HFModelName }}` }}
             - name: model-cache
               emptyDir: {}
@@ -214,6 +214,8 @@ data:
                 - name: VLLM_LOGGING_LEVEL
                   value: {{ .Values.modelservice.vllm.logLevel }}
                 {{- end }}
+                - name: VLLM_IS_PREFILL
+                  value: "1"
                 - name: VLLM_NIXL_SIDE_CHANNEL_PORT
                   value: "5557"
                 - name: VLLM_NIXL_SIDE_CHANNEL_HOST
@@ -278,7 +280,7 @@ data:
             - name: dshm
               emptyDir:
                 medium: Memory
-                sizeLimit: 1Gi
+                sizeLimit: 16Gi
             {{ `{{ if .HFModelName }}` }}
             - name: model-cache
               emptyDir: {}
