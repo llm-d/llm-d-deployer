@@ -234,8 +234,8 @@ gateway:
       port: 80
       protocol: HTTP
 
-  # -- Gateway's service type. Ingress is only available if the service type is set to NodePort. Accepted values: ["LoadBalancer", "NodePort"]
-  serviceType: NodePort
+  # -- Gateway's service type. Ingress is only available if the service type is set to NodePort. Accepted values: ["LoadBalancer", "NodePort", "ClusterIP"]
+  serviceType: LoadBalancer
 
 # -- Ingress configuration
 # @default -- See below

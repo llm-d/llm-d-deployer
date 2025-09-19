@@ -133,7 +133,7 @@
         },
         "serviceType": {
           "default": "NodePort",
-          "description": "Gateway's service type. Ingress is only available if the service type is set to NodePort. Accepted values: [\"LoadBalancer\", \"NodePort\"]",
+          "description": "Gateway's service type. Ingress is only available if the service type is set to NodePort. Accepted values: [\"LoadBalancer\", \"NodePort\", \"ClusterIP\"]",
           "required": [],
           "title": "serviceType"
         }

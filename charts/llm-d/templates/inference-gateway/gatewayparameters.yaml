@@ -35,7 +35,7 @@ spec:
           connection: debug
         logLevel: info
     service:
-      type: {{ .Values.gateway.serviceType | default "NodePort" | quote }}
+      type: {{ .Values.gateway.serviceType | default "LoadBalancer" | quote }}
       extraLabels:
         gateway: custom
     podTemplate:
